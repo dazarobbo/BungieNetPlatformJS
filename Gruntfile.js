@@ -1,0 +1,97 @@
+module.exports = (grunt) => {
+  "use strict";
+
+  grunt.initConfig({
+
+    pkg: grunt.file.readJSON("package.JSON"),
+
+    bower_concat: {
+      all:{
+        dest: {
+          js: "build/bower.js"
+        },
+        include: [
+          "urijs",
+          "bignumber.js"
+        ],
+        mainFiles: {
+          "urijs": [
+            "src/URI.min.js",
+            "src/URITemplate.js"
+          ]
+        }
+      }
+    },
+
+    concat: {
+      options: {
+        stripBanners: true,
+      },
+      dist: {
+        src: [
+          "build/bower.js", //always first
+          "src/ExtendableError.js",
+          "src/BungieNet.js",
+          "src/BungieNet.Error.js",
+          "src/BungieNet.Cookies.js",
+          "src/BungieNet.CurrentUser.js",
+          "src/BungieNet.Platform.js",
+          "src/BungieNet.Platform.Request.js",
+          "src/BungieNet.Platform.Response.js"
+        ],
+        dest: "build/<%= pkg.name %>.concat.js"
+      }
+    },
+
+    browserify: {
+      dist: {
+        options: {
+          transform: [
+            ["babelify", { presets: ["es2015"] }]
+          ]
+        },
+        files: {
+          "build/<%= pkg.name %>.bundle.js": "build/<%= pkg.name %>.concat.js"
+        }
+      }
+    },
+
+    babel: {
+      options: {
+        sourceMap: false,
+        presets: ["es2015"]
+      },
+      dist: {
+        files: {
+          "build/<%= pkg.name %>.babel.js": "build/<%= pkg.name %>.concat.js"
+        }
+      }
+    },
+
+    uglify: {
+      options: {
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+      },
+      build: {
+        src: "build/<%= pkg.name %>.concat.js",
+        dest: "build/<%= pkg.name %>.min.js"
+      }
+    }
+
+  });
+
+  grunt.loadNpmTasks("grunt-bower-concat");
+  grunt.loadNpmTasks("grunt-browserify");
+  grunt.loadNpmTasks("grunt-babel");
+  grunt.loadNpmTasks("grunt-contrib-concat");
+  grunt.loadNpmTasks("grunt-contrib-uglify");
+
+  grunt.registerTask("default", [
+    "bower_concat",
+    "concat",
+    //"browserify"
+    //"babel",
+    //"uglify"
+  ]);
+
+};

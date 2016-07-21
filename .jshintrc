@@ -1,0 +1,40 @@
+{
+  "bitwise": false,
+  "curly": true,
+  "eqeqeq": true,
+  "esversion": 6,
+  "forin": true,
+  "freeze": true,
+  "futurehostile": true,
+  "globals": [
+
+  ],
+  "iterator": false,
+  "latedef": true,
+  "maxcomplexity": false,
+  "maxdepth": 5,
+  "maxerr": 50,
+  "maxparams": 8,
+  "maxstatements": 50,
+  "noarg": true,
+  "nocomma": true,
+  "nonbsp": true,
+  "nonew": true,
+  "notypeof": true,
+  "predef": [
+    "BungieNet",
+    "URI",
+    "ExtendableError",
+    "BigNumber"
+  ],
+  "shadow": false,
+  "singleGroups": true,
+  "strict": true,
+  "undef": true,
+  "unused": true,
+  "varstmt": false,
+
+  "browser": true,
+  "devel": true,
+  "module": true
+}

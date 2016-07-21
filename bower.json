@@ -1,0 +1,49 @@
+{
+  "name": "bungienetplatformjs",
+  "description": "JavaScript API for the Bungie.net Platform",
+  "main": [
+    "build/bungienetplatformjs.js"
+  ],
+  "moduleType": [],
+  "license": [
+    "MIT"
+  ],
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test",
+    "src",
+    ".bowerrc",
+    ".gitattributes",
+    ".gitignore",
+    ".jshintignore",
+    ".jshintrc",
+    ".tern-project",
+    "bower.json",
+    "Gruntfile.js",
+    "package.json",
+    "README.md"
+  ],
+  "keywords": [
+    "bungie",
+    "bungie.net",
+    "platform",
+    "destiny",
+    "javascript",
+    "api"
+  ],
+  "authors": [
+    "dazarobbo"
+  ],
+  "homepage": "https://www.bungie.net/en/Clan/Forum/39966/0/1/0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dazarobbo/BungieNetPlatformJS.git"
+  },
+  "dependencies": {
+    "bignumber.js": "^2.4.0",
+    "urijs": "uri.js#^1.18.1"
+  },
+  "devDependencies": {},
+  "private": false
+}
