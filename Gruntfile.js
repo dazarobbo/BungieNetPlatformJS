@@ -57,7 +57,7 @@ module.exports = (grunt) => {
           }
         },
         files: {
-          "build/<%= pkg.name %>.browserify.js":
+          "build/<%= pkg.name %>.js":
             "build/<%= pkg.name %>.concat.js"
         }
       }
@@ -81,7 +81,7 @@ module.exports = (grunt) => {
         banner: '/*! <%= pkg.name %>-<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: "build/<%= pkg.name %>.browserify.js",
+        src: "build/<%= pkg.name %>.js",
         dest: "build/<%= pkg.name %>.min.js"
       }
     }

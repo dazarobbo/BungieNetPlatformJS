@@ -21,7 +21,7 @@
     "url": "https://github.com/dazarobbo/BungieNetPlatformJS.git"
   },
   "main": [
-    "build/bungienetplatformjs.min.js"
+    "build/bungienetplatformjs.js"
   ],
   "moduleType": [
 
