@@ -1,20 +1,38 @@
-BungieNet.Platform = class{
+/* globals BungieNet: true */
+/**
+ * BungieNet.Platform
+ *
+ * @param {Object} opts
+ *
+ * Create an instance of this class to access the bungie.net API with any of the
+ * following options:
+ *
+ * {
+ * 	apiKey: {String} bungie.net API key,
+ * 	userContext: {Boolean} whether the platform should use cookies,
+ * 	timeout: {Number} network timeout in milliseconds,
+ * 	beforeSend: {Function} callback with the XHR object as param,
+ * 	onStateChange: {Function} callback with XHR object as param
+ * }
+ *
+ * @example
+ * let p = new BungieNet.Platform({
+ * 	apiKey: "your-key-here"
+ * });
+ *
+ * p.apiKey = "a-different-key";
+ * p.timeout = 10000; //10 seconds
+ *
+ * p.getCountsForCurrentUser().then(r => {
+ * 	//do something
+ * }, (err) => {
+ * 	//some error
+ * });
+ *
+ */
+BungieNet.Platform = class {
 
-  /**
-   * Construct a new bungie.net platform instance with options
-   *
-   * {
-   * 	apiKey: string bungie.net API key,
-   * 	userContext: bool whether the platform should use cookies,
-   * 	timeout: int network timeout in milliseconds,
-   * 	beforeSend: function callback with the XHR object as param,
-   * 	onStateChange: function callback with XHR object as param
-   * }
-   *
-   * @param  {Object} opts
-   * @return {BungieNet.Platform}
-   */
-  constructor(opts = {}){
+  constructor(opts = {}) {
 
     /**
      * Internal list of XHR requests
@@ -31,6 +49,7 @@ BungieNet.Platform = class{
     };
 
     //copy any value in opts to this._options
+    //only copy matching keys
     Object.keys(this._options)
       .filter(x => opts.hasOwnProperty(x))
       .forEach(x => this._options[x] = opts[x]);
@@ -38,11 +57,20 @@ BungieNet.Platform = class{
   }
 
   /**
-   * Cancels all current requests
+   * Cancel all current requests
    */
-  cancelAll(){
+  cancelAll() {
+    //TODO: if this doesn't trigger onerror, remove each manually
     this._requests.forEach(x => x.abort());
     this._requests = [];
+  }
+
+  /**
+   * Removes a given XHR from the platform request array
+   * @param  {XMLHttpRequest} xhr
+   */
+  _removeRequest(xhr) {
+    this.requests = this._requests.filter(x => x !== xhr);
   }
 
   /**
@@ -52,7 +80,7 @@ BungieNet.Platform = class{
    * @param  {mixed} data = void(0)
    * @return {Promise}
    */
-  _httpRequest(uri, method = "GET", data = void 0){
+  _httpRequest(uri, method = "GET", data = void 0) {
     return new Promise((resolve, reject) => {
 
       let promises = [];
@@ -69,18 +97,20 @@ BungieNet.Platform = class{
 
         this._options.onStateChange(xhr);
 
-        if(xhr.readyState === 4){
+        //when done
+        if(xhr.readyState === 4) {
 
-          //remove from internal arr
-          this.requests = this._requests.filter(x => x !== xhr);
+          //remove from array
+          this._removeRequest(xhr);
 
-          if(xhr.status === 200){
+          //validate
+          if(xhr.status === 200) {
             return resolve(xhr.responseText);
           }
           else{
             return reject(new BungieNet.Error(
+              null,
               BungieNet.Error.codes.network_error,
-              xhr.status,
               xhr
             ));
           }
@@ -89,8 +119,18 @@ BungieNet.Platform = class{
 
       };
 
+      //catch misc errors, reject with generic error
+      xhr.onerror = () => {
+        this._removeRequest(xhr);
+        return reject(new BungieNet.Error(
+          null,
+          BungieNet.Error.codes.network_error,
+          xhr
+        ));
+      };
+
       //check if making request as a user and add cookies
-      if(this._options.userContext){
+      if(this._options.userContext) {
         promises.push(
           BungieNet.CurrentUser.getCsrfToken()
             .then(token => {
@@ -98,6 +138,7 @@ BungieNet.Platform = class{
               xhr.setRequestHeader(BungieNet.Platform.headers.csrf, token);
             }, () => {
               return reject(new BungieNet.Error(
+                null,
                 BungieNet.Error.codes.no_csrf_token
               ));
             })
@@ -120,17 +161,22 @@ BungieNet.Platform = class{
    * @param  {BungieNet.Platform.Request} request
    * @return {Promise}
    */
-  _serviceRequest(request){
+  _serviceRequest(request) {
     return new Promise((resolve, reject) => {
       BungieNet.getLocale().then(loc => {
 
+        //construct the full path
+        //copy any query string params
+        //add the locale
         let theUri =
           BungieNet.platformPath
           .segment(request.uri.path())
           .setSearch(request.uri.search(true))
           .addSearch("lc", loc);
 
-        if(!theUri.path().endsWith("/")){
+        //urijs is smart enough to remove the trailing slash
+        //add it back in manually to avoid bungie.net redirects
+        if(!theUri.path().endsWith("/")) {
           theUri.path(theUri.path() + "/");
         }
 
@@ -141,12 +187,12 @@ BungieNet.Platform = class{
 
             let obj = void 0;
 
-            //try to parse the response as JSON
-            try{
+            try {
               obj = JSON.parse(respText);
             }
-            catch(err){
+            catch(err) {
               return reject(new BungieNet.Error(
+                null,
                 BungieNet.Error.codes.corrupt_response
               ));
             }
@@ -159,27 +205,27 @@ BungieNet.Platform = class{
     });
   }
 
-  get key(){
+  get key() {
     return this._options.apiKey;
   }
 
-  set key(key){
+  set key(key) {
     this._options.apiKey = key;
   }
 
-  get userContext(){
+  get userContext() {
     return this._options.userContext;
   }
 
-  set userContext(ok){
+  set userContext(ok) {
     this._options.userContext = ok;
   }
 
-  get timeout(){
+  get timeout() {
     return this._options.timeout;
   }
 
-  set timeout(timeout){
+  set timeout(timeout) {
     this._options.timeout = timeout;
   }
 
@@ -188,7 +234,7 @@ BungieNet.Platform = class{
   /**
    * @return {Promise}
    */
-  getUsersFollowed(){
+  getUsersFollowed() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Activity/Following/Users/")
     ));
@@ -199,7 +245,7 @@ BungieNet.Platform = class{
    * @param  {String} body
    * @return {Promise}
    */
-  createConversation(membersTo, body){
+  createConversation(membersTo, body) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/CreateConversation/"),
       "POST",
@@ -214,7 +260,7 @@ BungieNet.Platform = class{
    * @param  {Number} page
    * @return {Promise}
    */
-  getConversationsV5(page){
+  getConversationsV5(page) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationsv5/{page}/", {
         page: page
@@ -226,7 +272,7 @@ BungieNet.Platform = class{
    * @param  {BigNumber} id
    * @return {Promise}
    */
-  getConversationByIdV2(id){
+  getConversationByIdV2(id) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationByIdV2/{id}/", {
         id: id.toString()
@@ -247,7 +293,7 @@ BungieNet.Platform = class{
     page = 1,
     after = new BigNumber("0"),
     before = (new BigNumber(2)).pow(63).minus(1)
-  ){
+  ) {
 
     let uri = URI.expand(
       "/Message/GetConversationThreadV3/{id}/{page}/", {
@@ -266,7 +312,7 @@ BungieNet.Platform = class{
    * @param  {Number} mId memberID
    * @return {Promise}
    */
-  getConversationWithMemberIdV2(mId){
+  getConversationWithMemberIdV2(mId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationWithMemberV2/{id}/", {
         id: mId
@@ -278,7 +324,7 @@ BungieNet.Platform = class{
    * @param  {Number} page
    * @return {Promise}
    */
-  getGroupConversations(page){
+  getGroupConversations(page) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetGroupConversations/{page}/", {
         page: page
@@ -291,7 +337,7 @@ BungieNet.Platform = class{
    * @param  {BigNumber} conversationId
    * @return {Promise}
    */
-  leaveConversation(conversationId){
+  leaveConversation(conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/LeaveConversation/{id}/", {
         id: conversationId.toString()
@@ -305,7 +351,7 @@ BungieNet.Platform = class{
    * @param  {BigNumber} conversationId
    * @return {Promise}
    */
-  saveMessageV3(body, conversationId){
+  saveMessageV3(body, conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/saveMessageV3/"),
       "POST",
@@ -322,7 +368,7 @@ BungieNet.Platform = class{
    * @param  {BigNumber} conversationId
    * @return {Promise}
    */
-  userIsTyping(conversationId){
+  userIsTyping(conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/UserIsTyping/"),
       "POST",
@@ -335,7 +381,7 @@ BungieNet.Platform = class{
   /**
    * @return {Promise}
    */
-  getAvailableAvatars(){
+  getAvailableAvatars() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetAvailableAvatars/")
     ));
@@ -344,7 +390,7 @@ BungieNet.Platform = class{
   /**
    * @return {Promise}
    */
-  getAvailableThemes(){
+  getAvailableThemes() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetAvailableThemes/")
     ));
@@ -355,7 +401,7 @@ BungieNet.Platform = class{
    * @param  {Number} membershipId
    * @return {Promise}
    */
-  getBungieAccount(membershipType, membershipId){
+  getBungieAccount(membershipType, membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand(
         "/User/GetBungieAccount/{membershipType}/{membershipId}/", {
@@ -368,7 +414,7 @@ BungieNet.Platform = class{
   /**
    * @return {Promise}
    */
-  getCountsForCurrentUser(){
+  getCountsForCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetCounts/")
     ));
@@ -377,7 +423,7 @@ BungieNet.Platform = class{
   /**
    * @return {Promise}
    */
-  getCurrentUser(){
+  getCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetBungieNetUser/")
     ));
@@ -388,7 +434,7 @@ BungieNet.Platform = class{
    * @param  {Object} opts
    * @return {Promise}
    */
-  updateUser(opts){
+  updateUser(opts) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/UpdateUser/"),
       "POST",

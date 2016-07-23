@@ -1,3 +1,4 @@
+/* globals module */
 module.exports = (grunt) => {
   "use strict";
 
@@ -8,7 +9,7 @@ module.exports = (grunt) => {
     bower_concat: {
       all:{
         dest: {
-          js: "build/bower.js"
+          js: "build/<%= pkg.name %>-<%= pkg.version %>.bower.js"
         },
         include: [
           "urijs",
@@ -23,13 +24,15 @@ module.exports = (grunt) => {
       }
     },
 
+    //JS classes are NOT hoisted!
+    //concatenation MUST be in order!
     concat: {
       options: {
         stripBanners: true,
       },
       dist: {
         src: [
-          "build/bower.js", //always first
+          // "build/bower.js", //always first
           "src/ExtendableError.js",
           "src/BungieNet.js",
           "src/BungieNet.Error.js",
@@ -39,7 +42,7 @@ module.exports = (grunt) => {
           "src/BungieNet.Platform.Request.js",
           "src/BungieNet.Platform.Response.js"
         ],
-        dest: "build/<%= pkg.name %>.concat.js"
+        dest: "build/<%= pkg.name %>-<%= pkg.version %>.concat.js"
       }
     },
 
@@ -47,11 +50,15 @@ module.exports = (grunt) => {
       dist: {
         options: {
           transform: [
-            ["babelify", { presets: ["es2015"] }]
-          ]
+            ["babelify", { presets: ["es2015"], compact: false }]
+          ],
+          browserifyOptions: {
+            standalone: "BungieNetJs"
+          }
         },
         files: {
-          "build/<%= pkg.name %>.bundle.js": "build/<%= pkg.name %>.concat.js"
+          "build/<%= pkg.name %>-<%= pkg.version %>.browserify.js":
+            "build/<%= pkg.name %>-<%= pkg.version %>.concat.js"
         }
       }
     },
@@ -63,35 +70,36 @@ module.exports = (grunt) => {
       },
       dist: {
         files: {
-          "build/<%= pkg.name %>.babel.js": "build/<%= pkg.name %>.concat.js"
+          "build/<%= pkg.name %>-<%= pkg.version %>.babel.js":
+            "build/<%= pkg.name %>-<%= pkg.version %>.concat.js"
         }
       }
     },
 
     uglify: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        banner: '/*! <%= pkg.name %>-<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: "build/<%= pkg.name %>.concat.js",
-        dest: "build/<%= pkg.name %>.min.js"
+        src: "build/<%= pkg.name %>-<%= pkg.version %>.browserify.js",
+        dest: "build/<%= pkg.name %>-<%= pkg.version %>.min.js"
       }
     }
 
   });
 
-  grunt.loadNpmTasks("grunt-bower-concat");
-  grunt.loadNpmTasks("grunt-browserify");
-  grunt.loadNpmTasks("grunt-babel");
+  //grunt.loadNpmTasks("grunt-bower-concat");
   grunt.loadNpmTasks("grunt-contrib-concat");
+  grunt.loadNpmTasks("grunt-browserify");
+  //grunt.loadNpmTasks("grunt-babel");
   grunt.loadNpmTasks("grunt-contrib-uglify");
 
   grunt.registerTask("default", [
-    "bower_concat",
+    //"bower_concat",
     "concat",
-    //"browserify"
+    "browserify",
     //"babel",
-    //"uglify"
+    "uglify"
   ]);
 
 };

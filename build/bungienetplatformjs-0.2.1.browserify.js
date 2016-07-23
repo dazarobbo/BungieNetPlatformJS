@@ -1,67 +1,125 @@
-/**
- * BungieNet
- */
-export class BungieNet {
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.BungieNetJs = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
 
-  /**
-   * Gets the base bungie.net URI
-   * @return {URI}
-   */
-  static get base() {
-    return new URI({
-      protocol: BungieNet.scheme,
-      hostname: BungieNet.host
-    });
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ExtendableError = exports.ExtendableError = function (_Error) {
+  _inherits(ExtendableError, _Error);
+
+  function ExtendableError(message) {
+    _classCallCheck(this, ExtendableError);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExtendableError).call(this, message));
+
+    _this.name = _this.constructor.name;
+    _this.message = message;
+
+    if (typeof Error.captureStackTrace === "function") {
+      Error.captureStackTrace(_this, _this.constructor);
+    } else {
+      _this.stack = new Error(message).stack;
+    }
+
+    return _this;
   }
 
-  /**
-   * Fully qualified hostname
-   * @return {String}
-   */
-  static get host() {
-    return `www.${BungieNet.domain}`;
+  return ExtendableError;
+}(Error);
+
+var BungieNet = exports.BungieNet = function () {
+  function BungieNet() {
+    _classCallCheck(this, BungieNet);
   }
 
-  /**
-   * Generates the most appropriate locale-aware base URI
-   * @return {Promise}
-   */
-  static getLocaleBase() {
-    return new Promise(resolve => {
-      BungieNet.getLocale().then(loc => {
-        return resolve(BungieNet.base.segment(loc));
+  _createClass(BungieNet, null, [{
+    key: "getLocaleBase",
+
+
+    /**
+     * Generates the most appropriate locale-aware base URI
+     * @return {Promise}
+     */
+    value: function getLocaleBase() {
+      return new Promise(function (resolve) {
+        BungieNet.getLocale().then(function (loc) {
+          return resolve(BungieNet.base.segment(loc));
+        });
       });
-    });
-  }
+    }
 
-  /**
-   * Base platform URI
-   * @return {URI}
-   */
-  static get platformPath() {
-    return BungieNet.base.segment("Platform");
-  }
+    /**
+     * Base platform URI
+     * @return {URI}
+     */
 
-  /**
-   * Find the most appropriate locale to use, taking into account any
-   * currently detected user
-   * @return {Promise}
-   */
-  static getLocale() {
-    return new Promise(resolve => {
-      //use the current user's default locale if it exists
-      //otherwise use the default locale
-      BungieNet.CurrentUser.getLocale().then(resolve, () => {
-        return resolve(BungieNet.defaultLocale);
+  }, {
+    key: "getLocale",
+
+
+    /**
+     * Find the most appropriate locale to use, taking into account any
+     * currently detected user
+     * @return {Promise}
+     */
+    value: function getLocale() {
+      return new Promise(function (resolve) {
+        //use the current user's default locale if it exists
+        //otherwise use the default locale
+        BungieNet.CurrentUser.getLocale().then(resolve, function () {
+          return resolve(BungieNet.defaultLocale);
+        });
       });
-    });
-  }
+    }
+  }, {
+    key: "base",
 
-}
+
+    /**
+     * Gets the base bungie.net URI
+     * @return {URI}
+     */
+    get: function get() {
+      return new URI({
+        protocol: BungieNet.scheme,
+        hostname: BungieNet.host
+      });
+    }
+
+    /**
+     * Fully qualified hostname
+     * @return {String}
+     */
+
+  }, {
+    key: "host",
+    get: function get() {
+      return "www." + BungieNet.domain;
+    }
+  }, {
+    key: "platformPath",
+    get: function get() {
+      return BungieNet.base.segment("Platform");
+    }
+  }]);
+
+  return BungieNet;
+}();
 
 /**
  * @type {String}
  */
+
+
 BungieNet.defaultLocale = "en";
 
 /**
@@ -1978,3 +2036,828 @@ BungieNet.enums = {
   }
 
 };
+
+/* globals ExtendableError: true */
+BungieNet.Error = function (_ExtendableError) {
+  _inherits(_class, _ExtendableError);
+
+  function _class() {
+    var message = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+    var code = arguments.length <= 1 || arguments[1] === undefined ? BungieNet.Error.codes.unknown : arguments[1];
+    var data = arguments.length <= 2 || arguments[2] === undefined ? void 0 : arguments[2];
+
+    _classCallCheck(this, _class);
+
+    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(_class).call(this, message));
+
+    _this2.code = code;
+    _this2.data = data;
+    return _this2;
+  }
+
+  return _class;
+}(ExtendableError);
+
+BungieNet.Error.codes = {
+
+  /**
+   * Cookies cannot be found
+   * @type {Number}
+   */
+  no_cookie_by_name: 1,
+
+  /**
+   * Network failure
+   * @type {Number}
+   */
+  network_error: 2,
+
+  /**
+   * Value required for X-CSRF header not found
+   * @type {Number}
+   */
+  no_csrf_token: 3,
+
+  /**
+   * Response from bungie.net could not be parsed as valid JSON
+   * @type {Number}
+   */
+  corrupt_response: 4,
+
+  /**
+   * An invalid cookie provider was set or used
+   * @type {Number}
+   */
+  no_cookie_provider: 5,
+
+  /**
+   * Generic error
+   * @type {Number}
+   */
+  unknown: 6
+
+};
+
+/**
+ * BungieNet.Cookies
+ *
+ * Interface to examine/extract bungie.net cookies from a given cookie
+ * provider.
+ *
+ * A cookie provider must implement at least the following methods:
+ *
+ * [public] getAll( void ) : Promise(array of Cookie)
+ * - return all cookies (*.bungie.net only)
+ *
+ *
+ * Cookie must implement at least the following properties:
+ *
+ * name: string
+ * session: bool
+ * value: string
+ *
+ *
+ * The cookie provider should be set similar to:
+ * 	BungieNet.Cookies.provider = new CustomCookieProvider();
+ */
+BungieNet.Cookies = function () {
+  function _class2() {
+    _classCallCheck(this, _class2);
+  }
+
+  _createClass(_class2, null, [{
+    key: "get",
+
+
+    /**
+     * Returns the cookie with the given name
+     * @param  {String} name
+     * @return {Promise}
+     */
+    value: function get(name) {
+      return new Promise(function (resolve, reject) {
+        BungieNet.Cookies.getMatching(function (c) {
+          return c.name === name;
+        }).then(function (cookies) {
+
+          if (cookies.length === 0) {
+            return reject(new BungieNet.Error(null, BungieNet.Error.codes.no_cookie_by_name));
+          }
+
+          return resolve(cookies[0]);
+        }, reject);
+      });
+    }
+
+    /**
+     * Returns an array of cookies which pass the predicate function
+     * @param  {Function} predicate
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getMatching",
+    value: function getMatching(predicate) {
+      return new Promise(function (resolve, reject) {
+
+        try {
+          BungieNet.Cookies.provider.getAll().then(function (cookies) {
+            return resolve(cookies.filter(predicate));
+          });
+        } catch (ex) {
+          return reject(new BungieNet.Error(null, BungieNet.Error.codes.no_cookie_provider));
+        }
+      });
+    }
+
+    /**
+     * Returns an array of session cookies
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getSessionCookies",
+    value: function getSessionCookies() {
+      return BungieNet.Cookies.getMatching(function (c) {
+        return c.session;
+      });
+    }
+
+    /**
+     * Returns the value for a given cookie name
+     * @param  {String} name name of cookie
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getValue",
+    value: function getValue(name) {
+      return new Promise(function (resolve, reject) {
+        BungieNet.Cookies.get(name).then(function (cookie) {
+          return resolve(cookie.value);
+        }, reject);
+      });
+    }
+  }]);
+
+  return _class2;
+}();
+
+/**
+ * Cookie provider interface
+ * @type {mixed}
+ */
+BungieNet.Cookies.provider = null;
+
+/**
+ * BungieNet.CurrentUser
+ *
+ * Functions specific to the current user or client
+ */
+BungieNet.CurrentUser = function () {
+  function _class3() {
+    _classCallCheck(this, _class3);
+  }
+
+  _createClass(_class3, null, [{
+    key: "authenticated",
+
+
+    /**
+     * Returns a bool for whether the user is signed in based on cookie existence
+     * @return {Promise}
+     */
+    value: function authenticated() {
+      return new Promise(function (resolve) {
+
+        //if cookie found, resolve as true
+        //if it isn't found, resolve as false
+        //TODO: does this make sense?
+        return BungieNet.Cookies.get("bungleatk").then(function () {
+          return resolve(true);
+        }, function () {
+          return resolve(false);
+        });
+      });
+    }
+
+    /**
+     * Whether there is any trace of an existing user
+     * @return {Promise}
+     */
+
+  }, {
+    key: "exists",
+    value: function exists() {
+      return new Promise(function (resolve, reject) {
+        BungieNet.Cookies.getMatching(function (c) {
+          return c;
+        }).then(function (cookies) {
+          return resolve(cookies.length > 0);
+        }, reject);
+      });
+    }
+
+    /**
+     * Returns the CSRF token for API requests
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getCsrfToken",
+    value: function getCsrfToken() {
+      //token is the value of the bungled cookie
+      return BungieNet.Cookies.getValue("bungled");
+    }
+
+    /**
+     * Returns the member id of the current user
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getMembershipId",
+    value: function getMembershipId() {
+      return new Promise(function (resolve, reject) {
+        BungieNet.Cookies.getValue("bungleme").then(function (id) {
+          return resolve(parseInt(id, 10));
+        }, reject);
+      });
+    }
+
+    /**
+     * Returns the set bungie.net theme
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getTheme",
+    value: function getTheme() {
+      return BungieNet.cookies.getValue("bungletheme");
+    }
+
+    /**
+     * Returns the current user's locale
+     * @return {Promise} resolves with string if successful, otherwise rejected
+     * with null
+     */
+
+  }, {
+    key: "getLocale",
+    value: function getLocale() {
+      return new Promise(function (resolve, reject) {
+        BungieNet.Cookies.getValue("bungleloc").then(function (str) {
+
+          //parse the locale from the cookie
+          var arr = /&?lc=(.+?)(?:$|&)/i.exec(str);
+
+          //if successful, resolve it
+          if (arr.length >= 1) {
+            return resolve(arr[1]);
+          }
+
+          //otherwise reject as unable to find
+          return reject(null);
+        }, function () {
+          return reject(null);
+        });
+      });
+    }
+  }]);
+
+  return _class3;
+}();
+
+/**
+ * BungieNet.Platform
+ *
+ * @param {Object} opts
+ *
+ * Create an instance of this class to access the bungie.net API with any of the
+ * following options:
+ *
+ * {
+ * 	apiKey: {String} bungie.net API key,
+ * 	userContext: {Boolean} whether the platform should use cookies,
+ * 	timeout: {Number} network timeout in milliseconds,
+ * 	beforeSend: {Function} callback with the XHR object as param,
+ * 	onStateChange: {Function} callback with XHR object as param
+ * }
+ *
+ * @example
+ * let p = new BungieNet.Platform({
+ * 	apiKey: "your-key-here"
+ * });
+ *
+ * p.apiKey = "a-different-key";
+ * p.timeout = 10000; //10 seconds
+ *
+ * p.getCountsForCurrentUser().then(r => {
+ * 	//do something
+ * }, (err) => {
+ * 	//some error
+ * });
+ *
+ */
+BungieNet.Platform = function () {
+  function _class4() {
+    var _this3 = this;
+
+    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    _classCallCheck(this, _class4);
+
+    /**
+     * Internal list of XHR requests
+     * @type {Array}
+     */
+    this._requests = [];
+
+    this._options = {
+      apiKey: "",
+      userContext: true,
+      timeout: 5000,
+      beforeSend: function beforeSend() {},
+      onStateChange: function onStateChange() {}
+    };
+
+    //copy any value in opts to this._options
+    //only copy matching keys
+    Object.keys(this._options).filter(function (x) {
+      return opts.hasOwnProperty(x);
+    }).forEach(function (x) {
+      return _this3._options[x] = opts[x];
+    });
+  }
+
+  /**
+   * Cancel all current requests
+   */
+
+
+  _createClass(_class4, [{
+    key: "cancelAll",
+    value: function cancelAll() {
+      //TODO: if this doesn't trigger onerror, remove each manually
+      this._requests.forEach(function (x) {
+        return x.abort();
+      });
+      this._requests = [];
+    }
+
+    /**
+     * Removes a given XHR from the platform request array
+     * @param  {XMLHttpRequest} xhr
+     */
+
+  }, {
+    key: "_removeRequest",
+    value: function _removeRequest(xhr) {
+      this.requests = this._requests.filter(function (x) {
+        return x !== xhr;
+      });
+    }
+
+    /**
+     * Make a HTTP request
+     * @param  {URI} uri
+     * @param  {String} method = "GET"
+     * @param  {mixed} data = void(0)
+     * @return {Promise}
+     */
+
+  }, {
+    key: "_httpRequest",
+    value: function _httpRequest(uri) {
+      var _this4 = this;
+
+      var method = arguments.length <= 1 || arguments[1] === undefined ? "GET" : arguments[1];
+      var data = arguments.length <= 2 || arguments[2] === undefined ? void 0 : arguments[2];
+
+      return new Promise(function (resolve, reject) {
+
+        var promises = [];
+
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, uri.toString(), true);
+        xhr.timeout = _this4._options.timeout;
+        xhr.setRequestHeader(BungieNet.Platform.headers.apiKey, _this4._options.apiKey);
+
+        //watch for changes
+        xhr.onreadystatechange = function () {
+
+          _this4._options.onStateChange(xhr);
+
+          //when done
+          if (xhr.readyState === 4) {
+
+            //remove from array
+            _this4._removeRequest(xhr);
+
+            //validate
+            if (xhr.status === 200) {
+              return resolve(xhr.responseText);
+            } else {
+              return reject(new BungieNet.Error(null, BungieNet.Error.codes.network_error, xhr));
+            }
+          }
+        };
+
+        //catch misc errors, reject with generic error
+        xhr.onerror = function () {
+          _this4._removeRequest(xhr);
+          return reject(new BungieNet.Error(null, BungieNet.Error.codes.network_error, xhr));
+        };
+
+        //check if making request as a user and add cookies
+        if (_this4._options.userContext) {
+          promises.push(BungieNet.CurrentUser.getCsrfToken().then(function (token) {
+            xhr.withCredentials = true;
+            xhr.setRequestHeader(BungieNet.Platform.headers.csrf, token);
+          }, function () {
+            return reject(new BungieNet.Error(null, BungieNet.Error.codes.no_csrf_token));
+          }));
+        }
+
+        _this4._requests.push(xhr);
+
+        //wait for any promises to resolve then fire
+        Promise.all(promises).then(function () {
+          _this4._options.beforeSend(xhr);
+          xhr.send(data);
+        });
+      });
+    }
+
+    /**
+     * API-level request method
+     * @param  {BungieNet.Platform.Request} request
+     * @return {Promise}
+     */
+
+  }, {
+    key: "_serviceRequest",
+    value: function _serviceRequest(request) {
+      var _this5 = this;
+
+      return new Promise(function (resolve, reject) {
+        BungieNet.getLocale().then(function (loc) {
+
+          //construct the full path
+          //copy any query string params
+          //add the locale
+          var theUri = BungieNet.platformPath.segment(request.uri.path()).setSearch(request.uri.search(true)).addSearch("lc", loc);
+
+          //urijs is smart enough to remove the trailing slash
+          //add it back in manually to avoid bungie.net redirects
+          if (!theUri.path().endsWith("/")) {
+            theUri.path(theUri.path() + "/");
+          }
+
+          _this5._httpRequest(theUri, request.method, JSON.stringify(request.data)).then(function (respText) {
+
+            var obj = void 0;
+
+            try {
+              obj = JSON.parse(respText);
+            } catch (err) {
+              return reject(new BungieNet.Error(null, BungieNet.Error.codes.corrupt_response));
+            }
+
+            return resolve(new BungieNet.Platform.Response(obj));
+          }, reject);
+        });
+      });
+    }
+  }, {
+    key: "getUsersFollowed",
+
+
+    //
+
+    /**
+     * @return {Promise}
+     */
+    value: function getUsersFollowed() {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/Activity/Following/Users/")));
+    }
+
+    /**
+     * @param  {Array} membersTo array of memberIDs
+     * @param  {String} body
+     * @return {Promise}
+     */
+
+  }, {
+    key: "createConversation",
+    value: function createConversation(membersTo, body) {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/Message/CreateConversation/"), "POST", {
+        membersToId: membersTo,
+        body: body
+      }));
+    }
+
+    /**
+     * @param  {Number} page
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getConversationsV5",
+    value: function getConversationsV5(page) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/Message/GetConversationsv5/{page}/", {
+        page: page
+      })));
+    }
+
+    /**
+     * @param  {BigNumber} id
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getConversationByIdV2",
+    value: function getConversationByIdV2(id) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/Message/GetConversationByIdV2/{id}/", {
+        id: id.toString()
+      })));
+    }
+
+    /**
+     * Get a page of a conversation
+     * @param  {Number} id  conversation id
+     * @param  {Number} page = 1  page to return
+     * @param  {BigNumber}  before = (2^63)-1 message id filter
+     * @param  {BigNumber}  after = 0 message id filter
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getConversationThreadV3",
+    value: function getConversationThreadV3(id) {
+      var page = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+      var after = arguments.length <= 2 || arguments[2] === undefined ? new BigNumber("0") : arguments[2];
+      var before = arguments.length <= 3 || arguments[3] === undefined ? new BigNumber(2).pow(63).minus(1) : arguments[3];
+
+
+      var uri = URI.expand("/Message/GetConversationThreadV3/{id}/{page}/", {
+        id: id,
+        page: page
+      });
+
+      uri.addSearch("after", after.toString());
+      uri.addSearch("before", before.toString());
+
+      return this._serviceRequest(new BungieNet.Platform.Request(uri));
+    }
+
+    /**
+     * @param  {Number} mId memberID
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getConversationWithMemberIdV2",
+    value: function getConversationWithMemberIdV2(mId) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/Message/GetConversationWithMemberV2/{id}/", {
+        id: mId
+      })));
+    }
+
+    /**
+     * @param  {Number} page
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getGroupConversations",
+    value: function getGroupConversations(page) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/Message/GetGroupConversations/{page}/", {
+        page: page
+      })));
+    }
+
+    /**
+     * Leave a given conversation by id
+     * @param  {BigNumber} conversationId
+     * @return {Promise}
+     */
+
+  }, {
+    key: "leaveConversation",
+    value: function leaveConversation(conversationId) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/Message/LeaveConversation/{id}/", {
+        id: conversationId.toString()
+      })));
+    }
+
+    /**
+     * Add a message to a conversation
+     * @param  {String} body
+     * @param  {BigNumber} conversationId
+     * @return {Promise}
+     */
+
+  }, {
+    key: "saveMessageV3",
+    value: function saveMessageV3(body, conversationId) {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/Message/saveMessageV3/"), "POST", {
+        body: body,
+        conversationId: conversationId.toString()
+      }));
+    }
+
+    /**
+     * Signal that the current user is typing a message
+     * @todo IF THIS RETURNS AN ERROR IT'S BECAUSE THE ID MUST BE A NUMBER
+     * @param  {BigNumber} conversationId
+     * @return {Promise}
+     */
+
+  }, {
+    key: "userIsTyping",
+    value: function userIsTyping(conversationId) {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/Message/UserIsTyping/"), "POST", {
+        conversationId: conversationId.toString()
+      }));
+    }
+
+    /**
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getAvailableAvatars",
+    value: function getAvailableAvatars() {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/User/GetAvailableAvatars/")));
+    }
+
+    /**
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getAvailableThemes",
+    value: function getAvailableThemes() {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/User/GetAvailableThemes/")));
+    }
+
+    /**
+     * @param  {BungieNet.enums.membershipType} membershipType
+     * @param  {Number} membershipId
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getBungieAccount",
+    value: function getBungieAccount(membershipType, membershipId) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/User/GetBungieAccount/{membershipType}/{membershipId}/", {
+        membershipType: membershipType,
+        membershipId: membershipId
+      })));
+    }
+
+    /**
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getCountsForCurrentUser",
+    value: function getCountsForCurrentUser() {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/User/GetCounts/")));
+    }
+
+    /**
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getCurrentUser",
+    value: function getCurrentUser() {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/User/GetBungieNetUser/")));
+    }
+
+    /**
+     * Updates the user with the given options
+     * @param  {Object} opts
+     * @return {Promise}
+     */
+
+  }, {
+    key: "updateUser",
+    value: function updateUser(opts) {
+      return this._serviceRequest(new BungieNet.Platform.Request(new URI("/User/UpdateUser/"), "POST", opts));
+    }
+  }, {
+    key: "key",
+    get: function get() {
+      return this._options.apiKey;
+    },
+    set: function set(key) {
+      this._options.apiKey = key;
+    }
+  }, {
+    key: "userContext",
+    get: function get() {
+      return this._options.userContext;
+    },
+    set: function set(ok) {
+      this._options.userContext = ok;
+    }
+  }, {
+    key: "timeout",
+    get: function get() {
+      return this._options.timeout;
+    },
+    set: function set(timeout) {
+      this._options.timeout = timeout;
+    }
+  }]);
+
+  return _class4;
+}();
+
+/**
+ * Header key-name pairs
+ * @type {Object}
+ */
+BungieNet.Platform.headers = {
+  apiKey: "X-API-Key",
+  csrf: "X-CSRF"
+};
+
+/**
+ * BungieNet.Platform.Request
+ *
+ * Pass an instance of this class to BungieNet.Platform._serviceRequest with
+ * details of a specific endpoint.
+ *
+ * The URI should be relative to the base bungie.net platform path. For example,
+ * "/Activity/Following/Users/" is correct, but
+ * "bungie.net/Platform/Activity/Following/Users/" is not.
+ *
+ * This type complements BungieNet.Platform.Response.
+ */
+BungieNet.Platform.Request = function () {
+
+  /**
+   * @param  {URI} uri    relative URI from bungie.net/Platform
+   * @param  {String} method =             "GET" HTTP method
+   * @param  {String} data   =             void  0  data to send to the server
+   */
+  function _class5(uri) {
+    var method = arguments.length <= 1 || arguments[1] === undefined ? "GET" : arguments[1];
+    var data = arguments.length <= 2 || arguments[2] === undefined ? void 0 : arguments[2];
+
+    _classCallCheck(this, _class5);
+
+    this.uri = uri;
+    this.method = method;
+    this.data = data;
+  }
+
+  return _class5;
+}();
+
+/**
+ * BungieNet.Platform.Response
+ *
+ * Represents an application response from the bungie.net platform. This type
+ * should be constructed using an object from bungie.net (ie. JSON).
+ *
+ * This type complements BungieNet.Platform.Request.
+ */
+BungieNet.Platform.Response = function () {
+
+  /**
+   * @param  {Object} o
+   */
+  function _class6(o) {
+    _classCallCheck(this, _class6);
+
+    this.errorCode = o.ErrorCode;
+    this.errorStatus = o.ErrorStatus;
+    this.message = o.Message;
+    this.messageData = o.MessageData;
+    this.response = o.Response;
+    this.throttleSeconds = o.ThrottleSeconds;
+  }
+
+  /**
+   * Whether this response represents a platform application error
+   * @type {Boolean}
+   */
+
+
+  _createClass(_class6, [{
+    key: "isError",
+    get: function get() {
+      return this.errorCode !== BungieNet.enums.platformErrorCodes.success;
+    }
+  }]);
+
+  return _class6;
+}();
+
+},{}]},{},[1])(1)
+});

@@ -1,17 +1,41 @@
 {
   "name": "bungienetplatformjs",
-  "version": "0.1.0",
+  "description": "JavaScript API for the Bungie.net Platform",
+  "version": "0.2.1",
+  "license": "MIT",
+  "author": "dazarobbo",
+  "keywords": [
+    "bungie",
+    "bungie.net",
+    "platform",
+    "destiny",
+    "javascript",
+    "api"
+  ],
+  "homepage": "https://github.com/dazarobbo/BungieNetPlatformJS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dazarobbo/BungieNetPlatformJS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dazarobbo/BungieNetPlatformJS/issues"
+  },
+  "main": "",
+  "bin": {
+
+  },
+  "man": "",
+  "config": {
+
+  },
   "devDependencies": {
     "babel-preset-es2015": "^6.9.0",
-    "babel-preset-es2016": "^6.11.3",
     "babelify": "7.3.0",
     "grunt": "^0.4.5",
-    "grunt-babel": "^6.0.0",
     "grunt-bower-concat": "^1.0.0",
     "grunt-browserify": "3.6.0",
     "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-jshint": "~0.10.0",
-    "grunt-contrib-nodeunit": "~0.4.1",
     "grunt-contrib-uglify": "~0.5.0"
-  }
+  },
+  "private": false
 }

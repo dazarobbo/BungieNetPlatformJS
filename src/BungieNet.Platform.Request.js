@@ -1,11 +1,27 @@
+/* globals BungieNet: true */
 /**
- * Request to the Bungie.net Platform
- * @type {BungieNet.Platform.Request}
+ * BungieNet.Platform.Request
+ *
+ * Pass an instance of this class to BungieNet.Platform._serviceRequest with
+ * details of a specific endpoint.
+ *
+ * The URI should be relative to the base bungie.net platform path. For example,
+ * "/Activity/Following/Users/" is correct, but
+ * "bungie.net/Platform/Activity/Following/Users/" is not.
+ *
+ * This type complements BungieNet.Platform.Response.
  */
-BungieNet.Platform.Request = class{
-  constructor(uri, method = "GET", data = void 0){
+BungieNet.Platform.Request = class {
+
+  /**
+   * @param  {URI} uri    relative URI from bungie.net/Platform
+   * @param  {String} method =             "GET" HTTP method
+   * @param  {String} data   =             void  0  data to send to the server
+   */
+  constructor(uri, method = "GET", data = void 0) {
     this.uri = uri;
     this.method = method;
     this.data = data;
   }
+
 };

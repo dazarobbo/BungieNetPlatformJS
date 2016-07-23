@@ -1,10 +1,16 @@
-BungieNet.CurrentUser = class{
+/* globals BungieNet: true */
+/**
+ * BungieNet.CurrentUser
+ *
+ * Functions specific to the current user or client
+ */
+BungieNet.CurrentUser = class {
 
   /**
    * Returns a bool for whether the user is signed in based on cookie existence
    * @return {Promise}
    */
-  static authenticated(){
+  static authenticated() {
     return new Promise(resolve => {
 
       //if cookie found, resolve as true
@@ -21,7 +27,7 @@ BungieNet.CurrentUser = class{
    * Whether there is any trace of an existing user
    * @return {Promise}
    */
-  static exists(){
+  static exists() {
     return new Promise((resolve, reject) => {
       BungieNet.Cookies
         .getMatching(c => c)
@@ -35,7 +41,7 @@ BungieNet.CurrentUser = class{
    * Returns the CSRF token for API requests
    * @return {Promise}
    */
-  static getCsrfToken(){
+  static getCsrfToken() {
     //token is the value of the bungled cookie
     return BungieNet.Cookies.getValue("bungled");
   }
@@ -44,7 +50,7 @@ BungieNet.CurrentUser = class{
    * Returns the member id of the current user
    * @return {Promise}
    */
-  static getMembershipId(){
+  static getMembershipId() {
     return new Promise((resolve, reject) => {
       BungieNet.Cookies
         .getValue("bungleme")
@@ -56,7 +62,7 @@ BungieNet.CurrentUser = class{
    * Returns the set bungie.net theme
    * @return {Promise}
    */
-  static getTheme(){
+  static getTheme() {
     return BungieNet.cookies.getValue("bungletheme");
   }
 
@@ -65,7 +71,7 @@ BungieNet.CurrentUser = class{
    * @return {Promise} resolves with string if successful, otherwise rejected
    * with null
    */
-  static getLocale(){
+  static getLocale() {
     return new Promise((resolve, reject) => {
       BungieNet.Cookies.getValue("bungleloc")
         .then(str => {
@@ -74,7 +80,7 @@ BungieNet.CurrentUser = class{
             let arr = /&?lc=(.+?)(?:$|&)/i.exec(str);
 
             //if successful, resolve it
-            if(arr.length >= 1){
+            if(arr.length >= 1) {
               return resolve(arr[1]);
             }
 

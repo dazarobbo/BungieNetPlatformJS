@@ -22,9 +22,7 @@
   "nonew": true,
   "notypeof": true,
   "predef": [
-    "BungieNet",
     "URI",
-    "ExtendableError",
     "BigNumber"
   ],
   "shadow": false,

@@ -1,14 +1,18 @@
+/* globals BungieNet: true */
 /**
- * Response from the Bungie.net Platform
- * @type {BungieNet.Platform.Response}
+ * BungieNet.Platform.Response
+ *
+ * Represents an application response from the bungie.net platform. This type
+ * should be constructed using an object from bungie.net (ie. JSON).
+ *
+ * This type complements BungieNet.Platform.Request.
  */
-BungieNet.Platform.Response = class{
+BungieNet.Platform.Response = class {
 
   /**
-   * @param  {Object} o a JSON-decoded HTTP response
-   * @return {BungieNet.Platform.Response}
+   * @param  {Object} o
    */
-  constructor(o){
+  constructor(o) {
     this.errorCode = o.ErrorCode;
     this.errorStatus = o.ErrorStatus;
     this.message = o.Message;
@@ -18,10 +22,10 @@ BungieNet.Platform.Response = class{
   }
 
   /**
-   * Whether this response represents an application error
-   * @return {Boolean}
+   * Whether this response represents a platform application error
+   * @type {Boolean}
    */
-  get isError(){
+  get isError() {
     return this.errorCode !== BungieNet.enums.platformErrorCodes.success;
   }
 

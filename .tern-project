@@ -10,6 +10,17 @@
 
   ],
   "plugins": {
+    "complete_strings": {
 
+    },
+    "doc_comment": {
+      "fullDocs": true
+    },
+    "es_modules": {
+
+    },
+    "modules": {
+
+    }
   }
 }

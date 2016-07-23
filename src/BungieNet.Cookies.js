@@ -1,18 +1,42 @@
-BungieNet.Cookies = class{
+/* globals BungieNet: true */
+/**
+ * BungieNet.Cookies
+ *
+ * Interface to examine/extract bungie.net cookies from a given cookie
+ * provider.
+ *
+ * A cookie provider must implement at least the following methods:
+ *
+ * [public] getAll( void ) : Promise(array of Cookie)
+ * - return all cookies (*.bungie.net only)
+ *
+ *
+ * Cookie must implement at least the following properties:
+ *
+ * name: string
+ * session: bool
+ * value: string
+ *
+ *
+ * The cookie provider should be set similar to:
+ * 	BungieNet.Cookies.provider = new CustomCookieProvider();
+ */
+BungieNet.Cookies = class {
 
   /**
    * Returns the cookie with the given name
    * @param  {String} name
    * @return {Promise}
    */
-  static get(name){
+  static get(name) {
     return new Promise((resolve, reject) => {
       BungieNet.Cookies
         .getMatching(c => c.name === name)
         .then(cookies => {
 
-          if(cookies.length === 0){
+          if(cookies.length === 0) {
             return reject(new BungieNet.Error(
+              null,
               BungieNet.Error.codes.no_cookie_by_name
             ));
           }
@@ -28,7 +52,7 @@ BungieNet.Cookies = class{
    * @param  {Function} predicate
    * @return {Promise}
    */
-  static getMatching(predicate){
+  static getMatching(predicate) {
     return new Promise((resolve, reject) => {
 
       try{
@@ -36,8 +60,9 @@ BungieNet.Cookies = class{
           .getAll()
           .then(cookies => resolve(cookies.filter(predicate)));
       }
-      catch(ex){
+      catch(ex) {
         return reject(new BungieNet.Error(
+          null,
           BungieNet.Error.codes.no_cookie_provider
         ));
       }
@@ -49,7 +74,7 @@ BungieNet.Cookies = class{
    * Returns an array of session cookies
    * @return {Promise}
    */
-  static getSessionCookies(){
+  static getSessionCookies() {
     return BungieNet.Cookies.getMatching(c => c.session);
   }
 
@@ -58,12 +83,11 @@ BungieNet.Cookies = class{
    * @param  {String} name name of cookie
    * @return {Promise}
    */
-  static getValue(name){
+  static getValue(name) {
     return new Promise((resolve, reject) => {
       BungieNet.Cookies
         .get(name)
-        .then(cookie => resolve(cookie.value), reject)
-        .catch(() => reject(void 0));
+        .then(cookie => resolve(cookie.value), reject);
     });
   }
 
