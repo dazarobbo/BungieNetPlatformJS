@@ -4,7 +4,9 @@
 <script src="URITemplate.js"></script>
 <script src="bungienetplatformjs-0.2.1.min.js"></script>
 <script>
+
 let {BungieNet} = BungieNetJs;
+
 let p = new BungieNet.Platform({
   apiKey: "your-key-here"
 });
