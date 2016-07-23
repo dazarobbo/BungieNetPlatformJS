@@ -9,7 +9,7 @@ module.exports = (grunt) => {
     bower_concat: {
       all:{
         dest: {
-          js: "build/<%= pkg.name %>-<%= pkg.version %>.bower.js"
+          js: "build/<%= pkg.name %>.bower.js"
         },
         include: [
           "urijs",
@@ -42,7 +42,7 @@ module.exports = (grunt) => {
           "src/BungieNet.Platform.Request.js",
           "src/BungieNet.Platform.Response.js"
         ],
-        dest: "build/<%= pkg.name %>-<%= pkg.version %>.concat.js"
+        dest: "build/<%= pkg.name %>.concat.js"
       }
     },
 
@@ -57,8 +57,8 @@ module.exports = (grunt) => {
           }
         },
         files: {
-          "build/<%= pkg.name %>-<%= pkg.version %>.browserify.js":
-            "build/<%= pkg.name %>-<%= pkg.version %>.concat.js"
+          "build/<%= pkg.name %>.browserify.js":
+            "build/<%= pkg.name %>.concat.js"
         }
       }
     },
@@ -70,8 +70,8 @@ module.exports = (grunt) => {
       },
       dist: {
         files: {
-          "build/<%= pkg.name %>-<%= pkg.version %>.babel.js":
-            "build/<%= pkg.name %>-<%= pkg.version %>.concat.js"
+          "build/<%= pkg.name %>.babel.js":
+            "build/<%= pkg.name %>.concat.js"
         }
       }
     },
@@ -81,8 +81,8 @@ module.exports = (grunt) => {
         banner: '/*! <%= pkg.name %>-<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: "build/<%= pkg.name %>-<%= pkg.version %>.browserify.js",
-        dest: "build/<%= pkg.name %>-<%= pkg.version %>.min.js"
+        src: "build/<%= pkg.name %>.browserify.js",
+        dest: "build/<%= pkg.name %>.min.js"
       }
     }
 
