@@ -2703,17 +2703,17 @@ BungieNet.Platform = function () {
     }
 
     /**
-     * @param  {BungieNet.enums.membershipType} membershipType
      * @param  {Number} membershipId
+     * @param  {BungieNet.enums.membershipType} membershipType
      * @return {Promise}
      */
 
   }, {
     key: "getBungieAccount",
-    value: function getBungieAccount(membershipType, membershipId) {
-      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/User/GetBungieAccount/{membershipType}/{membershipId}/", {
-        membershipType: membershipType,
-        membershipId: membershipId
+    value: function getBungieAccount(membershipId, membershipType) {
+      return this._serviceRequest(new BungieNet.Platform.Request(URI.expand("/User/GetBungieAccount/{membershipId}/{membershipType}/", {
+        membershipId: membershipId,
+        membershipType: membershipType
       })));
     }
 
