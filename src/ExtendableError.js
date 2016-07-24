@@ -2,7 +2,7 @@
  * Base class for custom error types
  * @see http://stackoverflow.com/a/32749533/570787
  */
-export class ExtendableError extends Error {
+class ExtendableError extends Error {
 
   constructor(message) {
 

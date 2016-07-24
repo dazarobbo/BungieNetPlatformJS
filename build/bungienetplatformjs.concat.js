@@ -1,4 +1,4 @@
-export class ExtendableError extends Error {
+class ExtendableError extends Error {
 
   constructor(message) {
 
