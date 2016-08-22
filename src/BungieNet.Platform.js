@@ -1,19 +1,16 @@
-/* globals BungieNet: true */
+/* globals BungieNet */
 /**
  * BungieNet.Platform
  *
- * @param {Object} opts
+ * @param {Object} [opts={}]
+ * @param {String} [opts.apiKey=""] bungie.net API key,
+ * @param {Boolean} [opts.userContext=true] - whether the platform should use cookies,
+ * @param	{Number} [opts.timeout=5000] - network timeout in milliseconds,
+ * @param {Function} [opts.beforeSend=()=>{}] - callback with the XHR object as param,
+ * @param {Function} [opts.onStateChange=()=>{}] - callback with XHR object as param
+ * @param {BungieNet.Platform.authenticationType} [authType=BungieNet.Platform.authenticationType.cookies] - authentication type the platform will use
  *
- * Create an instance of this class to access the bungie.net API with any of the
- * following options:
- *
- * {
- * 	apiKey: {String} bungie.net API key,
- * 	userContext: {Boolean} whether the platform should use cookies,
- * 	timeout: {Number} network timeout in milliseconds,
- * 	beforeSend: {Function} callback with the XHR object as param,
- * 	onStateChange: {Function} callback with XHR object as param
- * }
+ * @todo implement authType
  *
  * @example
  * let p = new BungieNet.Platform({
@@ -25,39 +22,44 @@
  *
  * p.getCountsForCurrentUser().then(r => {
  * 	//do something
- * }, (err) => {
+ * }, err => {
  * 	//some error
  * });
  *
+ * @todo manage throttleSeconds and make a request queue?
  */
 BungieNet.Platform = class {
 
   constructor(opts = {}) {
 
     /**
-     * Internal list of XHR requests
-     * @type {Array}
+     * Internal array of XHR requests
+     * @type {XMLHttpRequest[]}
      */
     this._requests = [];
 
+    //TODO: move this to class var?
     this._options = {
       apiKey: "",
       userContext: true,
       timeout: 5000,
-      beforeSend: () => {},
-      onStateChange: () => {}
+      beforeSend: () => { /*nop*/ },
+      onStateChange: () => { /*nop*/ },
+      authType: BungieNet.Platform.authenticationType.cookies
     };
 
     //copy any value in opts to this._options
     //only copy matching keys
+    //DON'T use hasOwnProperty - opts could be any object
     Object.keys(this._options)
-      .filter(x => opts.hasOwnProperty(x))
+      .filter(x => x in opts)
       .forEach(x => this._options[x] = opts[x]);
 
   }
 
   /**
    * Cancel all current requests
+   * @return {void}
    */
   cancelAll() {
     //TODO: if this doesn't trigger onerror, remove each manually
@@ -66,8 +68,17 @@ BungieNet.Platform = class {
   }
 
   /**
+   * Whether the platform is currently managing requests
+   * @return {Boolean}
+   */
+  get active() {
+    return this._requests.length > 0;
+  }
+
+  /**
    * Removes a given XHR from the platform request array
    * @param  {XMLHttpRequest} xhr
+   * @return {void}
    */
   _removeRequest(xhr) {
     this.requests = this._requests.filter(x => x !== xhr);
@@ -76,9 +87,9 @@ BungieNet.Platform = class {
   /**
    * Make a HTTP request
    * @param  {URI} uri
-   * @param  {String} method = "GET"
-   * @param  {mixed} data = void(0)
-   * @return {Promise}
+   * @param  {String} [method = "GET"]
+   * @param  {*} [data = void 0]
+   * @return {Promise.<String>}
    */
   _httpRequest(uri, method = "GET", data = void 0) {
     return new Promise((resolve, reject) => {
@@ -95,6 +106,7 @@ BungieNet.Platform = class {
       //watch for changes
       xhr.onreadystatechange = () => {
 
+        //invoke callback
         this._options.onStateChange(xhr);
 
         //when done
@@ -107,7 +119,7 @@ BungieNet.Platform = class {
           if(xhr.status === 200) {
             return resolve(xhr.responseText);
           }
-          else{
+          else {
             return reject(new BungieNet.Error(
               null,
               BungieNet.Error.codes.network_error,
@@ -145,10 +157,9 @@ BungieNet.Platform = class {
         );
       }
 
-      this._requests.push(xhr);
-
       //wait for any promises to resolve then fire
       Promise.all(promises).then(() => {
+        this._requests.push(xhr);
         this._options.beforeSend(xhr);
         xhr.send(data);
       });
@@ -159,7 +170,7 @@ BungieNet.Platform = class {
   /**
    * API-level request method
    * @param  {BungieNet.Platform.Request} request
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   _serviceRequest(request) {
     return new Promise((resolve, reject) => {
@@ -180,6 +191,8 @@ BungieNet.Platform = class {
           theUri.path(theUri.path() + "/");
         }
 
+        //TODO: is this stringifying on GET and empty POST?
+        //does it matter?
         this._httpRequest(
           theUri,
           request.method,
@@ -229,10 +242,18 @@ BungieNet.Platform = class {
     this._options.timeout = timeout;
   }
 
+  get authType() {
+    return this._options.authType;
+  }
+
+  set authType(at) {
+    this._options.authType = at;
+  }
+
   //
 
   /**
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getUsersFollowed() {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -241,9 +262,9 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @param  {Array} membersTo array of memberIDs
+   * @param  {Array} membersTo - array of memberIDs
    * @param  {String} body
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   createConversation(membersTo, body) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -258,7 +279,7 @@ BungieNet.Platform = class {
 
   /**
    * @param  {Number} page
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getConversationsV5(page) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -269,8 +290,8 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @param  {BigNumber} id
-   * @return {Promise}
+   * @param  {BigNumber} id - conversation id
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getConversationByIdV2(id) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -282,11 +303,11 @@ BungieNet.Platform = class {
 
   /**
    * Get a page of a conversation
-   * @param  {Number} id  conversation id
-   * @param  {Number} page = 1  page to return
-   * @param  {BigNumber}  before = (2^63)-1 message id filter
-   * @param  {BigNumber}  after = 0 message id filter
-   * @return {Promise}
+   * @param  {Number} id - conversation id
+   * @param  {Number} [page=1] - page to return
+   * @param  {BigNumber} [before=(2^63)-1] - message id filter
+   * @param  {BigNumber} [after=0] - message id filter
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getConversationThreadV3(
     id,
@@ -309,8 +330,8 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @param  {Number} mId memberID
-   * @return {Promise}
+   * @param  {Number} mId - memberID
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getConversationWithMemberIdV2(mId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -322,7 +343,7 @@ BungieNet.Platform = class {
 
   /**
    * @param  {Number} page
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getGroupConversations(page) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -335,7 +356,7 @@ BungieNet.Platform = class {
   /**
    * Leave a given conversation by id
    * @param  {BigNumber} conversationId
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   leaveConversation(conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -349,7 +370,7 @@ BungieNet.Platform = class {
    * Add a message to a conversation
    * @param  {String} body
    * @param  {BigNumber} conversationId
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   saveMessageV3(body, conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -366,7 +387,7 @@ BungieNet.Platform = class {
    * Signal that the current user is typing a message
    * @todo IF THIS RETURNS AN ERROR IT'S BECAUSE THE ID MUST BE A NUMBER
    * @param  {BigNumber} conversationId
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   userIsTyping(conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -379,7 +400,7 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getAvailableAvatars() {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -388,7 +409,7 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getAvailableThemes() {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -399,7 +420,7 @@ BungieNet.Platform = class {
   /**
    * @param  {Number} membershipId
    * @param  {BungieNet.enums.membershipType} membershipType
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getBungieAccount(membershipId, membershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -412,7 +433,7 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getCountsForCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -421,7 +442,7 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -432,7 +453,7 @@ BungieNet.Platform = class {
   /**
    * Updates the user with the given options
    * @param  {Object} opts
-   * @return {Promise}
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   updateUser(opts) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -451,4 +472,14 @@ BungieNet.Platform = class {
 BungieNet.Platform.headers = {
   apiKey: "X-API-Key",
   csrf: "X-CSRF"
+};
+
+/**
+ * Authentication type enum
+ * @type {Object}
+ */
+BungieNet.Platform.authenticationType = {
+  none: 0,
+  cookies: 1,
+  oauth: 2
 };

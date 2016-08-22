@@ -10,7 +10,7 @@
 BungieNet.Platform.Response = class {
 
   /**
-   * @param  {Object} o
+   * @param {Object} o
    */
   constructor(o) {
     this.errorCode = o.ErrorCode;

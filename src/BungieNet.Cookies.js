@@ -1,4 +1,4 @@
-/* globals BungieNet: true */
+/* globals BungieNet */
 /**
  * BungieNet.Cookies
  *
@@ -26,7 +26,7 @@ BungieNet.Cookies = class {
   /**
    * Returns the cookie with the given name
    * @param  {String} name
-   * @return {Promise}
+   * @return {Promise.<Cookie>}
    */
   static get(name) {
     return new Promise((resolve, reject) => {
@@ -50,12 +50,12 @@ BungieNet.Cookies = class {
   /**
    * Returns an array of cookies which pass the predicate function
    * @param  {Function} predicate
-   * @return {Promise}
+   * @return {Promise.<Cookie[]>}
    */
   static getMatching(predicate) {
     return new Promise((resolve, reject) => {
 
-      try{
+      try {
         BungieNet.Cookies.provider
           .getAll()
           .then(cookies => resolve(cookies.filter(predicate)));
@@ -72,7 +72,7 @@ BungieNet.Cookies = class {
 
   /**
    * Returns an array of session cookies
-   * @return {Promise}
+   * @return {Promise.<Cookie[]>}
    */
   static getSessionCookies() {
     return BungieNet.Cookies.getMatching(c => c.session);
@@ -80,8 +80,8 @@ BungieNet.Cookies = class {
 
   /**
    * Returns the value for a given cookie name
-   * @param  {String} name name of cookie
-   * @return {Promise}
+   * @param  {String} name - name of cookie
+   * @return {Promise.<String>}
    */
   static getValue(name) {
     return new Promise((resolve, reject) => {
@@ -95,6 +95,6 @@ BungieNet.Cookies = class {
 
 /**
  * Cookie provider interface
- * @type {mixed}
+ * @type {*}
  */
 BungieNet.Cookies.provider = null;

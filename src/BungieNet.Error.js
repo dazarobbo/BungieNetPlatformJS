@@ -1,5 +1,4 @@
-/* globals BungieNet: true */
-/* globals ExtendableError: true */
+/* globals BungieNet, ExtendableError */
 BungieNet.Error = class extends ExtendableError {
 
   constructor(
@@ -51,5 +50,5 @@ BungieNet.Error.codes = {
    * @type {Number}
    */
   unknown: 6
-  
+
 };

@@ -14,9 +14,9 @@
 BungieNet.Platform.Request = class {
 
   /**
-   * @param  {URI} uri    relative URI from bungie.net/Platform
-   * @param  {String} method =             "GET" HTTP method
-   * @param  {String} data   =             void  0  data to send to the server
+   * @param  {URI} uri - relative URI from bungie.net/Platform
+   * @param  {String} [method="GET"] - HTTP method
+   * @param  {String} [data=void 0] - data to send to the server
    */
   constructor(uri, method = "GET", data = void 0) {
     this.uri = uri;

@@ -8,7 +8,7 @@ BungieNet.CurrentUser = class {
 
   /**
    * Returns a bool for whether the user is signed in based on cookie existence
-   * @return {Promise}
+   * @return {Promise.<Boolean>}
    */
   static authenticated() {
     return new Promise(resolve => {
@@ -25,7 +25,7 @@ BungieNet.CurrentUser = class {
 
   /**
    * Whether there is any trace of an existing user
-   * @return {Promise}
+   * @return {Promise.<Cookie[]>}
    */
   static exists() {
     return new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ BungieNet.CurrentUser = class {
 
   /**
    * Returns the CSRF token for API requests
-   * @return {Promise}
+   * @return {Promise.<String>}
    */
   static getCsrfToken() {
     //token is the value of the bungled cookie
@@ -48,7 +48,7 @@ BungieNet.CurrentUser = class {
 
   /**
    * Returns the member id of the current user
-   * @return {Promise}
+   * @return {Promise.<Number>}
    */
   static getMembershipId() {
     return new Promise((resolve, reject) => {
@@ -60,7 +60,7 @@ BungieNet.CurrentUser = class {
 
   /**
    * Returns the set bungie.net theme
-   * @return {Promise}
+   * @return {Promise.<String>}
    */
   static getTheme() {
     return BungieNet.cookies.getValue("bungletheme");
@@ -68,8 +68,8 @@ BungieNet.CurrentUser = class {
 
   /**
    * Returns the current user's locale
-   * @return {Promise} resolves with string if successful, otherwise rejected
-   * with null
+   * @return {Promise.<String>} resolves with string if successful, otherwise
+   * rejected with null
    */
   static getLocale() {
     return new Promise((resolve, reject) => {

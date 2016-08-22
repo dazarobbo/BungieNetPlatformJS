@@ -23,9 +23,7 @@
   "main": [
     "build/bungienetplatformjs.js"
   ],
-  "moduleType": [
-
-  ],
+  "moduleType": [],
   "ignore": [
     "node_modules",
     "bower_components",
@@ -43,10 +41,9 @@
   ],
   "dependencies": {
     "bignumber.js": "^2.4.0",
-    "urijs": "uri.js#^1.18.1"
+    "urijs": "uri.js#^1.18.1",
+    "moment": "^2.14.1"
   },
-  "devDependencies": {
-
-  },
+  "devDependencies": {},
   "private": false
 }

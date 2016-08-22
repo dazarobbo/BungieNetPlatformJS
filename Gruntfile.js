@@ -13,12 +13,16 @@ module.exports = (grunt) => {
         },
         include: [
           "urijs",
-          "bignumber.js"
+          "bignumber.js",
+          "moment"
         ],
         mainFiles: {
           "urijs": [
             "src/URI.min.js",
             "src/URITemplate.js"
+          ],
+          "moment": [
+            "min/moment.min.js"
           ]
         }
       }

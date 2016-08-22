@@ -24,7 +24,7 @@ export class BungieNet {
 
   /**
    * Generates the most appropriate locale-aware base URI
-   * @return {Promise}
+   * @return {Promise.<URI>}
    */
   static getLocaleBase() {
     return new Promise(resolve => {
@@ -45,7 +45,7 @@ export class BungieNet {
   /**
    * Find the most appropriate locale to use, taking into account any
    * currently detected user
-   * @return {Promise}
+   * @return {Promise.<String>}
    */
   static getLocale() {
     return new Promise(resolve => {
