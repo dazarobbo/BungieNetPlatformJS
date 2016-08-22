@@ -8,12 +8,12 @@
 let {BungieNet} = BungieNetJs;
 
 let p = new BungieNet.Platform({
-  apiKey: "your-key-here"
+  apiKey: "api-key-here"
 });
 
 p.getCountsForCurrentUser().then(r => {
   //do something
-}, (err) => {
+}, err => {
   //error
 });
 ```
