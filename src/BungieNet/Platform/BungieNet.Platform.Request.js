@@ -17,11 +17,27 @@ BungieNet.Platform.Request = class {
    * @param  {URI} uri - relative URI from bungie.net/Platform
    * @param  {String} [method="GET"] - HTTP method
    * @param  {String} [data=void 0] - data to send to the server
+   * @param  {Object} [headers={}] - additional request headers
    */
-  constructor(uri, method = "GET", data = void 0) {
+  constructor(uri, method = "GET", data = void 0, headers = {}) {
+
     this.uri = uri;
     this.method = method;
     this.data = data;
+    this.headers = headers;
+
+    //Set of http specific options to be set
+    this.options = new Set();
+
+  }
+
+  /**
+   * Internal set of function callbacks to set http-specific options before the
+   * request is sent. Function should be Promise-d.
+   * @return {Set}
+   */
+  get options() {
+    return this.options;
   }
 
 };
