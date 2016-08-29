@@ -910,7 +910,6 @@ BungieNet.Platform = class {
   /**
    * @param  {BigNumber} membershipId
    * @param  {BungieNet.enums.membershipType} membershipType
-   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getBungieAccount(membershipId, membershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -921,10 +920,14 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} membershipId - bungie.net memberId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getBungieNetUserById(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/GetBungieNetUserById/{membershipId}/", {
-          membershipId: membershipId.toString()
+        membershipId: membershipId.toString()
       })
     ));
   }
