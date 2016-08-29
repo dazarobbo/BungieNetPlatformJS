@@ -2,22 +2,38 @@
 /**
  * BungieNet.Platform
  *
- * @param {Object} [opts={}]
- * @param {String} [opts.apiKey=""] bungie.net API key
- * @param {Boolean} [opts.userContext=true] - whether the platform should use cookies
- * @param {Number} [opts.timeout=5000] - network timeout in milliseconds
- * @param {Number} [opts.throttle=true] - whether to respect bungie.net's throttling
- * @param {Function} [opts.beforeSend=()=>{}] - callback with the XHR object as param
- * @param {Function} [opts.onStateChange=()=>{}] - callback with XHR object as param
- * @param {BungieNet.Platform.authenticationType} [opts.authType=BungieNet.Platform.authenticationType.cookies] - authentication type the platform will use
- * @param {Boolean} [opts.paused=false] - whether the platform is paused to new requests
+ * @param {Object} [opts = {}]
+ * @param {String} [opts.apiKey = ""] bungie.net API key
+ * @param {BungieNet.Platform.authenticationType} [opts.authType = BungieNet.Platform.authenticationType.cookies] - authentication type the platform will use
+ * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
+ * @param {Boolean} [opts.paused = false] - whether the platform is paused to new requests
+ * @param {Number} [opts.respectThrottle = true] - whether to respect bungie.net's throttling
+ * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
+ * @param {Boolean} [opts.anonymous = false] - whether the platform should make unidentified requests
  *
- * @link https://destinydevs.github.io/BungieNetPlatform/docs/Endpoints
+ * Notes:
+ * (a) platform request workflow is as follows:
+ *  1. when an endpoint has been invoked
+ *  2. a service request is created
+ *  3. the request is passed to a HTTP routine
+ *  4. the HTTP routine create a HTTP request
+ *  5. the HTTP request is added to a wait queue
+ *  6. when appropriate, the HTTP request is dequeued frm the wait queue
+ *  7. the HTTP request is added to the active pool
+ *  8. the HTTP request is initiated
+ *  ...
+ *  (i) when the HTTP request finishes
+ *  (ii) the response is parsed into a response
  *
- * @todo implement authType
- * @todo implement queuing
+ * (b) certain operations/situations will trigger the platform into trying to
+ * dequeue from the wait queue. These are:
+ * - when the platform detects a request 'done'-ing;
+ * - when maxConcurrent is updated;
+ * - when the platform is unpaused; and
+ * - when respectThrottle is updated.
+ *
+ * @todo replace userContext with "anonymous" requests
  * @todo implement throttling
- * @todo remove userContext, replace with authType
  *
  * @example
  * let p = new BungieNet.Platform({
@@ -38,66 +54,47 @@ BungieNet.Platform = class {
 
   constructor(opts = {}) {
 
+    /**
+     * @type {Set}
+     */
     this._activePool = new Set();
-    this._waitingQueue = [];
-    this._throttleExpiration = new Date(); //Date
 
+    /**
+     * @type {Date}
+     */
+    this._throttleExpiration = new Date();
+
+    /**
+     * @type {BungieNet.Platform.Queue}
+     */
+    this._waitQueue = new BungieNet.Platform.Queue();
+
+    /**
+     * @type {Object}
+     */
     this._options = {
       apiKey: "",
-      userContext: true,
-      timeout: 5000,
-      respectThrottle: true,
-      maxConcurrent: -1,
       authType: BungieNet.Platform.authenticationType.cookies,
-      paused: false
+      maxConcurrent: -1,
+      paused: false,
+      respectThrottle: true,
+      timeout: 5000,
+      userContext: true
     };
 
     /**
-     * 1. if any queued requests in waiting list (onTryDequeueRequest):
-     *  - dequeue the front
-     *  - dispatch onDequeuedRequest
-     *  - return the front
-     *
-     * 2. when a new request added to active request list (add active request):
-     *  - dipatch onActiveRequest
-     *
-     * 3. just before firing request:
-     *  - dispatch onBeforeSend
-     *
-     * 4. if platform cannot fire due to previous throttling:
-     *  - dipatch onThrottled
-     *  - remove from active request list
-     *  - add to waiting list
-     *
-     * 5. if network error occurs:
-     *  - dispatch onNetworkError
-     *  - dispatch onRequestDone
-     *
-     * 6. when xhr state changes:
-     *  - dispatch onRequestStateChange
-     *
-     * 7. if platform response is not success:
-     *  - dispatch onPlatformError
-     *
-     * 8. when platform response completes (failed or not):
-     *  - remove from active request list
-     *  - dispatch onRequestDone
-     *
-     *
-     * n1. when throttle expires, check for 1.
-     *
+     * @type {BungieNet.Platform.EventTarget}
      */
-
-    this._eventsV2 = BungieNet.Platform.EventTarget([
-      "queued",
-      "dequeuedRequest",
+    this._events = BungieNet.Platform.EventTarget([
       "activeRequest",
       "beforeSend",
-      "throttled",
+      "dequeuedRequest",
       "networkError",
-      "requestStateChange",
       "platformError",
-      "requestDone"
+      "queued",
+      "requestDone",
+      "requestStateChange",
+      "throttled"
     ]);
 
     //copy any value in opts to this._options
@@ -110,19 +107,21 @@ BungieNet.Platform = class {
   }
 
 
-  /// Private Methods
+  /// Authentication
 
+  /**
+   * Applies cookie-based authentication to the request
+   * @param {BungieNet.Platform.Request} request
+   * @return {Promise.<BungieNet.Platform.Request>}
+   */
   _cookieAuthentication(request) {
     return new Promise((resolve, reject) => {
       BungieNet.CurrentUser.getCsrfToken()
         .then(token => {
 
           request.options.add(http => {
-            return new Promise(resolve => {
-              http.useCookies = true;
-              http.addHeader(BungieNet.Platform.headers.csrf, token);
-              return resolve();
-            });
+            http.useCookies = true;
+            http.addHeader(BungieNet.Platform.headers.csrf, token);
           });
 
           return resolve(request);
@@ -136,16 +135,19 @@ BungieNet.Platform = class {
     });
   }
 
+  /**
+   * Applies OAuth-based authentication to the request
+   * @param {BungieNet.Platform.Request} request
+   * @return {Promise.<BungieNet.Platform.Request>}
+   */
   _oauthAuthentication(request) {
     return new Promise(resolve => {
 
       request.options.add(http => {
-        return new Promise(resolve => {
-          http.addHeader(BungieNet.Platform.headers.oauth,
-            "Bearer " + this._options.oauthToken
-          );
-          return resolve();
-        });
+        http.addHeader(
+          BungieNet.Platform.headers.oauth,
+          `Bearer ${this._options.oauthToken}`
+        );
       });
 
       return resolve(request);
@@ -153,23 +155,29 @@ BungieNet.Platform = class {
     });
   }
 
-  _httpRequestV2(request) {
+
+
+  /// Network
+
+  /**
+   * Initiates the request and queues it
+   * @param {BungieNet.Platform.Request} request
+   * @return {Promise.<BungieNet.Platform.Http2>}
+   */
+  _httpRequest(request) {
     return new Promise((resolve, reject) => {
 
-      let promises = [];
       let http = new BungieNet.Platform.Http2(request);
 
       http.timeout = this._options.timeout;
 
       //add any predefined headers
       for(let {name, value} of request.headers) {
-          http.addHeader(name, value);
+        http.addHeader(name, value);
       }
 
       //apply any/all http options
-      for(let cb of request.options) {
-        promises.push(cb(http));
-      }
+      request.options.forEach(func => func(http));
 
       http.on("update", () => {
         this.__httpUpdate(http);
@@ -187,10 +195,8 @@ BungieNet.Platform = class {
         });
       });
 
-      //when ready, queue, then try
-      Promise.all(promises).then(() => {
-        this.__queueRequest(http).then(this.__tryRequest);
-      });
+      //queue it, try the queue
+      this.__queueRequest(http).then(this.__tryRequest);
 
     });
   }
@@ -223,34 +229,35 @@ BungieNet.Platform = class {
 
         //add api key header
         request.options.add(http => {
-          return new Promise(resolve => {
-            http.addHeader(BungieNet.Platform.headers.apiKey, this._options.apiKey);
-            return resolve();
-          });
+          http.addHeader(
+            BungieNet.Platform.headers.apiKey,
+            this._options.apiKey
+          );
         });
 
         //add authentication
-        switch(this._options.authType) {
+        if(!this._options.anonymous) {
+          switch(this._options.authType) {
 
-          case BungieNet.Platform.authenticationType.cookies:
-            promises.push(this._cookieAuthentication(request));
-            break;
+            case BungieNet.Platform.authenticationType.cookies:
+              promises.push(this._cookieAuthentication(request));
+              break;
 
-          case BungieNet.Platform.authenticationType.oauth:
-            promises.push(this._oauthAuthentication(request));
-            break;
+            case BungieNet.Platform.authenticationType.oauth:
+              promises.push(this._oauthAuthentication(request));
+              break;
 
-          default:
-          case BungieNet.Platform.authenticationType.none:
-            //no need to do anything
-            break;
+            default: //superfluous, but just to make it clear...
+            case BungieNet.Platform.authenticationType.none:
+              //no need to do anything
+              break;
 
+          }
         }
 
         //when ready, do the request
         Promise.all(promises).then(() => {
-
-          this._httpRequestV2(request).then(({responseText}) => {
+          this._httpRequest(request).then(({responseText}) => {
 
             let obj = void 0;
 
@@ -271,7 +278,6 @@ BungieNet.Platform = class {
             });
 
           }, reject);
-
         });
 
       });
@@ -279,78 +285,96 @@ BungieNet.Platform = class {
   }
 
 
+
   /// Private HTTP Handlers
 
+  /**
+   * Handler for when a HTTP request updates (readystatechange)
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __httpUpdate(http) {
     return new Promise(resolve => {
-      this.__requestStateChange(http);
-      return resolve();
+      return this.__requestStateChange(http).then(resolve);
     });
   }
 
+  /**
+   * Handler for when a HTTP request succeeds (HTTP 200)
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __httpSuccess(http) {
     return new Promise(resolve => {
-      this.__httpRequestDone(http);
-      return resolve();
+      return this.__httpRequestDone(http).then(resolve);
     });
   }
 
+  /**
+   * Handler for when a HTTP request fails (ie. network failure)
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __httpFail(http) {
     return new Promise(resolve => {
-      this.__httpError(http);
-      return resolve();
+      return this.__httpError(http).then(resolve);
     });
   }
 
 
   /// Private Handlers
 
+  /**
+   * Adds a request to the wait queue
+   * @param {BungieNet.Platform.Http2}
+   * @return {Promise}
+   */
   __queueRequest(http) {
     return new Promise(resolve => {
 
-      this._waitingQueue.push(http);
+      this._waitQueue.enqueue(http);
 
       let ev = new BungieNet.Platform.Event("queued");
       ev.target = this;
       ev.http = http;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
       return resolve();
 
     });
   }
 
+  /**
+   * Attempts to begin a request, taking any conditiions into account
+   * @return {Promise}
+   */
   __tryRequest() {
-    return new Promise(resolve => {
-
-      //check if any waiting requests
-      if(this._waitingQueue.length === 0) {
-        return;
-      }
+    return new Promise((resolve, reject) => {
 
       //check if paused
       if(this._options.paused) {
-        return;
+        return reject();
+      }
+
+      //check if any waiting requests
+      if(this._waitQueue.empty) {
+        return reject();
       }
 
       //check if too many ongoing requests
       if(this._options.maxConcurrent !== -1) {
         if(this._activePool.size >= this._options.maxConcurrent) {
-          return;
+          return reject();
         }
       }
 
       //check for throttling
-      if(Date.now() < this._throttleExpiration) {
-        this.__throttled();
-        return;
+      if(this._options.respectThrottle && this.throttled) {
+        return this.__throttled().then(reject);
       }
 
-      this.__tryDequeueRequest().then(firstHttp => {
-
-        if(firstHttp === null) {
-          return;
-        }
+      //try get a request from the queue
+      return this.__tryDequeueRequest().then(firstHttp => {
 
         this.__beforeSend(firstHttp).then(() => {
           this.__setActiveRequest(firstHttp);
@@ -359,30 +383,39 @@ BungieNet.Platform = class {
 
         return resolve();
 
-      });
+      }, reject);
 
     });
   }
 
+  /**
+   * Attempts to dequeue a request from the wait list
+   * @return {Promise.<BungieNet.Platform.Http2>}
+   */
   __tryDequeueRequest() {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
 
-      if(this._waitingQueue.length === 0) {
-        return null;
+      if(this._waitQueue.empty) {
+        return reject();
       }
 
-      let firstHttp = this._waitingQueue.shift();
+      let firstHttp = this._waitQueue.dequeue();
 
       let ev = new BungieNet.Platform.Event("dequeuedRequest");
       ev.target = this;
       ev.http = firstHttp;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
       return resolve(firstHttp);
 
     });
   }
 
+  /**
+   * Places a request into the active pool and starts it
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __setActiveRequest(http) {
     return new Promise(resolve => {
 
@@ -392,28 +425,36 @@ BungieNet.Platform = class {
       let ev = new BungieNet.Platform.Event("activeRequest");
       ev.target = this;
       ev.http = http;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
-      return resolve();
+      return resolve(http);
 
     });
   }
 
+  /**
+   * Before the request is sent, call this to dispatch the event
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __beforeSend(http) {
     return new Promise(resolve => {
-
-      //before the request becomes active
 
       let ev = new BungieNet.Platform.Event("beforeSend");
       ev.target = this;
       ev.http = http;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
-      return resolve();
+      return resolve(ev.http);
 
     });
   }
 
+  /**
+   * Updates the instance with throttle information from a response
+   * @param {BungieNet.Platform.Response} response
+   * @return {Promise}
+   */
   __privateThrottled(response) {
     return new Promise(resolve => {
 
@@ -421,11 +462,16 @@ BungieNet.Platform = class {
       d.setSecond(d.getSeconds() + response.throttleSeconds);
       this._throttleExpiration = d;
 
-      return resolve();
+      return resolve(response);
 
     });
   }
 
+  /**
+   * Dispatcher to be called when an attempt to request is made while
+   * the platform is throttled
+   * @return {Promise}
+   */
   __throttled() {
     return new Promise(resolve => {
 
@@ -433,27 +479,42 @@ BungieNet.Platform = class {
       //determines the new request will be throttled
       let ev = new BungieNet.Platform.Event("throttled");
       ev.target = this;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
       return resolve();
 
     });
   }
 
+  /**
+   * When the HTTP request is 'done', regardless of success or failure
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __httpRequestDone(http) {
     return new Promise(resolve => {
       this.__requestDone(http).then(resolve);
     });
   }
 
+  /**
+   * When the XHR request for whatever reason
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __httpError(http) {
     return new Promise(resolve => {
       this.__onNetworkError(http)
-        .then(this.__requestDone(http))
+        .then(() => { this.__requestDone(http); })
         .then(resolve);
     });
   }
 
+  /**
+   * When this instance returns a valid bungie.net platform response
+   * @param {BungieNet.Platform.Response} response
+   * @return {Promise}
+   */
   __serviceRequestDone(response) {
     return new Promise(resolve => {
 
@@ -467,57 +528,76 @@ BungieNet.Platform = class {
             case BungieNet.enums.platformErrorCodes.per_endpoint_request_throttle_exceeded:
 
               //update throttle info
-              this.__onPrivateThrottled(response).then(resolve);
-              return;
+              return this.__privateThrottled(response).then(resolve);
 
           }
         });
       }
 
-      return resolve();
+      return resolve(response);
 
     });
   }
 
+  /**
+   * Handler for network errors
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __networkError(http) {
     return new Promise(resolve => {
 
       let ev = new BungieNet.Platform.Event("networkError");
       ev.target = this;
       ev.http = http;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
-      return resolve();
+      return resolve(ev.http);
 
     });
   }
 
+  /**
+   * Handler for the request state changing
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __requestStateChange(http) {
     return new Promise(resolve => {
 
       let ev = new BungieNet.Platform.Event("requestStateChange");
       ev.target = this;
       ev.http = http;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
-      return resolve();
+      return resolve(ev.http);
 
     });
   }
 
+  /**
+   * Handler for when the bungie.net platform returns a non-successful response
+   * @param {BungieNet.Platform.Response} response
+   * @return {Promise}
+   */
   __platformError(response) {
     return new Promise(resolve => {
 
       let ev = new BungieNet.Platform.Event("platformError");
       ev.target = this;
       ev.response = response;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
-      return resolve();
+      return resolve(response);
 
     });
   }
 
+  /**
+   * When a request is 'done', regardless of success or failure
+   * @param {BungieNet.Platform.Http2} http
+   * @return {Promise}
+   */
   __requestDone(http) {
     return new Promise(resolve => {
 
@@ -526,27 +606,53 @@ BungieNet.Platform = class {
       let ev = new BungieNet.Platform.Event("requestDone");
       ev.target = this;
       ev.http = http;
-      this._eventsV2.dispatch(ev);
+      this._events.dispatch(ev);
 
       //DON'T RESOLVE ON THIS
       this.__tryRequest();
 
-      return resolve();
+      return resolve(http);
 
     });
   }
 
 
 
+  /// Public
+
+
+
   /// Events
 
+  /**
+   * Attach an event listener
+   * @param {String} type - event type to listen for
+   * @param {Function} func - event callback
+   */
   on(type, func) {
-    this._eventsV2.addEventListener(type, func);
+    this._events.addEventListener(type, func);
+  }
+
+  /**
+   * Remove an event listener
+   * @param {String} type - event to remove
+   * @param {Function} func - handler to remove
+   */
+  off(type, func) {
+    this._events.removeEventListener(type, func);
   }
 
 
 
   /// Platform Options
+
+  /**
+   * Number of active requests
+   * @return {Number}
+   */
+  get activeRequests() {
+    return this._activePool.size;
+  }
 
   get apiKey() {
     return this._options.apiKey;
@@ -556,29 +662,12 @@ BungieNet.Platform = class {
     this._options.apiKey = key;
   }
 
-  get userContext() {
-    return this._options.userContext;
+  get authType() {
+    return this._options.authType;
   }
 
-  set userContext(ok) {
-    this._options.userContext = ok;
-  }
-
-  get timeout() {
-    return this._options.timeout;
-  }
-
-  set timeout(timeout) {
-    this._options.timeout = timeout;
-  }
-
-  get respectThrottle() {
-    return this._options.respectThrottle;
-  }
-
-  set respectThrottle(ok) {
-    this._options.respectThrottle = ok;
-    this.__onTryRequest();
+  set authType(at) {
+    this._options.authType = at;
   }
 
   get maxConcurrent() {
@@ -587,15 +676,7 @@ BungieNet.Platform = class {
 
   set maxConcurrent(mc) {
     this._options.maxConcurrent = mc;
-    this.__onTryRequest();
-  }
-
-  get authType() {
-    return this._options.authType;
-  }
-
-  set authType(at) {
-    this._options.authType = at;
+    this.__tryRequest();
   }
 
   get paused() {
@@ -608,7 +689,44 @@ BungieNet.Platform = class {
 
   unpause() {
     this._options.unpause = false;
-    this.__onTryRequest();
+    this.__tryRequest();
+  }
+
+  get respectThrottle() {
+    return this._options.respectThrottle;
+  }
+
+  set respectThrottle(ok) {
+    this._options.respectThrottle = ok;
+    this.__tryRequest();
+  }
+
+  get throttled() {
+    return this._throttleExpiration > Date.now();
+  }
+
+  get timeout() {
+    return this._options.timeout;
+  }
+
+  set timeout(timeout) {
+    this._options.timeout = timeout;
+  }
+
+  get anonymous() {
+    return this._options.anonymous;
+  }
+
+  set anonymous(ok) {
+    this._options.anonymous = ok;
+  }
+
+  /**
+   * Number of queued requests
+   * @return {Number}
+   */
+  get queuedRequests() {
+    return this._waitQueue.length;
   }
 
 
