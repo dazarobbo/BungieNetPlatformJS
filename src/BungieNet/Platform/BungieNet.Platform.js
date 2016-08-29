@@ -941,12 +941,37 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: [
+   *  {
+   *    credentialType: 2,
+   *    credentialDisplayName: "Psnid",
+   *    isPublic: false
+   *  },
+   *  {
+   *    ...
+   *  }
+   * ]
+   */
   getCredentialTypesForAccount() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetCredentialTypesForAccount/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: {
+   *  destinyAccounts: [],
+   *  bungieNetUser: {},
+   *  clans: [],
+   *  relatedGroups: {},
+   *  destinyAccountErrors: []
+   * }
+   */
   getCurrentBungieAccount() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetCurrentBungieAccount/")
@@ -962,36 +987,98 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: [
+   *  {
+   *    AppInstallationId: "-guid-",
+   *    AppType: "BnetMobile",
+   *    DeviceName: "Nexus",
+   *    DeviceType: 3,
+   *    MembershipId: "-bungie.net membership id-",
+   *    MembershipType: "-bnext enum-",
+   *    PairId: "-BigNumber-",
+   *    PairingDate: "iso date string"
+   *  }
+   * ]
+   */
   getMobileAppPairings() {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      new URI("/User/getMobileAppPairings/")
+      new URI("/User/GetMobileAppPairings/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example {@see getMobileAppPairings}
+   */
   getMobileAppPairingsUncached() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetMobileAppPairingsUncached/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: [
+   *  {
+   *    notificationSettingId: "-BigNumber-",
+   *    membershipId: "-BigNumber-",
+   *    optInFlags: "",
+   *    scheduleFlags: 0,
+   *    notificationMethod: "-BigNumber-",
+   *    notificationType: "-BigNumber-",
+   *    displayName: "New Messages",
+   *    settingDescription: "Tell me if I have a new Bungie.net Private Message",
+   *    possibleMethods: 7
+   *  },
+   *  ...
+   * ]
+   */
   getNotificationSettings() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetNotificationSettings/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: [
+   *  {
+   *    apiKey: "hex",
+   *    ownerMembershipId: "0",
+   *    creationDate: "iso date string",
+   *    expirationDate: "iso date string",
+   *    apiEulaVersion: 1
+   *  }
+   * ]
+   */
   getPlatformApiKeysForUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetPlatformApiKeysForUser/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: "/ExpireWebAuth.ashx?..."
+   */
   getSignOutUrl() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/GetSignOutUrl/")
     ));
   }
 
+  /**
+   * @param {BigNumber} membershipId - bungie.net membership id
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: []
+   */
   getUserAliases(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/GetUserAliases/{membershipId}/", {
@@ -1000,6 +1087,15 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {Boolean} [excludeBungieNet = false] - exclude bungie.net member id
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: {
+   *  -id-as-key-: -membership-type-as-value-,
+   *  ...
+   * }
+   */
   getUserMembershipIds(excludeBungieNet) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/GetMembershipIds/{?excludebungienet}", {
@@ -1028,14 +1124,29 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {String} username - query to search for
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: [
+   *  { user information },
+   *  ...
+   * ]
+   */
   searchUsers(username) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/User/SearchUsers/{?,q}", {
+      URI.expand("/User/SearchUsers/{?q}", {
         q: username
       })
     ));
   }
 
+  /**
+   * @param {String} username - search query
+   * @param {Number} [page = 1] - 1-based page number
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example {@see searchUsers}
+   */
   searchUsersPaged(username, page = 1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/SearchUsersPaged/{searchTerm}/{page}/", {
@@ -1045,6 +1156,13 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {String} username - search query
+   * @param {Number} [page = 1] 1-based page number
+   * @param {*} [p3 = null] UNKNOWN
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example {@see SearchUsersPaged}
+   */
   searchUsersPagedV2(username, page = 1, p3 = null) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/SearchUsersPaged/{searchTerm}/{page}/{p3}/", {
@@ -1138,9 +1256,10 @@ BungieNet.Platform = class {
 
 
   /// Message Service
+
   /**
-   * @param {Array} membersTo - array of memberIDs
-   * @param {String} body
+   * @param {String[]} membersTo - array of memberIDs
+   * @param {String} body - body of the message
    * @return {Promise.<BungieNet.Platform.Response>}
    */
   createConversation(membersTo, body) {
@@ -1253,9 +1372,9 @@ BungieNet.Platform = class {
   /**
    * Get a page of a conversation
    * @param  {BigNumber} id - conversation id
-   * @param  {Number} [page=1] - page to return
-   * @param  {BigNumber} [before=(2^63)-1] - message id filter
-   * @param  {BigNumber} [after=0] - message id filter
+   * @param  {Number} [page = 1] - page to return
+   * @param  {BigNumber} [before = (2^63) - 1] - message id filter
+   * @param  {BigNumber} [after = 0] - message id filter
    * @return {Promise.<BungieNet.Platform.Response>}
    */
   getConversationThreadV3(
@@ -1264,18 +1383,15 @@ BungieNet.Platform = class {
     after = new BigNumber("0"),
     before = (new BigNumber(2)).pow(63).minus(1)
   ) {
-
-    let uri = URI.expand(
-      "/Message/GetConversationThreadV3/{id}/{page}/", {
-      id: id.toString(),
-      page: page
-    });
-
-    uri.addSearch("after", after.toString());
-    uri.addSearch("before", before.toString());
-
-    return this._serviceRequest(new BungieNet.Platform.Request(uri));
-
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand(
+        "/Message/GetConversationThreadV3/{id}/{page}/{?after,before}", {
+        id: id.toString(),
+        page: page,
+        after: after.toString(),
+        before: before.toString()
+      })
+    ));
   }
 
   getConversationWithMemberId(memberId) {
