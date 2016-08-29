@@ -1806,10 +1806,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getPoll(p1) {
+  /**
+   * @param {BigNumber} postId - postId of the post containing the poll
+   */
+  getPoll(postId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/Poll/{p1}/", {
-        p1: p1
+      URI.expand("/Forum/Poll/{postId}/", {
+        postId: postId.toString()
       })
     ));
   }
