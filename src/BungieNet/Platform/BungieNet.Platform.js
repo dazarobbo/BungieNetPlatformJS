@@ -1348,7 +1348,7 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @param  {Number} [page=1]
+   * @param  {Number} [page = 1]
    * @return {Promise.<BungieNet.Platform.Response>}
    */
   getConversationsV5(page = 1) {
@@ -1415,10 +1415,10 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @param  {Number} page
+   * @param  {Number} [page = 1] - 1-based
    * @return {Promise.<BungieNet.Platform.Response>}
    */
-  getGroupConversations(page) {
+  getGroupConversations(page = 1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetGroupConversations/{page}/", {
         page: page
@@ -1589,7 +1589,9 @@ BungieNet.Platform = class {
 
   /**
    * Signal that the current user is typing a message
-   * @todo IF THIS RETURNS AN ERROR IT'S BECAUSE THE ID MUST BE A NUMBER
+   *
+   * Bungie.net sends a number as the conversationId rather than as a string,
+   * but both appear to work
    * @param  {BigNumber} conversationId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
@@ -1608,18 +1610,24 @@ BungieNet.Platform = class {
   /// Notification Service
   getRealTimeEvents(p1, p2, timeout) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Notification/Events/{p1}/{p2}/{?,timeout}", {
+      URI.expand("/Notification/Events/{p1}/{p2}/{?timeout}", {
         timeout: timeout
       })
     ));
   }
 
+  /**
+   * @deprecated
+   */
   getRecentNotificationCount() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Notification/GetCount/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getRecentNotifications() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Notification/GetRecent/")
@@ -1635,14 +1643,48 @@ BungieNet.Platform = class {
 
 
   /// Content Service
-  getCareer(p1) {
+
+  /**
+   * @param {BigNumber} careerId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: {
+   *  careerId: "44767",
+   *  title: "Lead Weapons and Vehicles Artist",
+   *  category: "Art",
+   *  categoryTag: "art",
+   *  tags: [],
+   *  detail: "-html-string-"
+   * }
+   */
+  getCareer(careerId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Content/Careers/{p1}/", {
-        p1: p1
+      URI.expand("/Content/Careers/{id}/", {
+        id: careerId.toString()
       })
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: {
+   *  categories: [
+   *    {
+   *      categoryName: "Art",
+   *      tag: "art",
+   *      careers: [
+   *        {
+   *          careerId: "44767",
+   *          title: "Lead Weapons and Vehicle Artist "
+   *        }
+   *        ...
+   *      ]
+   *    }
+   *    ...
+   *  ]
+   * }
+   */
   getCareers() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Content/Careers/")
@@ -1651,7 +1693,7 @@ BungieNet.Platform = class {
 
   getContentById(p1, p2, head) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Content/GetContentById/{p1}/{p2}/{?,head}", {
+      URI.expand("/Content/GetContentById/{p1}/{p2}/{?head}", {
         p1: p1,
         p2: p2,
         head: head
@@ -1724,7 +1766,7 @@ BungieNet.Platform = class {
 
   getNews(p1, p2, itemsPerPage, currentPage = 1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Content/Site/News/{p1}/{p2}/{?,itemsperpage,currentpage}", {
+      URI.expand("/Content/Site/News/{p1}/{p2}/{?itemsperpage,currentpage}", {
         p1: p1,
         p2: p2,
         itemsperpage: itemsPerPage,
@@ -1733,6 +1775,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPromoWidget() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Content/Site/Destiny/Promo/")
@@ -1747,9 +1792,13 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {String} query - search query
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   searchCareers(query) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Content/Careers/Search/{?,searchtext}", {
+      URI.expand("/Content/Careers/Search/{?searchtext}", {
         searchtext: query
       })
     ));
@@ -2929,6 +2978,17 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: [
+   *  {
+   *    groupdId: "-BigNumber-",
+   *    membershipType: 2,
+   *    membershipId: "-BigNumber-"
+   *  }
+   * ]
+   */
   getMyClanMemberships() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/MyClans/")
@@ -3408,10 +3468,15 @@ BungieNet.Platform = class {
 
 
   /// Admin Service
-  adminUserSearch(q) {
+
+  /**
+   * @param {String} username - search term
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  adminUserSearch(username) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/Search/{?q}", {
-        q: q
+      URI.expand("/Admin/Member/Search/{?username}", {
+        username: username
       })
     ));
   }
