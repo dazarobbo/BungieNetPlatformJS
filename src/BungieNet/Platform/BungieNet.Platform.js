@@ -1887,6 +1887,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   changeLockState(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/ChangeLockState/{p1}/{p2}/", {
@@ -1931,21 +1934,21 @@ BungieNet.Platform = class {
    *
    * @param {Object} post
    * @param {String} post.body
-   * @param {Number} post.category
+   * @param {Number} post.category - which enum for this? flags?
    * @param {Number} post.groupId
    * @param {Boolean} post.isGroupPrivate
-   * @param {*} post.metadata - null
-   * @param {BigNumber} post.parentPostId
+   * @param {String|null} post.metadata - null
+   * @param {BigNumber} post.parentPostId - postId being replied to
    * @param {Number} post.playerSupportFlags
-   * @param {*} post.playerSupportMetadata
-   * @param {*} post.recruitIntensity
-   * @param {*} post.recruitMicrophoneRequired
-   * @param {*} post.recruitSlots
-   * @param {*} post.recruitTone
-   * @param {*} post.subTopicOverride
+   * @param {null} post.playerSupportMetadata
+   * @param {BigNumber} post.recruitIntensity
+   * @param {Boolean} post.recruitMicrophoneRequired - null?
+   * @param {BigNumber} post.recruitSlots
+   * @param {BigNumber} post.recruitTone
+   * @param {Boolean} post.subTopicOverride
    * @param {String} post.subject
    * @param {String} post.tagCategory
-   * @param {String} post.tagInput
+   * @param {String} post.tagInput - comma separated
    * @param {String} post.urlLinkOrImage
    * @return {Promise.<BungieNet.Platform.Response>}
    */
@@ -1969,14 +1972,36 @@ BungieNet.Platform = class {
     ));
   }
 
-  editPost(p1) {
+  /**
+   * @param {BigNumber} postId
+   * @param {Object} post
+   * @param {String} [post.body = ""]
+   * @param {Number} [post.category = 0] - enum?
+   * @param {Number} [post.disableBits = 64] - enum for this?
+   * @param {Boolean} [post.isGroupPostPrivate = false]
+   * @param {String|null} [post.metadata = null]
+   * @param {String} [post.subject = ""]
+   * @param {String} [post.tagCategory = ""]
+   * @param {String} [post.tagInput = ""]
+   * @param {String} [post.urlLinkOrImage = ""]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  editPost(postId, post) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/EditPost/{p1}/", {
-        p1: p1
+      URI.expand("/Forum/EditPost/{id}/", {
+        id: postId.toString()
       }),
       "POST",
       {
-
+        body: post.body,
+        category: post.category,
+        disableBits: post.disableBits,
+        isGroupPostPrivate: post.isGroupPostPrivate,
+        metata: post.metadata,
+        subject: post.subject,
+        tagCategory: post.tagCategory,
+        tagInput: post.tagInput,
+        urlLinkOrImage: post.urlLinkOrImage
       }
     ));
   }
@@ -2020,19 +2045,29 @@ BungieNet.Platform = class {
     ));
   }
 
-  getPopularTag(quantity, tagsSinceDate) {
+  /**
+   * @param {Number} quantity
+   * @param {*} tagsSinceDate
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getPopularTags(quantity, tagsSinceDate) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/GetPopularTags/{?,quantity,tagsSinceDate}", {
+      URI.expand("/Forum/GetPopularTags/{?quantity,tagsSinceDate}", {
         quantity: quantity,
         tagsSinceDate: tagsSinceDate
       })
     ));
   }
 
+  /**
+   * @param {BigNumber} childPostId
+   * @param {Boolean} showBanned
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPostAndParent(childPostId, showBanned) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/GetPostAndParent/{childPostId}/{?,showbanned}", {
-        childPostId: childPostId,
+      URI.expand("/Forum/GetPostAndParent/{childPostId}/{?showbanned}", {
+        childPostId: childPostId.toString(),
         showbanned: showBanned
       })
     ));
@@ -2133,10 +2168,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  joinFireteamThread(p1) {
+  /**
+   * @param {BigNumber} postId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  joinFireteamThread(postId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/Recruit/Join/{p1}/", {
-        p1: p1
+      URI.expand("/Forum/Recruit/Join/{id}/", {
+        id: postId.toString()
       }),
       "POST",
       {
@@ -2145,11 +2184,16 @@ BungieNet.Platform = class {
     ));
   }
 
-  kickBanFireteamApplicant(p1, p2) {
+  /**
+   * @param {BigNumber} postId
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  kickBanFireteamApplicant(postId, membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/Recruit/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+      URI.expand("/Forum/Recruit/{postId}/{membershipId}/", {
+        postId: postId.toString(),
+        membershipId: membershipId.toString()
       }),
       "POST",
       {
@@ -2158,10 +2202,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  leaveFireteamThread(p1) {
+  /**
+   * @param {BigNumber} postId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  leaveFireteamThread(postId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/Recruit/Leave/{p1}/", {
-        p1: p1
+      URI.expand("/Forum/Recruit/Leave/{id}/", {
+        id: postId.toString()
       }),
       "POST",
       {
@@ -2170,11 +2218,16 @@ BungieNet.Platform = class {
     ));
   }
 
-  markReplyAsAnswer(p1, p2) {
+  /**
+   * @param {BigNumber} answerPostId
+   * @param {BigNumber} questionTopicId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  markReplyAsAnswer(answerPostId, questionTopicId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/MarkReplyAsAnswer/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+      URI.expand("/Forum/MarkReplyAsAnswer/{answer}/{question}/", {
+        answer: answerPostId.toString(),
+        question: questionTopicId.toString()
       }),
       "POST",
       {
@@ -2253,7 +2306,7 @@ BungieNet.Platform = class {
   pollVote(pollId, optionIndex) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/Poll/Vote/{pollId}/{index}/", {
-        pollId: pollId,
+        pollId: pollId.toString(),
         optionIndex: optionIndex
       }),
       "POST",
@@ -2263,11 +2316,16 @@ BungieNet.Platform = class {
     ));
   }
 
-  ratePost(p1, p2) {
+  /**
+   * @param {BigNumber} postId
+   * @param {Number} rating - 0 to 100, currently only 0 OR 100
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  ratePost(postId, rating) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/RatePost/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+      URI.expand("/Forum/RatePost/{postId}/{rating}/", {
+        postId: postId.toString(),
+        rating: rating
       }),
       "POST",
       {
@@ -2276,10 +2334,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  unmarkReplyAsAnswer(p1) {
+  /**
+   * @param {BigNumber} topicId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  unmarkReplyAsAnswer(topicId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/UnmarkReplyAsAnswer/{p1}/", {
-        p1: p1
+      URI.expand("/Forum/UnmarkReplyAsAnswer/{topicId}/", {
+        topicId: topicId.toString()
       })
     ));
   }
@@ -2288,6 +2350,10 @@ BungieNet.Platform = class {
 
   /// Activity Service
 
+  /**
+   * @param {String} tag - ie. #destiny, hash included
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   followTag(tag) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Tag/Follow/{?tag}", {
@@ -2300,10 +2366,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  followUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  followUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Activity/User/{p1}/Follow/", {
-        p1: p1
+      URI.expand("/Activity/User/{id}/Follow/", {
+        id: membershipId.toString()
       }),
       "POST",
       {
@@ -2387,7 +2457,7 @@ BungieNet.Platform = class {
 
   getForumActivitiesForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Activity/User/{p1}/Activities/ForumsV2/{currentpage,format}", {
+      URI.expand("/Activity/User/{p1}/Activities/ForumsV2/{?currentpage,format}", {
         p1: p1,
         currentpage: currentPage,
         format: format
@@ -2403,7 +2473,7 @@ BungieNet.Platform = class {
 
   getFriendsAllNoPresence(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Activity/Friends/AllNoPresence/{p1}", {
+      URI.expand("/Activity/Friends/AllNoPresence/{p1}/", {
         p1: p1
       })
     ));
@@ -2418,16 +2488,23 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getGroupsFollowedByCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Activity/Following/Groups/")
     ));
   }
 
-  getGroupsFollowedByUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getGroupsFollowedByUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Activity/User/{p1}/Following/Groups/", {
-        p1: p1
+      URI.expand("/Activity/User/{id}/Following/Groups/", {
+        id: membershipId.toString()
       })
     ));
   }
@@ -2486,6 +2563,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {String} tag - ie. #destiny, with hash
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unfollowTag(tag) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Tag/Unfollow/{?tag}", {
@@ -2498,10 +2579,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  unfollowUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  unfollowUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Activity/User/{p1}/Unfollow/", {
-        p1: p1
+      URI.expand("/Activity/User/{id}/Unfollow/", {
+        id: membershipId.toString()
       }),
       "POST",
       {
