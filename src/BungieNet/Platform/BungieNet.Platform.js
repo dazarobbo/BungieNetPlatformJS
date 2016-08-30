@@ -1230,7 +1230,7 @@ BungieNet.Platform = class {
   /**
    * Updates the user with the given options
    * @link https://destinydevs.github.io/BungieNetPlatform/docs/UserService/UpdateUser#/JSON-POST-Parameters
-   * @param  {Object} [opts={}]
+   * @param  {Object} [opts = {}]
    * @return {Promise.<BungieNet.Platform.Response>}
    */
   updateUser(opts = {}) {
@@ -1258,7 +1258,7 @@ BungieNet.Platform = class {
   /// Message Service
 
   /**
-   * @param {String[]} membersTo - array of memberIDs
+   * @param {BigNumber[]} membersTo - array of memberIDs
    * @param {String} body - body of the message
    * @return {Promise.<BungieNet.Platform.Response>}
    */
@@ -1267,7 +1267,7 @@ BungieNet.Platform = class {
       new URI("/Message/CreateConversation/"),
       "POST",
       {
-        membersToId: membersTo,
+        membersToId: membersTo.map(bn => bn.toString()),
         body: body
       }
     ));
@@ -1394,6 +1394,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} memberId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getConversationWithMemberId(memberId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationWithMember/{memberId}/", {
@@ -1592,6 +1596,7 @@ BungieNet.Platform = class {
    *
    * Bungie.net sends a number as the conversationId rather than as a string,
    * but both appear to work
+   *
    * @param  {BigNumber} conversationId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
@@ -1634,6 +1639,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   resetNotification() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Notification/Reset/")
@@ -1915,6 +1923,32 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   *
+   * When creating a poll, set post.metadata to a JSON-encoded string array of
+   * options. For example, if the options are Yes, No, and Maybe, post.metadata
+   * would be set to "["Yes","No","Maybe"]". The square brackets are included.
+   *
+   * @param {Object} post
+   * @param {String} post.body
+   * @param {Number} post.category
+   * @param {Number} post.groupId
+   * @param {Boolean} post.isGroupPrivate
+   * @param {*} post.metadata - null
+   * @param {BigNumber} post.parentPostId
+   * @param {Number} post.playerSupportFlags
+   * @param {*} post.playerSupportMetadata
+   * @param {*} post.recruitIntensity
+   * @param {*} post.recruitMicrophoneRequired
+   * @param {*} post.recruitSlots
+   * @param {*} post.recruitTone
+   * @param {*} post.subTopicOverride
+   * @param {String} post.subject
+   * @param {String} post.tagCategory
+   * @param {String} post.tagInput
+   * @param {String} post.urlLinkOrImage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createPost(post) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Forum/CreatePost/"),
@@ -2149,18 +2183,42 @@ BungieNet.Platform = class {
     ));
   }
 
-  moderateGroupPost(p1) {
+  /**
+   * @param {BigNumber} postId
+   * @param {BigNumber} moderatedItemId
+   * @param {Number} reason
+   * @param {String} [comments = "group post ban"]
+   * @param {BungieNet.enums.affectedItemType} [moderatedItemType = BungieNet.enums.affectedItemType.post]
+   * @param {BungieNet.enums.requestedPunishment} [requestedPunishment = BungieNet.enums.requestedPunishment.ban]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  moderateGroupPost(
+    postId,
+    moderatedItemId,
+    reason = 1,
+    comments = "group post ban",
+    moderatedItemType = BungieNet.enums.affectedItemType.post,
+    requestedPunishment = BungieNet.enums.requestedPunishment.ban
+  ) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/Post/{p1}/GroupModerate/", {
-        p1: p1
+      URI.expand("/Forum/Post/{postId}/GroupModerate/", {
+        postId: postId.toString()
       }),
       "POST",
       {
-
+        comments: comments,
+        moderatedItemId: moderatedItemId.toString(),
+        moderatedItemType: moderatedItemType,
+        reason: reason,
+        requestedPunishment: requestedPunishment
       }
     ));
   }
 
+  /**
+   *
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   moderatePost(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/Post/{p1}/Moderate/", {
@@ -2185,11 +2243,18 @@ BungieNet.Platform = class {
     ));
   }
 
-  pollVote(p1, p2) {
+  /**
+   *
+   * - payload is set to null, this may result in a bug
+   * @param {BigNumber} pollId
+   * @param {Number} optionIndex - 0-based index of the option being voted for
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  pollVote(pollId, optionIndex) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/Poll/Vote/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+      URI.expand("/Forum/Poll/Vote/{pollId}/{index}/", {
+        pollId: pollId,
+        optionIndex: optionIndex
       }),
       "POST",
       {
@@ -4430,90 +4495,142 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getTriumphs(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Triumphs/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId
+        destinyMembershipId: destinyMembershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getUniqueWeaponHistory(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/UniqueWeapons/{membershipType}/{destinyMembershipId}/{characterId}/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVault(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Vault/{?accountId}", {
         membershipType: membershipType,
-        accountId: destinyMembershipId
+        accountId: destinyMembershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVaultSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Vault/Summary/{?accountId}", {
         membershipType: membershipType,
-        accountId: destinyMembershipId
+        accountId: destinyMembershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @param {Number} vendorId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVendorForCurrentCharacter(membershipType, characterId, vendorId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/", {
         membershipType: membershipType,
-        characterId: characterId,
+        characterId: characterId.toString(),
         vendorId: vendorId
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @param {Number} vendorId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVendorForCurrentCharacterWithMetadata(membershipType, characterId, vendorId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Metadata/", {
         membershipType: membershipType,
-        characterId: characterId,
+        characterId: characterId.toString(),
         vendorId: vendorId
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @param {Number} vendorId
+   * @param {BigNumber} itemId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVendorItemDetailForCurrentUser(membershipType, characterId, vendorId, itemId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/", {
         membershipType: membershipType,
-        characterId: characterId,
+        characterId: characterId.toString(),
         vendorId: vendorId,
-        itemId: itemId
+        itemId: itemId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @param {Number} vendorId
+   * @param {BigNumber} itemId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVendorItemDetailForCurrentUserWithMetadata(membershipType, characterId, vendorId, itemId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/Metadata/", {
         membershipType: membershipType,
-        characterId: characterId,
+        characterId: characterId.toString(),
         vendorId: vendorId,
-        itemId: itemId
+        itemId: itemId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getVendorSummariesForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendors/Summaries/", {
         membershipType: membershipType,
-        characterId: characterId
+        characterId: characterId.toString()
       })
     ));
   }
@@ -4530,6 +4647,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {String} displayName
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   searchDestinyPlayer(membershipType, displayName) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/SearchDestinyPlayer/{membershipType}/{displayName}/", {
@@ -4539,28 +4661,43 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} itemId
+   * @param {BigNumber} characterId
+   * @param {Boolean} state - true to lock, false to unlock
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   setItemLockState(membershipType, itemId, characterId, state) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/SetLockState/"),
       "POST",
       {
         membershipType: membershipType,
-        itemId: itemId,
-        characterId: characterId,
+        itemId: itemId.toString(),
+        characterId: characterId.toString(),
         state: state
       }
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} membershipId
+   * @param {BigNumber} characterId
+   * @param {BigNumber} itemId
+   * @param {Boolean} state - true to track, false to not track
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   setQuestTrackedState(membershipType, membershipId, characterId, itemId, state) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/SetQuestTrackedState/"),
       "POST",
       {
         membershipType: membershipType,
-        membershipId: membershipId,
-        characterId: characterId,
-        itemId: itemId,
+        membershipId: membershipId.toString(),
+        characterId: characterId.toString(),
+        itemId: itemId.toString(),
         state: state
       }
     ));
