@@ -1976,6 +1976,7 @@ BungieNet.Platform = class {
 
   /**
    * @param {BigNumber} postId - postId of the post containing the poll
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getPoll(postId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -3713,6 +3714,17 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: {
+   *  IsThrottled: false,
+   *  ThrottleExpires: "-iso-date-string",
+   *  NumberOfFailedAttemptsToday: 0,
+   *  MaximumFailedAttemptsPerDay: 3,
+   *  AgeVerificationState: true
+   * }
+   */
   getCurrentUserThrottleState() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/ThrottleState/")
@@ -3778,6 +3790,7 @@ BungieNet.Platform = class {
 
 
   /// Destiny Service
+
   buyItem() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/BuyItem/"),
@@ -3788,44 +3801,66 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} itemId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   equipItem(membershipType, itemId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/EquipItem/"),
       "POST",
       {
         membershipType: membershipType,
-        itemId: itemId,
-        characterId: characterId
+        itemId: itemId.toString(),
+        characterId: characterId.toString()
       }
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @param {BigNumber[]} itemIds
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   equipItems(membershipType, characterId, itemIds) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/EquipItems/"),
       "POST",
       {
         membershipType: membershipType,
-        characterId: characterId,
-        itemIds: itemIds
+        characterId: characterId.toString(),
+        itemIds: itemIds.map(bn => bn.toString())
       }
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAccount(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId
+        destinyMembershipId: destinyMembershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAccountSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Summary/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId
+        destinyMembershipId: destinyMembershipId.toString()
       })
     ));
   }
@@ -3838,19 +3873,28 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @param {BungieNet.enums.destinyActivityModeType} [mode = BungieNet.enums.destinyActivityModeType.none]
+   * @param {Number} [count = 25] number of results to return
+   * @param {Number} [page = 1] 1-based
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getActivityHistory(
     membershipType,
     destinyMembershipId,
     characterId,
-    mode,
-    count,
-    page
+    mode = BungieNet.enums.destinyActivityModeType.none,
+    count = 25,
+    page = 1
   ) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/ActivityHistory/{membershipType}/{destinyMembershipId}/{characterId}/{?mode,count,page}", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId,
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString(),
         mode: mode,
         count: count,
         page: page
@@ -3858,62 +3902,98 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdvisorsForAccount(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Advisors/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId
+        destinyMembershipId: destinyMembershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdvisorsForCharacter(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Advisors/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdvisorsForCharacterV2(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Advisors/V2/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdvisorsForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Advisors/", {
         membershipType: membershipType,
-        characterId: characterId
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAllItemsSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Items/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId
+        destinyMembershipId: destinyMembershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAllVendorsForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendors/", {
         membershipType: membershipType,
-        characterId: characterId
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType}
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getBondAdvisors(membershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Advisors/Bonds/", {
@@ -3922,66 +4002,105 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCharacter(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Complete/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCharacterActivities(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Activities/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCharacterInventory(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCharacterInventorySummary(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/Summary/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCharacterProgression(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Progression/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCharacterSummary(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getClanLeaderboards(p1, modes, statid, maxtop) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/ClanLeaderboards/{p1}/{?modes,statid,maxtop}", {
@@ -3993,12 +4112,18 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyAggregateActivityStats(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/AggregateActivityStats/{membershipType}/{destinyMembershipId}/{characterId}/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString()
       })
     ));
   }
@@ -4019,18 +4144,27 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyLiveTileContentItems() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/LiveTiles/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyManifest() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Manifest/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinySingleDefinition(definitionType, definitionId, version) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Manifest/{definitionType}/{definitionId}/{?version}", {
@@ -4041,11 +4175,16 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getExcellenceBadges(membershipType, destinyMembershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/GetExcellenceBadges/{membershipType}/{destinyMembershipId}/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId
+        destinyMembershipId: destinyMembershipId.toString()
       })
     ));
   }
@@ -4061,6 +4200,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getGrimoireDefinition() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Vanguard/Grimoire/Definition/")
@@ -4095,29 +4237,45 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getHistoricalStatsDefinition() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Stats/Definition/")
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BungieNet.enums.destinyStatsGroupType[]} groups
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getHistoricalStatsForAccount(membershipType, destinyMembershipId, groups) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/Account/{membershipType}/{destinyMembershipId}/{?groups}", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
+        destinyMembershipId: destinyMembershipId.toString(),
         groups: groups
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @param {BigNumber} itemInstanceId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getItemDetail(membershipType, destinyMembershipId, characterId, itemInstanceId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/{itemInstanceId}/", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId,
-        itemInstanceId: itemInstanceId
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString(),
+        itemInstanceId: itemInstanceId.toString()
       })
     ));
   }
@@ -4133,40 +4291,68 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BungieNet.enums.destinyActivityModeType[]} modes
+   * @param {*} statid
+   * @param {*} maxtop
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getLeaderboards(membershipType, destinyMembershipId, modes, statid, maxtop) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/Leaderboards/{membershipType}/{destinyMembershipId}/{?modes,statid,maxtop}", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        modes: modes,
+        destinyMembershipId: destinyMembershipId.toString(),
+        modes: modes.join(","),
         statid: statid,
         maxtop: maxtop
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {BigNumber} destinyMembershipId
+   * @param {BigNumber} characterId
+   * @param {BungieNet.enums.destinyActivityModeType[]} modes
+   * @param {*} statid
+   * @param {*} maxtop
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getLeaderboardsForCharacter(membershipType, destinyMembershipId, characterId, modes, statid, maxtop) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/Leaderboards/{membershipType}/{destinyMembershipId}/{characterId}/{?modes,statid,maxtop}", {
         membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId,
-        modes: modes,
+        destinyMembershipId: destinyMembershipId.toString(),
+        characterId: characterId.toString(),
+        modes: modes.join(","),
         statid: statid,
         maxtop: maxtop
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.destinyActivityModeType[]} modes
+   * @param {*} code
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getLeaderboardsForPsn(modes, code) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/LeaderboardsForPsn/{?modes,code}", {
-        modes: modes,
+        modes: modes.join(","),
         code: code
       })
     ));
   }
 
+  /**
+   * @param {BungieNet.eums.membershipType} membershipType
+   * @param {String} displayName
+   * @param {Boolean} [ignoreCase = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getMembershipIdByDisplayName(membershipType, displayName, ignoreCase) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/Stats/GetMembershipIdByDisplayName/{displayName}/{?ignorecase}", {
@@ -4380,6 +4566,15 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.membershipType} membershipType
+   * @param {Number} itemReferenceHash
+   * @param {BigNumber} itemId
+   * @param {Number} stackSize
+   * @param {BigNumber} characterId
+   * @param {Boolean} transferToVault
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   transferItem(
     membershipType,
     itemReferenceHash,
@@ -4392,11 +4587,11 @@ BungieNet.Platform = class {
       new URI("/Destiny/TransferItem/"),
       "POST",
       {
-        membershipType: membershipType,
+        membershipType: membershipType.toString(),
         itemReferenceHash: itemReferenceHash,
-        itemId: itemId,
+        itemId: itemId.toString(),
         stackSize: stackSize,
-        characterId: characterId,
+        characterId: characterId.toString(),
         transferToVault: transferToVault
       }
     ));
