@@ -2598,6 +2598,12 @@ BungieNet.Platform = class {
 
 
   /// Group Service
+
+  /**
+   * @param {BigNumber} groupId
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   approveAllPending(groupId, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/ApproveAll/", {
@@ -2610,6 +2616,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   approveGroupMembership(groupId, membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/Approve/", {
@@ -2623,6 +2634,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   approveGroupMembershipV2(groupId, membershipId, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/ApproveV2/", {
@@ -2636,6 +2653,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {String} message
+   * @param {BigNumber[]} membershipIds
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   approvePendingForList(groupId, message, membershipIds) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/ApproveList/", {
@@ -2643,12 +2666,19 @@ BungieNet.Platform = class {
       }),
       "POST",
       {
-        membershipIds: membershipIds,
+        membershipIds: membershipIds.map(bn => bn.toString()),
         message: message
       }
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {String} comment
+   * @param {BungieNet.enums.moderatorRequestedPunishment} - might not be right enum
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   banMember(groupId, membershipId, comment, length) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/Ban/", {
@@ -2663,6 +2693,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} allyGroupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   breakAlliance(groupId, allyGroupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Relationship/{allyGroupId}/BreakAlliance/", {
@@ -2676,6 +2711,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   breakAlliances(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/BreakAlliances/", {
@@ -2698,6 +2737,24 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {Object} details
+   * @param {String} details.about
+   * @param {Boolean} details.allowChat
+   * @param {*[]} details.attributes
+   * @param {String} details.avatarImageIndex
+   * @param {*[]} details.clanMembershipTypes
+   * @param {Boolean} details.isDefaultPostPublic
+   * @param {Boolean} details.isPublic
+   * @param {Boolean} details.isPublicTopicAdminOnly
+   * @param {String} details.locale
+   * @param {BigNumber} details.membershipOption
+   * @param {String} details.motto
+   * @param {String} detail.name
+   * @param {String} detail.tags - "#tag1,#tag2,#tag3"
+   * @param {String} detail.theme
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createGroupV2(details) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/Create/V2/"),
@@ -2717,6 +2774,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   denyAllPending(groupId, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/DenyAll/", {
@@ -2729,6 +2791,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   denyGroupMembership(groupId, membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/Deny/", {
@@ -2742,6 +2809,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   denyGroupMembershipV2(groupId, membershipId, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/DenyV2/", {
@@ -2755,6 +2828,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {String} message
+   * @param {BigNumber[]} membershipIds
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   denyPendingForList(groupId, message, membershipIds) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/DenyList/", {
@@ -2763,11 +2842,16 @@ BungieNet.Platform = class {
       "POST",
       {
         message: message,
-        membershipIds: membershipIds
+        membershipIds: membershipIds.map(bn => bn.toString())
       }
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BungieNet.enums.bungieMembershipType}
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   diableClanForGroup(groupId, clanMembershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Clans/Disable/{clanMembershipType}/", {
@@ -2781,6 +2865,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   disbandAlliance(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/BreakAllAlliances/", {
@@ -2793,6 +2881,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   editGroup(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Edit/", {
@@ -2805,11 +2897,18 @@ BungieNet.Platform = class {
     ));
   }
 
-  editGroupMembership(groupId, membershipId, groupMembershipType, clanPlatformType) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {BungieNet.enums.groupMemberType} groupMembershipType
+   * @param {*} [clanPlatformType = 0]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  editGroupMembership(groupId, membershipId, groupMembershipType, clanPlatformType = 0) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/SetMembershipType/{groupMembershipType}/{?clanPlatformType}", {
         groupId: groupId.toString(),
-        membershipId: membershipId,
+        membershipId: membershipId.toString(),
         groupMembershipType: groupMembershipType,
         clanPlatformType: clanPlatformType
       }),
@@ -2820,6 +2919,16 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {Object} details
+   * @param {String} details.about
+   * @param {String} details.clanCallSign
+   * @param {String} details.motto
+   * @param {String} details.name
+   * @param {String} details.tags - "#tag1,#tag2,#tag3"
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   editGroupV2(groupId, details) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/EditV2/", {
@@ -2830,6 +2939,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
+   * @param {String} clanName
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   enableClanForGroup(groupId, clanMembershipType, clanName) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Clans/Enable/{clanMembershipType}/{?clanName}", {
@@ -2844,6 +2959,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   followGroupsWithGroup(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/FollowList/", {
@@ -2856,6 +2975,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} followGroupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   followGroupWithGroup(groupId, followGroupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Follow/{followGroupId}/", {
@@ -2869,6 +2993,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} itemsPerPage
+   * @param {Number} currentPage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdminsOfGroup(groupId, itemsPerPage, currentPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Admins/{?itemsPerPage,currentPage}", {
@@ -2879,6 +3009,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} itemsPerPage
+   * @param {Number} currentPage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdminsOfGroupV2(groupId, itemsPerPage, currentPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/AdminsV2/{?itemsPerPage,currentPage}", {
