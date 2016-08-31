@@ -1096,7 +1096,7 @@ BungieNet.Platform = class {
    *  ...
    * }
    */
-  getUserMembershipIds(excludeBungieNet) {
+  getUserMembershipIds(excludeBungieNet = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/GetMembershipIds/{?excludebungienet}", {
         excludeBungieNet: excludeBungieNet
@@ -1230,10 +1230,10 @@ BungieNet.Platform = class {
   /**
    * Updates the user with the given options
    * @link https://destinydevs.github.io/BungieNetPlatform/docs/UserService/UpdateUser#/JSON-POST-Parameters
-   * @param  {Object} [opts = {}]
+   * @param  {Object} opts
    * @return {Promise.<BungieNet.Platform.Response>}
    */
-  updateUser(opts = {}) {
+  updateUser(opts) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/UpdateUser/"),
       "POST",
@@ -1301,22 +1301,26 @@ BungieNet.Platform = class {
     ));
   }
 
-  getConversationById(id) {
+  /**
+   * @param {BigNumber} conversationId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getConversationById(conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationById/{conversationId}/", {
-        conversationId: id.toString()
+        conversationId: conversationId.toString()
       })
     ));
   }
 
   /**
-   * @param  {BigNumber} id - conversation id
+   * @param  {BigNumber} conversationId - conversation id
    * @return {Promise.<BungieNet.Platform.Response>}
    */
-  getConversationByIdV2(id) {
+  getConversationByIdV2(conversationId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationByIdV2/{id}/", {
-        id: id.toString()
+        id: conversationId.toString()
       })
     ));
   }
@@ -1395,25 +1399,25 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @param {BigNumber} memberId
+   * @param {BigNumber} membershipId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
-  getConversationWithMemberId(memberId) {
+  getConversationWithMemberId(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Message/GetConversationWithMember/{memberId}/", {
-        memberId: memberId.toString()
+      URI.expand("/Message/GetConversationWithMember/{id}/", {
+        id: membershipId.toString()
       })
     ));
   }
 
   /**
-   * @param  {BigNumber} memberId - memberID
+   * @param  {BigNumber} membershipId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
-  getConversationWithMemberIdV2(memberId) {
+  getConversationWithMemberIdV2(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Message/GetConversationWithMemberV2/{memberId}/", {
-        memberId: memberId.toString()
+      URI.expand("/Message/GetConversationWithMemberV2/{id}/", {
+        id: membershipId.toString()
       })
     ));
   }
@@ -1960,10 +1964,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  deletePost(p1) {
+  /**
+   * @param {BigNumber} postId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  deletePost(postId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Forum/DeletePost/{p1}/", {
-        p1: p1
+      URI.expand("/Forum/DeletePost/{id}/", {
+        id: postId.toString()
       }),
       "POST",
       {
@@ -2061,10 +2069,10 @@ BungieNet.Platform = class {
 
   /**
    * @param {BigNumber} childPostId
-   * @param {Boolean} showBanned
+   * @param {Boolean} [showBanned = false]
    * @return {Promise.<BungieNet.Platform.Response>}
    */
-  getPostAndParent(childPostId, showBanned) {
+  getPostAndParent(childPostId, showBanned = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/GetPostAndParent/{childPostId}/{?showbanned}", {
         childPostId: childPostId.toString(),
@@ -2922,6 +2930,15 @@ BungieNet.Platform = class {
   /**
    * @param {BigNumber} groupId
    * @param {Object} details
+   * @param {Boolean} details.allowChat
+   * @param {BungieNet.enums.chatSecuritySetting} details.chatSecurity
+   * @param {BungieNet.enums.groupPostPublicity} details.defaultPublicity
+   * @param {Boolean} details.enableInvitationMessagingForAdmins
+   * @param {BungieNet.enums.groupHomepage} details.homepage
+   * @param {Boolean} details.isPublic
+   * @param {Boolean} details.isPublicTopicAdminOnly
+   * @param {String} details.locale
+   * @param {BungieNet.enums.membershipOption} details.membershipOption
    * @param {String} details.about
    * @param {String} details.clanCallSign
    * @param {String} details.motto
@@ -3025,14 +3042,23 @@ BungieNet.Platform = class {
     ));
   }
 
-  getAllFoundedGroupsForMember(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getAllFoundedGroupsForMember(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Group/User/{p1}/Founded/All/", {
-        p1: p1
+      URI.expand("/Group/User/{id}/Founded/All/", {
+        id: membershipId.toString()
       })
     ));
   }
 
+  /**
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAllGroupsForCurrentMember(clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyGroups/All/{?clanonly,populatefriends}", {
@@ -3042,6 +3068,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAllGroupsForMember(membershipId, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/User/{membershipId}/All/{?clanonly,populatefriends}", {
@@ -3052,7 +3084,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getAlliedGroups(groupId, currentPage, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getAlliedGroups(groupId, currentPage, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Allies/{?currentPage,populatefriends}", {
         groupId: groupId.toString(),
@@ -3062,19 +3100,31 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAvailableGroupAvatars() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/GetAvailableAvatars/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAvailableGroupThemes() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/GetAvailableThemes/")
     ));
   }
 
-  getBannedMembersOfGroup(groupId, itemsPerPage, currentPage) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Number} itemsPerPage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getBannedMembersOfGroup(groupId, currentPage, itemsPerPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Banned/{?itemsPerPage,currentPage}", {
         groupId: groupId.toString(),
@@ -3084,7 +3134,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getBannedMembersOfGroupV2(groupId, itemsPerPage, currentPage) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Number} itemsPerPage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getBannedMembersOfGroupV2(groupId, currentPage, itemsPerPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/BannedV2/{?itemsPerPage,currentPage}", {
         groupId: groupId.toString(),
@@ -3094,19 +3150,37 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getClanAttributeDefinitions() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/GetClanAttributeDefinitions/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDeletedGroupsForCurrentMember() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/MyGroups/Deleted/")
     ));
   }
 
-  getFoundedGroupsForMember(membershipId, currentPage, clanOnly, populateFriends) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Number} currentPage
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getFoundedGroupsForMember(
+    membershipId,
+    currentPage,
+    clanOnly = false,
+    populateFriends = false
+  ) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/User/{membershipId}/Founded/{currentPage}/{?clanonly,populatefriends}", {
         membershipId: membershipId.toString(),
@@ -3117,7 +3191,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  getGroup(groupId, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getGroup(groupId, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/{?populatefriends}", {
         groupId: groupId.toString(),
@@ -3126,7 +3205,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  getGroupByName(groupName, populateFriends) {
+  /**
+   * @param {String} groupName
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getGroupByName(groupName, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/Name/{groupName}/{?populatefriends}", {
         groupName: groupName,
@@ -3135,7 +3219,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getGroupsFollowedByGroup(groupId, currentPage, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getGroupsFollowedByGroup(groupId, currentPage, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Following/{currentPage}/{?populatefriends}", {
         groupId: groupId.toString(),
@@ -3145,7 +3235,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getGroupsFollowingGroup(groupId, currentPage, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getGroupsFollowingGroup(groupId, currentPage, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/FollowedBy/{currentPage}/{?populatefriends}", {
         groupId: groupId.toString(),
@@ -3155,6 +3251,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {String} partialTag
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getGroupTagSuggestions(partialTag) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/GetGroupTagSuggestions/{?partialtag}", {
@@ -3163,7 +3263,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  getJoinedGroupsForCurrentMember(clanOnly, populateFriends) {
+  /**
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getJoinedGroupsForCurrentMember(clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyGroups/{?clanonly,populatefriends}", {
         clanonly: clanOnly,
@@ -3172,7 +3277,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getJoinedGroupsForCurrentMemberV2(currentPage, clanOnly, populateFriends) {
+  /**
+   * @param {Number} currentPage
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getJoinedGroupsForCurrentMemberV2(currentPage, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyGroups/V2/{currentPage}/{?clanonly,populatefriends}", {
         currentPage: currentPage,
@@ -3182,7 +3293,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getJoinedGroupsForMember(membershipId, clanOnly, populateFriends) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getJoinedGroupsForMember(membershipId, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/User/{membershipId}/{?clanonly,populatefriends}", {
         membershipId: membershipId.toString(),
@@ -3192,7 +3309,19 @@ BungieNet.Platform = class {
     ));
   }
 
-  getJoinedGroupsForMemberV2(membershipId, currentPage, clanOnly, populateFriends) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Number} currentPage
+   * @param {Boolean} [clanOnly = false]
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getJoinedGroupsForMemberV2(
+    membershipId,
+    currentPage,
+    clanOnly = false,
+    populateFriends = false
+  ) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/User/{membershipId}/Joined/{currentPage}/{?clanonly,populatefriends}", {
         membershipId: membershipId.toString(),
@@ -3203,7 +3332,13 @@ BungieNet.Platform = class {
     ));
   }
 
-  getJoinedGroupsForMemberV3(membershipId, currentPage, populateFriends) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Number} currentPage
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getJoinedGroupsForMemberV3(membershipId, currentPage, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/User/{membershipId}/JoinedV3/{currentPage}/{?populatefriends}", {
         membershipId: membershipId.toString(),
@@ -3213,6 +3348,14 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {BungieNet.enums.groupMemberType}
+   * @param {*} [sort = 0]
+   * @param {BungieNet.enums.bungieMembershipType} platformType
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getMembersOfClan(groupId, currentPage, memberType, sort, platformType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/ClanMembers/{?currentPage,memberType,sort,platformType}", {
@@ -3225,7 +3368,16 @@ BungieNet.Platform = class {
     ));
   }
 
-  getMembersOfGroup(groupId, itemsPerPage, currentPage, memberType, platformType, sort) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Number} itemsPerPage
+   * @param {BungieNet.enums.groupMemberType} memberType
+   * @param {BungieNet.enums.bungieMembershipType} platformType
+   * @param {*} sort
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getMembersOfGroup(groupId, currentPage, itemsPerPage, memberType, platformType, sort) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{?itemsPerPage,currentPage,memberType,platformType,sort}", {
         groupId: groupId.toString(),
@@ -3238,7 +3390,16 @@ BungieNet.Platform = class {
     ));
   }
 
-  getMembersOfGroupV2(groupId, itemsPerPage, currentPage, memberType, platformType, sort) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Number} itemsPerPage
+   * @param {BungieNet.enums.groupMemberType} memberType
+   * @param {BungieNet.enums.bungieMembershipType} platformType
+   * @param {*} sort
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getMembersOfGroupV2(groupId, currentPage, itemsPerPage, memberType, platformType, sort) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/MembersV2/{?itemsPerPage,currentPage,memberType,platformType,sort}", {
         groupId: groupId.toString(),
@@ -3251,7 +3412,25 @@ BungieNet.Platform = class {
     ));
   }
 
-  getMembersOfGroupV3(groupId, itemsPerPage, currentPage, memberType, platformType, sort, nameSearch) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @param {Number} itemsPerPage
+   * @param {BungieNet.enums.groupMemberType} memberType
+   * @param {BungieNet.enums.bungieMembershipType} platformType
+   * @param {*} sort
+   * @param {String} nameSearch
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getMembersOfGroupV3(
+    groupId,
+    currentPage,
+    itemsPerPage,
+    memberType,
+    platformType,
+    sort,
+    nameSearch
+  ) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/MembersV3/{?itemsPerPage,currentPage,memberType,platformType,sort,nameSearch}", {
         groupId: groupId.toString(),
@@ -3282,6 +3461,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
+   * @param {Number} currentPage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPendingClanMemberships(groupId, clanMembershipType, currentPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Clan/{clanMembershipType}/Pending/{currentPage}/", {
@@ -3292,7 +3477,11 @@ BungieNet.Platform = class {
     ));
   }
 
-  getPendingGroupsForCurrentMember(populateFriends) {
+  /**
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getPendingGroupsForCurrentMember(populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyPendingGroups/{?populatefriends}", {
         populatefriends: populateFriends
@@ -3300,7 +3489,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  getPendingGroupsForCurrentMemberV2(currentPage, populateFriends) {
+  /**
+   * @param {Number} currentPage
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getPendingGroupsForCurrentMemberV2(currentPage, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyPendingGroupsV2/{currentPage}/{?populatefriends}", {
         currentPage: currentPage,
@@ -3309,7 +3503,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  getPendingGroupsForMember(membershipId, populateFriends) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getPendingGroupsForMember(membershipId, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/User/{membershipId}/Pending/{?populatefriends}", {
         membershipId: membershipId.toString(),
@@ -3318,6 +3517,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {Number} currentPage
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPendingGroupsForMemberV2(currentPage, populateFriends) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyPendingGroups/V2/{currentPage}/{?populatefriends}", {
@@ -3327,15 +3531,25 @@ BungieNet.Platform = class {
     ));
   }
 
-  getPendingMemberships(groupId, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getPendingMemberships(groupId, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/Pending/{?populatefriends}", {
-        groupId: groupId,
+        groupId: groupId.toString(),
         populatefriends: populateFriends
       })
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {Number} currentPage
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPendingMembershipsV2(groupId, currentPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/PendingV2/{?populatefriends}", {
@@ -3345,7 +3559,11 @@ BungieNet.Platform = class {
     ));
   }
 
-  getRecommendedGroups(populateFriends) {
+  /**
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getRecommendedGroups(populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/Recommended/{?populatefriends}", {
         populatefriends: populateFriends
@@ -3357,16 +3575,40 @@ BungieNet.Platform = class {
     ));
   }
 
-  groupSearch(populateFriends, searchParams) {
+  /**
+   * @param {Object} params
+   * @param {Object} params.contents
+   * @param {String} params.contents.searchValue
+   * @param {BungieNet.enums.groupTypeSearchFilter} params.contents.searchType
+   * @param {*} params.creationDate
+   * @param {Number} params.currentPage
+   * @param {BungieNet.enums.groupMemberCountFilter} params.groupMemberCountFilter
+   * @param {Number} params.itemsPerPage
+   * @param {String} params.localeFilter
+   * @param {BungieNet.enums.bungieMembershipType} params.membershipType
+   * @param {*} params.sortBy
+   * @param {String} params.tagText
+   * @param {Boolean} [populatefriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  groupSearch(params, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/Search/{?populatefriends}", {
         populatefriends: populateFriends
       }),
       "POST",
-      searchParams
+      params
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
+   * @param {String} title
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   inviteClanMember(groupId, membershipId, clanMembershipType, title, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/InviteToClan/{membershipId}/{clanMembershipType}/", {
@@ -3382,6 +3624,13 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {String} title
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   inviteGroupMember(groupId, membershipId, title, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Invite/{membershipId}/", {
@@ -3396,6 +3645,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber[]} targetIds
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   inviteManyToJoin(groupId, targetIds, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Allies/InviteMany/", {
@@ -3403,7 +3658,7 @@ BungieNet.Platform = class {
       }),
       "POST",
       {
-        targetIds: targetIds,
+        targetIds: targetIds.map(bn => bn.toString()),
         messageContent: {
           message: message
         }
@@ -3411,6 +3666,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} allyGroupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   inviteToJoinAlliance(groupId, allyGroupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Allies/Invite/{allyGroupId}/", {
@@ -3424,6 +3684,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
+   * @param {String} message
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   joinClanForGroup(groupId, clanMembershipType, message) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/{clanMembershipType}/", {
@@ -3437,6 +3703,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @param {BungieNet.enums.bungieMembershipType} clanPlatformType
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   kickMember(groupId, membershipId, clanPlatformType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/Kick/{?clanPlatformType}", {
@@ -3451,6 +3723,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   leaveClanForGroup(groupId, clanMembershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Clans/Leave/{clanMembershipType}/", {
@@ -3478,6 +3755,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BungieNet.enums.bungieMembershipType} membershipType
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   overrideFounderAdmin(groupId, membershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Admin/FounderOverride/{membershipType}/", {
@@ -3491,6 +3773,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   refreshClanSettingsInDestiny(clanMembershipType) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/MyClans/Refresh/{clanMembershipType}/", {
@@ -3503,7 +3789,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  requestGroupMembership(groupId, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  requestGroupMembership(groupId, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/Apply/{?populatefriends}", {
         groupId: groupId.toString(),
@@ -3516,7 +3807,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  requestGroupMembershipV2(groupId, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  requestGroupMembershipV2(groupId, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/ApplyV2/{?populatefriends}", {
         groupId: groupId.toString(),
@@ -3529,6 +3825,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} allyGroupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   requestToJoinAlliance(groupId, allyGroupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Allies/RequestToJoin/{allyGroupId}/", {
@@ -3542,7 +3843,12 @@ BungieNet.Platform = class {
     ));
   }
 
-  rescindGroupMembership(groupId, populateFriends) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {Boolean} [populateFriends = false]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  rescindGroupMembership(groupId, populateFriends = false) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/Rescind/{?populatefriends}", {
         groupId: groupId.toString(),
@@ -3555,6 +3861,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   setGroupAsAlliance(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/SetAsAlliance/", {
@@ -3567,6 +3877,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {*} p2
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   setPrivacy(groupId, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Privacy/{p2}/", {
@@ -3580,6 +3895,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unbanMember(groupId, membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/Unban/", {
@@ -3593,6 +3913,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   undeleteGroup(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Undelete/", {
@@ -3605,6 +3929,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unfollowAllGroupsWithGroup(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/UnfollowAll/", {
@@ -3617,6 +3945,10 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unfollowGroupsWithGroup(groupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/UnfollowList/", {
@@ -3629,6 +3961,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} followGroupId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unfollowGroupWithGroup(groupId, followGroupId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{groupId}/Unfollow/{followGroupId}/", {
@@ -3645,6 +3982,8 @@ BungieNet.Platform = class {
 
 
   /// Ignore Service
+
+
   flagItem() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Ignore/Flag/"),
@@ -3655,6 +3994,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getIgnoresForUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Ignore/MyIgnores/"),
@@ -3665,18 +4007,25 @@ BungieNet.Platform = class {
     ));
   }
 
-  getIgnoreStatusForPost(p1) {
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getIgnoreStatusForPost(postId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Ignore/MyIgnores/Posts/{p1}/", {
-        p1: p1
+      URI.expand("/Ignore/MyIgnores/Posts/{postId}/", {
+        postId: postId.toString()
       })
     ));
   }
 
-  getIgnoreStatusForUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getIgnoreStatusForUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Ignore/MyIgnores/Users/{p1}/", {
-        p1: p1
+      URI.expand("/Ignore/MyIgnores/Users/{membershipId}/", {
+        membershipId: membershipId.toString()
       })
     ));
   }
@@ -3768,6 +4117,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   bulkEditPost() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/BulkEditPost/"),
@@ -3778,6 +4130,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAdminHistory(p1, p2, membershipFilter, startDate, endDate) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Admin/GlobalHistory/{p1}/{p2}/{?membershipFilter,startdate,enddate}", {
@@ -3790,6 +4145,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAssignedReports() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/Assigned/"),
@@ -3800,27 +4158,42 @@ BungieNet.Platform = class {
     ));
   }
 
-  getDisciplinedReportsForMember(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Number} [currentPage = 1]
+   * @param {Number} [itemsPerPage = 1]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getDisciplinedReportsForMember(membershipId, currentPage = 1, itemsPerPage = 1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/Reports/", {
-        p1: p1
+      URI.expand("/Admin/Member/{id}/Reports/", {
+        id: membershipId.toString()
       }),
       "POST",
       {
-
+        currentPage: currentPage,
+        itemsPerPage: itemsPerPage
       }
     ));
   }
 
-  getRecentDisciplineAndFlagHistoryForMember(p1, p2) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {*} p2
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getRecentDisciplineAndFlagHistoryForMember(membershipId, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/RecentIncludingFlags/{p2}/", {
-        p1: p1,
+      URI.expand("/Admin/Member/{id}/RecentIncludingFlags/{p2}/", {
+        id: membershipId.toString(),
         p2: p2
       })
     ));
   }
 
+  /**
+   *
+   */
   getResolvedReports() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/Reports/"),
@@ -3831,31 +4204,55 @@ BungieNet.Platform = class {
     ));
   }
 
-  getUserBanState(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: {
+   *  membershipId: "-id-",
+   *  isProfileBanned: bool
+   *  isForumBanned: bool
+   *  isMsgBanned: bool,
+   *  isGroupWallBanned: bool
+   * }
+   */
+  getUserBanState(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/GetBanState/", {
-        p1: p1
+      URI.expand("/Admin/Member/{id}/GetBanState/", {
+        id: membershipId.toString()
       })
     ));
   }
 
-  getUserPostHistory(p1, p2) {
+  /**
+   * @param {BigNumber} membershipId
+   * @param {Number} currentPage - 0-based
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getUserPostHistory(membershipId, currentPage = 0) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/PostHistory/{p2}/", {
-        p1: p1,
-        p2: p2
+      URI.expand("/Admin/Member/{id}/PostHistory/{page}/", {
+        id: membershipId.toString(),
+        page: currentPage
       })
     ));
   }
 
-  getUserWebHistoryClientIpHistory(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getUserWebHistoryClientIpHistory(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/GetWebClientIpHistory/", {
-        p1: p1
+      URI.expand("/Admin/Member/{id}/GetWebClientIpHistory/", {
+        id: membershipId.toString()
       })
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   globallyIgnoreItem() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/Ignores/GloballyIgnore/"),
@@ -3866,10 +4263,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  overrideBanOnUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  overrideBanOnUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/SetBan/", {
-        p1: p1
+      URI.expand("/Admin/Member/{id}/SetBan/", {
+        id: membershipId.toString()
       }),
       "POST",
       {
@@ -3878,6 +4279,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   overrideGlobalIgnore() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/Ignores/OverrideGlobalIgnore/"),
@@ -3888,10 +4292,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  overrideGroupWallBanOnUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  overrideGroupWallBanOnUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/SetGroupWallBan/", {
-        p1: p1
+      URI.expand("/Admin/Member/{id}/SetGroupWallBan/", {
+        id: membershipId.toString()
       }),
       "POST",
       {
@@ -3900,10 +4308,14 @@ BungieNet.Platform = class {
     ));
   }
 
-  overrideMsgBanOnUser(p1) {
+  /**
+   * @param {BigNumber} membershipId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  overrideMsgBanOnUser(membershipId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Admin/Member/{p1}/SetMsgBan/", {
-        p1: p1
+      URI.expand("/Admin/Member/{id}/SetMsgBan/", {
+        id: membershipId.toString()
       }),
       "POST",
       {
@@ -3912,6 +4324,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   overturnReport() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/Reports/Overturn/"),
@@ -3922,12 +4337,24 @@ BungieNet.Platform = class {
     ));
   }
 
-  resolveReport() {
+  /**
+   * @param {BigNumber} reportId
+   * @param {BigNumber} reason
+   * @param {BigNumber} banLength
+   * @param {Number} result
+   * @param {BigNumber} reportId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  resolveReport(reportId, reason, banLength, result, comments) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Admin/Assigned/Resolve/"),
       "POST",
       {
-
+        banLength: banLength.toString(),
+        comments: comments,
+        reason: reason.toString(),
+        reportId: reportId.toString(),
+        result: result
       }
     ));
   }
