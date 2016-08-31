@@ -732,6 +732,10 @@ BungieNet.Platform = class {
 
 
   /// Application Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   applicationSearch() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/App/Search/"),
@@ -742,6 +746,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   changeApiKeyStatus(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/ChangeApiKeyState/{p1}/{p2}/", {
@@ -755,6 +762,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createApiKey(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/CreateApiKey/{p1}/", {
@@ -767,6 +777,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createApplication() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/App/CreateApplication/"),
@@ -777,6 +790,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   editApplication(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/EditApplication/{p1}/", {
@@ -789,6 +805,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAccessTokensFromCode() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/App/GetAccessTokensFromCode/"),
@@ -799,6 +818,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAccessTokensFromRefreshToken() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/App/GetAccessTokensFromRefreshToken/"),
@@ -809,6 +831,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getApplication(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/Application/{p1}/", {
@@ -817,6 +842,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getApplicationApiKeys(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/ApplicationApiKeys/{p1}/", {
@@ -825,6 +853,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAuthorizations(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/Authorizations/{p1}/", {
@@ -833,6 +864,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   privateApplicationSearch() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/App/PrivateSearch/"),
@@ -843,6 +877,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   revokeAuthorization(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/App/RevokeAuthorization/{p1}/{p2}/", {
@@ -859,6 +896,10 @@ BungieNet.Platform = class {
 
 
   /// User Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/CreateUser/"),
@@ -869,6 +910,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   editSuccessMessageFlags(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/MessageFlags/Success/Update/{p1}/", {
@@ -890,6 +934,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAvailableAvatarsAdmin(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/GetAvailableAvatarsAdmin/{p1}/", {
@@ -1104,6 +1151,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   linkOverride() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/LinkOverride/"),
@@ -1114,6 +1164,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   registerMobileAppPair() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/RegisterMobileAppPair/"),
@@ -1173,6 +1226,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   setAcknowledged(ackId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/Acknowledged/{ackId}/", {
@@ -1185,6 +1241,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unregisterMobileAppPair(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/UnregisterMobileAppPair/{p1}/", {
@@ -1197,6 +1256,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   updateDestinyEmblemAvatar() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/UpdateDestinyEmblemAvatar/"),
@@ -1207,6 +1269,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   updateNotificationSetting() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/Notification/Update/"),
@@ -1217,6 +1282,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   updateStateInfoForMobileAppPair() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/UpdateStateInfoForMobileAppPair/"),
@@ -1241,6 +1309,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   updateUserAdmin(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/User/UpdateUserAdmin/{p1}/", {
@@ -1273,6 +1344,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createConversationV2() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/CreateConversationV2/"),
@@ -1283,6 +1357,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAllianceInvitedToJoinInvitations(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/AllianceInvitations/InvitationsToJoinAnotherGroup/{p1}/{p2}/", {
@@ -1292,6 +1369,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAllianceJoinInvitations(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/AllianceInvitations/RequestsToJoinYourGroup/{p1}/{p2}/", {
@@ -1325,6 +1405,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getConversationsV2(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationsV2/{p1}/{p2}/", {
@@ -1334,6 +1417,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getConversationsV3(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationsV3/{p1}/{p2}/", {
@@ -1343,6 +1429,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getConversationsV4(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationsV4/{p1}/", {
@@ -1363,6 +1452,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getConversationThreadV2(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/GetConversationThreadV2/{p1}/{p2}/{p3}/", {
@@ -1434,6 +1526,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getInvitationDetails(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/Invitations/{p1}/Details/", {
@@ -1442,30 +1537,45 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getTotalConversationCount() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/GetTotalConversationCount/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getUnreadConversationCountV2() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/GetUnreadPrivateConversationCount/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getUnreadConversationCountV3() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/GetTotalConversationCountV3/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getUnreadConversationCountV4() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/GetUnreadConversationCountV4/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getUnreadGroupConversationCount() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/GetUnreadGroupConversationCount/")
@@ -1485,17 +1595,25 @@ BungieNet.Platform = class {
     ));
   }
 
-  moderateGroupWall(p1, p2) {
+  /**
+   * @param {BigNumber} groupId
+   * @param {BigNumber} messageId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  moderateGroupWall(groupId, messageId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      new URI("/Message/ModerateGroupWall/{p1}/{p2}/"),
+      new URI("/Message/ModerateGroupWall/{groupId}/{messageId}/"),
       "POST",
       {
-        p1: p1,
-        p2: p2
+        groupId: groupId.toString(),
+        messageId: messageId.toString()
       }
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   reviewAllInvitations(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/Invitations/ReviewAllDirect/{p1}/{p2}/", {
@@ -1509,6 +1627,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   reviewInvitation(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/Invitations/{p1}/{p2}/{p3}/", {
@@ -1523,6 +1644,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   reviewInvitationDirect(invitationId, invitationResponseState) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/Invitations/ReviewDirect/{id}/{state}/", {
@@ -1536,6 +1660,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   reviewInvitations(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Message/Invitations/ReviewListDirect/{p1}/", {
@@ -1548,6 +1675,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   saveMessageV2() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/SaveMessageV2/"),
@@ -1575,16 +1705,28 @@ BungieNet.Platform = class {
     ));
   }
 
-  saveMessageV4() {
+  /**
+   * Currently used by bungie.net to save a message to a group wall
+   * @param {String} body
+   * @param {BigNumber} conversationId
+   * @param {String} [subject = ""]
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  saveMessageV4(conversationId, body, subject = "") {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/SaveMessageV4/"),
       "POST",
       {
-
+        conversationId: conversationId.toString(),
+        body: body,
+        subject: subject
       }
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   updateConversationLastViewedTimestamp() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Message/Conversation/UpdateLastViewedTimestamp/"),
@@ -1617,6 +1759,10 @@ BungieNet.Platform = class {
 
 
   /// Notification Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getRealTimeEvents(p1, p2, timeout) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Notification/Events/{p1}/{p2}/{?timeout}", {
@@ -1703,6 +1849,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getContentById(p1, p2, head) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/GetContentById/{p1}/{p2}/{?head}", {
@@ -1713,6 +1862,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getContentByTagAndType(p1, p2, p3, head) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/GetContentByTagAndType/{p1}/{p2}/{p3}/{?,head}", {
@@ -1724,6 +1876,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getContentType(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/GetContentType/{p1}/", {
@@ -1732,6 +1887,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyContent(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Destiny/{p1}/", {
@@ -1740,6 +1898,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyContentV2(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Destiny/V2/{p1}/", {
@@ -1748,12 +1909,18 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getFeaturedArticle() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Content/Site/Featured/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getHomepageContent(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Homepage/{p1}/", {
@@ -1762,12 +1929,18 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getHomepageContentV2() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Homepage/V2/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getJobs(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Jobs/{p1}/", {
@@ -1776,6 +1949,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getNews(p1, p2, itemsPerPage, currentPage = 1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/News/{p1}/{p2}/{?itemsperpage,currentpage}", {
@@ -1796,6 +1972,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPublications(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Publications/{p1}/", {
@@ -1816,6 +1995,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   searchContentByTagAndType(p1, p2, p3, head, currentPage, itemsPerPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/SearchContentByTagAndType/{p1}/{p2}/{p3}/{?head,currentpage,itemsperpage}", {
@@ -1829,6 +2011,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   searchContentEx(p1, head) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/SearchEx/{p1}/{?,head}", {
@@ -1838,6 +2023,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   searchContentWithText(p1, head, cType, tag, currentPage, searchText) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Content/Site/Homepage/{p1}/{?head,ctype,tag,currentpage,searchtext}/", {
@@ -1858,6 +2046,10 @@ BungieNet.Platform = class {
 
 
   /// ExternalSocial Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAggregatedSocialFeed(p1, types) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/ExternalSocial/GetAggregatedSocialFeed/{p1}/{?,types}", {
@@ -1870,6 +2062,10 @@ BungieNet.Platform = class {
 
 
   /// Survey Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getSurvey() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Survey/GetSurvey/")
@@ -1879,6 +2075,10 @@ BungieNet.Platform = class {
 
 
   /// Forum Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   approveFireteamThread(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/Recruit/Approve/{p1}/", {
@@ -1907,6 +2107,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   changePinState(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/ChangePinState/{p1}/{p2}/", {
@@ -1920,6 +2123,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createContentComment() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Forum/CreateContentComment/"),
@@ -2014,6 +2220,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCoreTopicsPaged(p1, p2, p3, p4) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/GetCoreTopicsPaged/{p1}/{p2}/{p3}/{p4}/", {
@@ -2025,6 +2234,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getForumTagCountEstimate(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/GetForumTagCountEstimate/{p1}/", {
@@ -2033,6 +2245,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getForumTagSuggestions(partialTag) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/GetForumTagSuggestions/{p1}/{?,partialtag}", {
@@ -2081,6 +2296,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPostAndParentAwaitingApproval(childPostId, showBanned) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/GetPostAndParentAwaitingApproval/{childPostId}/{?,showbanned}", {
@@ -2090,6 +2308,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPostsThreadedPaged(
     parentPostId,
     page,
@@ -2114,6 +2335,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPostsThreadedPagedFromChild(
     childPostId,
     page,
@@ -2136,6 +2360,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getRecruitmentThreadSummaries() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Forum/Recruit/Summaries/"),
@@ -2146,6 +2373,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getTopicForContent(contentId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/GetTopicForContent/{contentId}/", {
@@ -2154,6 +2384,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getTopicsPaged(
     page,
     pageSize,
@@ -2292,6 +2525,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   moderateTag(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Forum/Tags/{p1}/Moderate/", {
@@ -2390,6 +2626,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAggregatedActivitiesForCurrentUser(typeFilter, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Aggregation/{?typefilter,format}", {
@@ -2399,12 +2638,18 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getEntitiesFollowedByCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Activity/Following/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getEntitiesFollowedByCurrentUserV2(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Following/V2/{p1}/{p2}/", {
@@ -2414,6 +2659,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getEntitiesFollowedByUser(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Following/", {
@@ -2422,6 +2670,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getEntitiesFollowedByUserV2(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Following/V2/{p2}/{p3}/", {
@@ -2432,6 +2683,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getFollowersOfTag(tag, itemsPerPage, currentPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Tag/Followers/{?tag,itemsperpage,currentpage}", {
@@ -2442,6 +2696,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getFollowersOfUser(membershipId, itemsPerPage, currentPage) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{membershipId}/Followers/{?itemsperpage,currentpage}", {
@@ -2452,6 +2709,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getForumActivitiesForUser(p1, itemsPerPage, currentPage, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/{?itemsperpage,currentpage,format}", {
@@ -2463,6 +2723,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getForumActivitiesForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Activities/ForumsV2/{?currentpage,format}", {
@@ -2473,12 +2736,18 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getFriends() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Activity/Friends/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getFriendsAllNoPresence(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Friends/AllNoPresence/{p1}/", {
@@ -2487,6 +2756,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getFriendsPaged(membershipType, page) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Friends/{membershipType}/{page}/", {
@@ -2517,6 +2789,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getGroupsFollowedPagedByCurrentUser(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/Following/Groups/{p1}/", {
@@ -2525,6 +2800,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getGroupsFollowedPagedByUser(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Following/Groups/Paged/{p2}/", {
@@ -2534,6 +2812,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getLikeAndShareActivityForUser(p1, itemsPerPage, currentPage, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Activities/LikesAndShares/{?itemsperpage,currentpage,format}", {
@@ -2545,6 +2826,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getLikeAndShareActivityForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Activities/LikesAndSharesV2/{?currentpage,format}", {
@@ -2555,6 +2839,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getLikeShareAndForumActivityForUser(p1, currentPage, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Activity/User/{p1}/Activities/LikeShareAndForum/{?currentpage,format}", {
@@ -2565,6 +2852,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getUsersFollowedByCurrentUser() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Activity/Following/Users/")
@@ -2735,6 +3025,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createGroup() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/Create/"),
@@ -2771,6 +3064,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   createMinimalGroup(name, about) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Group/Create/Minimal/"),
@@ -3741,6 +4037,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   migrate(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Group/{p1}/Migrate/{p2}/{p3}/", {
@@ -3983,7 +4282,9 @@ BungieNet.Platform = class {
 
   /// Ignore Service
 
-
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   flagItem() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Ignore/Flag/"),
@@ -4030,6 +4331,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getReportContext(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Ignore/ReportContext/{p1}/", {
@@ -4038,6 +4342,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   ignoreItem(
     ignoredItemId,
     ignoredItemType,
@@ -4062,12 +4369,18 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   myLastReport() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Ignore/MyLastReport/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   unignoreItem() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Ignore/Unignore/"),
@@ -4081,6 +4394,10 @@ BungieNet.Platform = class {
 
 
   /// Game Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPlayerGamesById(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Game/GetPlayerGamesById/{p1}/", {
@@ -4089,6 +4406,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   reachModelSneakerNet(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Game/ReachModelSneakerNet/{p1}/", {
@@ -4192,7 +4512,7 @@ BungieNet.Platform = class {
   }
 
   /**
-   *
+   * @return {Promise.<BungieNet.Platform.Response>}
    */
   getResolvedReports() {
     return this._serviceRequest(new BungieNet.Platform.Request(
@@ -4362,6 +4682,10 @@ BungieNet.Platform = class {
 
 
   /// Token Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   applyOfferToCurrentDestinyMembership(p1, p2) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Tokens/ApplyOfferToCurrentDestinyMembership/{p1}/{p2}/", {
@@ -4375,6 +4699,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   breakBond() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/RAF/BreakBond/"),
@@ -4385,6 +4712,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   claimAndApplyOnToken(tokenType, redeemCode) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Tokens/ClaimAndApplyToken/{tokenType}/", {
@@ -4397,6 +4727,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   claimToken(redeemCode) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/Claim/"),
@@ -4407,6 +4740,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   consumeMarketplacePlatformCodeOffer(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Tokens/ConsumeMarketplacePlatformCodeOffer/{p1}/{p2}/{p3}/", {
@@ -4421,6 +4757,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCurrentUserOfferHistory() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/OfferHistory/")
@@ -4444,18 +4783,27 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getRAFEligibility() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/RAF/GetEligibility/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   marketplacePlatformCodeOfferHistory() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/MarketplacePlatformCodeOfferHistory/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   rafClaim() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/RAF/Claim/"),
@@ -4466,6 +4814,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   rafGenerateReferralCode(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Tokens/RAF/GenerateReferralCode/{p1}/", {
@@ -4478,18 +4829,27 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   rafGetNewPlayerBondDetails() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/RAF/GetNewPlayerBondDetails/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   rafGetVeteranBondDetails() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/RAF/GetVeteranBondDetails/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   verifyAge() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Tokens/VerifyAge/"),
@@ -4504,6 +4864,9 @@ BungieNet.Platform = class {
 
   /// Destiny Service
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   buyItem() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/BuyItem/"),
@@ -4578,6 +4941,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getActivityBlob(e) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/GetActivityBlob/{e}/", {
@@ -4841,6 +5207,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyExplorerItems(params) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Explorer/Items/{?params*}", {
@@ -4849,6 +5218,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getDestinyExplorerTalentNodeSteps(params) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Explorer/TalentNodeSteps/{?params*}", {
@@ -4902,6 +5274,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getGrimoireByMembership(membershipType, destinyMembershipId, flavour, single) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Vanguard/Grimoire/{membershipType}/{destinyMembershipId}/{?flavour,single}", {
@@ -4922,30 +5297,33 @@ BungieNet.Platform = class {
     ));
   }
 
-  getHistoricalStats(
-    membershipType,
-    destinyMembershipId,
-    characterId,
-    periodType,
-    modes,
-    groups,
-    monthstart,
-    monthend,
-    daystart,
-    dayend
-  ) {
+  /**
+   * @param {Object} options
+   * @param {BungieNet.enums.bungieMembershipType} options.membershipType
+   * @param {BigNumber} options.destinyMembershipId
+   * @param {BigNumber} options.characterId
+   * @param {BungieNet.enums.periodType} options.periodType
+   * @param {BungieNet.enums.destinyActivityModeType[]} options.modes
+   * @param {BungieNet.enums.destinyStatsGroupType[]} options.groups
+   * @param {String} options.monthStart
+   * @param {String} options.monthEnd
+   * @param {String} options.dayStart
+   * @param {String} options.dayEnd
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getHistoricalStats(options) {
     return this._serviceRequest(new BungieNet.Platform.Request(
-      URI.expand("/Destiny/Stats/{membershipType}/{destinyMembershipId}/{characterId}/{?periodType,modes,groups,monthstart,monthend,daystart,dayend}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        characterId: characterId,
-        periodType: periodType,
-        modes: modes,
-        groups: groups,
-        monthstart,
-        monthend,
-        daystart,
-        dayend
+      URI.expand("/Destiny/Stats/{mType}/{dMID}/{cId}/{?pType,mds,grps,mstart,mend,dstart,dend}", {
+        mType: options.membershipType,
+        dMID: options.destinyMembershipId,
+        cId: options.characterId,
+        pType: options.periodType,
+        mds: options.modes.join(","),
+        grps: options.groups.join(","),
+        mstart: options.monthStart,
+        mend: options.monthEnd,
+        dstart: options.dayStart,
+        dend: options.dayEnd
       })
     ));
   }
@@ -4993,6 +5371,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getItemReferenceDetail(p1, p2, p3, p4) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{p1}/Account/{p2}/Character/{p3}/ItemReference/{p4}/", {
@@ -5076,6 +5457,12 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.bungieMembershipType} membershipType
+   * @param {Boolean} flavour
+   * @param {BigNumber} single
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getMyGrimoire(membershipType, flavour, single) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Vanguard/Grimoire/{membershipType}/{?flavour,single}", {
@@ -5086,57 +5473,86 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @param {BigNumber} activityInstanceId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPostGameCarnageReport(activityInstanceId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Stats/PostGameCarnageReport/{activityInstanceId}/", {
-        activityInstanceId: activityInstanceId
+        activityInstanceId: activityInstanceId.toString()
       })
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPublicAdvisors() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Advisors/")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPublicAdvisorsV2() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Advisors/V2/")
     ));
   }
 
+  /**
+   * @param {BigNumber} vendorId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPublicVendor(vendorId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Vendors/{vendorId}/", {
-        vendorId: vendorId
+        vendorId: vendorId.toString()
       })
     ));
   }
 
+  /**
+   * @param {BigNumber} vendorId
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPublicVendorWithMetadata(vendorId) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/Vendors/{vendorId}/Metadata/", {
-        vendorId: vendorId
+        vendorId: vendorId.toString()
       })
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getPublicXurVendor() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Advisors/Xur/")
     ));
   }
 
+  /**
+   * @param {BungieNet.enums.bungieMembershipType} membershipType
+   * @param {BigNumber} recordBookHash
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getRecordBookCompletionStatus(membershipType, recordBookHash) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/RecordBooks/{recordBookHash}/Completition/", {
         membershipType: membershipType,
-        recordBookHash: recordBookHash
+        recordBookHash: recordBookHash.toString()
       })
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getSpecialEventAdvisors() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/Destiny/Events/")
@@ -5204,7 +5620,7 @@ BungieNet.Platform = class {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @param {Number} vendorId
+   * @param {BigNumber} vendorId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
   getVendorForCurrentCharacter(membershipType, characterId, vendorId) {
@@ -5212,7 +5628,7 @@ BungieNet.Platform = class {
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/", {
         membershipType: membershipType,
         characterId: characterId.toString(),
-        vendorId: vendorId
+        vendorId: vendorId.toString()
       })
     ));
   }
@@ -5220,7 +5636,7 @@ BungieNet.Platform = class {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @param {Number} vendorId
+   * @param {BigNumber} vendorId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
   getVendorForCurrentCharacterWithMetadata(membershipType, characterId, vendorId) {
@@ -5228,7 +5644,7 @@ BungieNet.Platform = class {
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Metadata/", {
         membershipType: membershipType,
         characterId: characterId.toString(),
-        vendorId: vendorId
+        vendorId: vendorId.toString()
       })
     ));
   }
@@ -5236,7 +5652,7 @@ BungieNet.Platform = class {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @param {Number} vendorId
+   * @param {BigNumber} vendorId
    * @param {BigNumber} itemId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
@@ -5245,7 +5661,7 @@ BungieNet.Platform = class {
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/", {
         membershipType: membershipType,
         characterId: characterId.toString(),
-        vendorId: vendorId,
+        vendorId: vendorId.toString(),
         itemId: itemId.toString()
       })
     ));
@@ -5254,7 +5670,7 @@ BungieNet.Platform = class {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @param {Number} vendorId
+   * @param {BigNumber} vendorId
    * @param {BigNumber} itemId
    * @return {Promise.<BungieNet.Platform.Response>}
    */
@@ -5263,7 +5679,7 @@ BungieNet.Platform = class {
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/Metadata/", {
         membershipType: membershipType,
         characterId: characterId.toString(),
-        vendorId: vendorId,
+        vendorId: vendorId.toString(),
         itemId: itemId.toString()
       })
     ));
@@ -5283,6 +5699,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   refundItem(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/Destiny/{p1}/RefundItem/", {
@@ -5385,6 +5804,10 @@ BungieNet.Platform = class {
 
 
   /// Community Content Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   alterApprovalState(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/AlterApprovalState/{p1}/", {
@@ -5397,6 +5820,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   editContent(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/Edit/{p1}/", {
@@ -5409,6 +5835,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getApprovalQueue(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/Queue/{p1}/{p2}/{p3}/", {
@@ -5419,6 +5848,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCommunityContent(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/Get/{p1}/{p2}/{p3}/", {
@@ -5429,6 +5861,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   submitContent() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/CommunityContent/Submit/"),
@@ -5442,19 +5877,30 @@ BungieNet.Platform = class {
 
 
   /// Core Service
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getAvailableLocales() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("//GetAvailableLocales")
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getCommonSettings() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("//Settings/")
     ));
   }
 
-  getGlobalAlerts(includeStreaming) {
+  /**
+   * @param {Boolean} includeStreaming
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getGlobalAlerts(includeStreaming = true) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("//GlobalAlerts/{?includestreaming}", {
         includestreaming: includeStreaming
@@ -5462,6 +5908,9 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getSystemStatus(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("//Status/{p1}/", {
@@ -5470,6 +5919,11 @@ BungieNet.Platform = class {
     ));
   }
 
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @example
+   * Response: "Hello World"
+   */
   helloWorld() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("//HelloWorld/")
