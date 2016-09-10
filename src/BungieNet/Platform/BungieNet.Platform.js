@@ -37,6 +37,7 @@
  * @todo design a workflow for requests, responses
  * @todo split platform into separate components
  * @todo is anonymous superfluous?
+ * @todo remove throttling
  *
  * @example
  * let p = new BungieNet.Platform({
@@ -58,13 +59,6 @@ BungieNet.Platform = class {
   constructor(opts = {}) {
 
     /**
-     * Used to keep track of when the platform is throttled; initialised to
-     * epoch
-     * @type {Date}
-     */
-    this._throttleExpiration = new Date(0);
-
-    /**
      * @type {BungieNet.Platform.FrameSet}
      */
     this._frames = new BungieNet.Platform.FrameSet();
@@ -72,7 +66,7 @@ BungieNet.Platform = class {
     /**
      * @type {BungieNet.Platform.EventTarget}
      */
-    this._events = BungieNet.Platform.EventTarget(Object.values(
+    this._events = new BungieNet.Platform.EventTarget(Object.values(
       BungieNet.Platform.events
     ));
 
@@ -148,7 +142,7 @@ BungieNet.Platform = class {
   _httpRequest(frame) {
     return new Promise((resolve, reject) => {
 
-      frame.http = new BungieNet.Platform.Http2(frame.request);
+      frame.platformRequest = new BungieNet.Platform.PlatformRequest(frame);
       frame.http.timeout = this._options.timeout;
 
       //add any predefined headers
@@ -159,24 +153,18 @@ BungieNet.Platform = class {
       //apply any/all http options
       frame.request.options.forEach(func => func(frame.http));
 
-      frame.http.on("update", () => {
-        this.__httpUpdate(frame);
-      });
-
-      frame.http.on("success", () => {
-        this.__httpSuccess(frame).then(() => {
-          return resolve(frame);
-        });
-      });
-
-      frame.http.on("fail", () => {
-        this.__httpFail(frame).then(() => {
-          return reject(frame);
-        });
-      });
+      frame.platformRequest.on("httpUpdate", this._frameHttpUpdate);
+      frame.platformRequest.on("httpError", this._frameHttpError);
+      frame.platformRequest.on("httpSuccess", this._frameHttpSuccess);
+      frame.platformRequest.on("httpDone", this._frameHttpDone);
+      frame.platformRequest.on("platformError", this._framePlatformError);
+      frame.platformRequest.on("platformSuccess", this._framePlatformSuccess);
+      frame.platformRequest.on("platformDone", this._framePlatformDone);
+      frame.platformRequest.on("error", this._frameError);
+      frame.platformRequest.on("success", this._frameSuccess);
 
       //queue it, then try the queue
-      this.__queueRequest(frame).then(this.__tryRequest);
+      this._queueFrame(frame).then(this._tryFrame);
 
     });
   }
@@ -240,6 +228,7 @@ BungieNet.Platform = class {
 
         //when ready, do the request
         Promise.all(promises).then(() => {
+
           this._httpRequest(frame)
             .then(frame => {
               return new Promise(resolve => {
@@ -250,7 +239,6 @@ BungieNet.Platform = class {
                 });
             }, reject)
             .then(this.__serviceRequestDone, reject)
-            .then(this.__checkDoReRequest)
             .then(frame => { resolve(frame.response); });
 
         }, reject);
@@ -261,102 +249,82 @@ BungieNet.Platform = class {
 
 
 
-  /// Private HTTP Handlers
+  /// Private Event Handlers
+
+  _frameHttpUpdate(e) {
+
+  }
+
+  _frameHttpError(e) {
+
+  }
+
+  _frameHttpSuccess(e) {
+
+  }
+
+  _frameHttpDone(e) {
+
+  }
+
+  _framePlatformError(e) {
+
+  }
+
+  _framePlatformSuccess(e) {
+
+  }
+
+  _framePlatformDone(e) {
+
+  }
+
+  _frameError(e) {
+
+  }
+
+  _frameSuccess(e) {
+
+  }
+
+  _activeFrame(frame) {
+    return new Promise(resolve => {
+
+      frame.state = BungieNet.Platform.Frame.state.active;
+      frame.http.go(); //start the request
+
+      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.activeFrame);
+      ev.target = this;
+      ev.frame = frame;
+      this._events.dispatch(ev);
+
+      return resolve(frame);
+
+    });
+  }
 
   /**
-   * Handler for when a HTTP request updates (readystatechange)
+   * Before the request is sent, call this to dispatch the event
    * @param {BungieNet.Platform.Frame} frame
    * @return {Promise}
    */
-  __httpUpdate(frame) {
+  _beforeFrameExecute(frame) {
     return new Promise(resolve => {
-      return this.__requestStateChange(frame).then(resolve);
-    });
-  }
 
-  /**
-   * Handler for when a HTTP request succeeds (HTTP 200)
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __httpSuccess(frame) {
-    return new Promise(resolve => {
-      return this.__httpRequestDone(frame).then(resolve);
-    });
-  }
+      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.beforeFrameExecute);
+      ev.target = this;
+      ev.frame = frame;
+      this._events.dispatch(ev);
 
-  /**
-   * Handler for when a HTTP request fails (ie. network failure)
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __httpFail(frame) {
-    return new Promise(resolve => {
-      return this.__httpError(frame).then(resolve);
-    });
-  }
-
-
-
-  /// Private Handlers
-
-  /**
-   * Parses a response
-   * @param {String} responseText
-   * @return {Promise.<BungieNet.Platform.Response>}
-   */
-  static __parseResponse(responseText) {
-    return new Promise((resolve, reject) => {
-
-      let obj = void 0;
-
-      try {
-        obj = JSON.parse(responseText);
-      }
-      catch(err) {
-        return reject(new BungieNet.Error(
-          null,
-          BungieNet.Error.codes.corrupt_response
-        ));
-      }
-
-      return resolve(new BungieNet.Platform.Response(obj));
+      return resolve(frame);
 
     });
   }
 
-  __checkDoReRequest(frame) {
+  _dequeuedFrame(frame) {
     return new Promise(resolve => {
 
-      frame.ttl--;
-
-      if(!frame.response.isThrottled) {
-        return resolve(frame);
-      }
-
-      if(--frame.ttl <= 0) {
-        return resolve(frame);
-      }
-
-      if(this._options.throttleAction === BungieNet.Platform.throttleAction.queue) {
-        this.__queueRequest(frame);
-      }
-
-    });
-  }
-
-  /**
-   * Adds a request to the wait queue
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __queueRequest(frame) {
-    return new Promise(resolve => {
-
-      frame.state = BungieNet.Platform.Frame.state.waiting;
-      this._frames.enqueue(frame);
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.queued);
+      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.dequeuedRequest);
       ev.target = this;
       ev.frame = frame;
       this._events.dispatch(ev);
@@ -366,11 +334,31 @@ BungieNet.Platform = class {
     });
   }
 
+  _queuedFrame(frame) {
+    return new Promise(resolve => {
+
+      frame.state = BungieNet.Platform.Frame.state.waiting;
+      this._frames.enqueue(frame);
+
+      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.queuedFrame);
+      ev.target = this;
+      ev.frame = frame;
+      this._events.dispatch(ev);
+
+      return resolve();
+
+    });
+  }
+
+
+
+  /// Event helpers
+
   /**
    * Attempts to begin a request, taking any conditiions into account
    * @return {Promise}
    */
-  __tryRequest() {
+  _tryFrame() {
     return new Promise((resolve, reject) => {
 
       //check if paused
@@ -390,16 +378,11 @@ BungieNet.Platform = class {
         }
       }
 
-      //check for throttling
-      if(this._options.respectThrottle && this.throttled) {
-        return this.__throttled().then(reject);
-      }
-
       //try get a request from the queue
-      return this.__tryDequeueRequest().then(firstFrame => {
+      return this._tryDequeueFrame().then(firstFrame => {
 
-        this.__beforeSend(firstFrame).then(() => {
-          this.__setActiveRequest(firstFrame);
+        this._beforeFrameExecute(firstFrame).then(() => {
+          this._setActiveFrame(firstFrame);
           //DON'T RESOLVE HERE!
         });
 
@@ -414,7 +397,7 @@ BungieNet.Platform = class {
    * Attempts to dequeue a request from the wait list
    * @return {Promise.<BungieNet.Platform.Frame>}
    */
-  __tryDequeueRequest() {
+  _tryDequeueFrame() {
     return new Promise((resolve, reject) => {
 
       if(this._frames.getWaiting().empty) {
@@ -423,229 +406,13 @@ BungieNet.Platform = class {
 
       let firstFrame = this._frames.getWaiting().front;
 
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.dequeuedRequest);
-      ev.target = this;
-      ev.frame = firstFrame;
-      this._events.dispatch(ev);
-
-      return resolve(firstFrame);
-
-    });
-  }
-
-  /**
-   * Places a request into the active pool and starts it
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __setActiveRequest(frame) {
-    return new Promise(resolve => {
-
-      frame.state = BungieNet.Platform.Frame.state.active;
-      frame.http.go(); //start the request
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.activeRequest);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * Before the request is sent, call this to dispatch the event
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __beforeSend(frame) {
-    return new Promise(resolve => {
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.beforeSend);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * Updates the instance with throttle information from a response
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __privateThrottled(frame) {
-    return new Promise(resolve => {
-
-      let d = new Date();
-      d.setSecond(d.getSeconds() + frame.response.throttleSeconds);
-      this._throttleExpiration = d;
-
-      //add a timer callback
-      //setTimeout(
-      //  this.__tryRequest,
-      //  this._throttleExpiration - Date.now());
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * Dispatcher to be called when an attempt to request is made while
-   * the platform is throttled
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __throttled(frame) {
-    return new Promise(resolve => {
-
-      //this is event sent to caller, BEFORE a request is made if the instance
-      //determines the new request will be throttled
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.throttled);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve();
-
-    });
-  }
-
-  /**
-   * When the HTTP request is 'done', regardless of success or failure
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __httpRequestDone(frame) {
-    return new Promise(resolve => {
-      this.__requestDone(frame).then(resolve);
-    });
-  }
-
-  /**
-   * When the XHR request for whatever reason fails
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __httpError(frame) {
-    return new Promise(resolve => {
-      this.__onNetworkError(frame)
-        .then(() => { this.__requestDone(frame); })
-        .then(resolve);
-    });
-  }
-
-  /**
-   * When this instance returns a valid bungie.net platform response
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __serviceRequestDone(frame) {
-    return new Promise(resolve => {
-
-      if(frame.response.isError) {
-
-        //update for platform errors
-        this.__onPlatformError(frame.response).then(() => {
-
-          if(frame.response.isThrottled) {
-            //update for throttled response
-            return this.__privateThrottled(frame).then(resolve);
-          }
-
-        });
-      }
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * Handler for network errors
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __networkError(frame) {
-    return new Promise(resolve => {
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.networkError);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * Handler for the request state changing
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __requestStateChange(frame) {
-    return new Promise(resolve => {
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.requestStateChange);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * Handler for when the bungie.net platform returns a non-successful response
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __platformError(frame) {
-    return new Promise(resolve => {
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.platformError);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve(frame);
-
-    });
-  }
-
-  /**
-   * When a request is 'done', regardless of success or failure
-   * @param {BungieNet.Platform.Frame} frame
-   * @return {Promise}
-   */
-  __requestDone(frame) {
-    return new Promise(resolve => {
-
-      frame.state = BungieNet.Platform.Frame.state.none;
-      this._frames.remove(frame);
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.requestDone);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      //DON'T RESOLVE ON THIS
-      this.__tryRequest();
-
-      return resolve(frame);
+      return this._dequeuedFrame(firstFrame)
+        .then(() => { resolve(firstFrame); });
 
     });
   }
 
 
-
-  /// Public
 
 
 
@@ -750,30 +517,6 @@ BungieNet.Platform = class {
   }
 
   /**
-   * @type {Boolean}
-   */
-  get respectThrottle() {
-    return this._options.respectThrottle;
-  }
-
-  /**
-   * @param {Boolean} ok
-   * @type {Boolean}
-   */
-  set respectThrottle(ok) {
-    this._options.respectThrottle = ok;
-    this.__tryRequest();
-  }
-
-  /**
-   * Whether the platform is currently throttled
-   * @return {Boolean}
-   */
-  get throttled() {
-    return this._throttleExpiration > Date.now();
-  }
-
-  /**
    * Timeout for requests to the platform in milliseconds
    * @return {[type]} [description]
    */
@@ -806,8 +549,8 @@ BungieNet.Platform = class {
    * Number of queued requests
    * @return {Number}
    */
-  get queuedRequests() {
-    return this._waitQueue.length;
+  get queuedCount() {
+    return this._frames.getWaiting().size;
   }
 
 
@@ -6028,15 +5771,22 @@ BungieNet.Platform.headers = {
  * @type {Object}
  */
 BungieNet.Platform.events = {
-  activeRequest: "activeRequest",
-  beforeSend: "beforeSend",
-  dequeuedRequest: "dequeuedRequest",
-  networkError: "networkError",
-  platformError: "platformError",
-  queued: "queued",
-  requestDone: "requestDone",
-  requestStateChange: "requestStateChange",
-  throttled: "throttled"
+
+  frameHttpUpdate: "frameUpdate",
+  frameHttpError: "frameHttpError",
+  frameHttpSuccess: "frameHttpSuccess",
+  frameHttpDone: "frameHttpDone",
+  framePlatformError: "framePlatformError",
+  framePlatformSuccess: "framePlatformSuccess",
+  framePlatformDone: "framePlatformDone",
+  frameError: "frameError",
+  frameSuccess: "frameSuccess",
+
+  activeFrame: "platformActiveRequest",
+  beforeFrameExecute: "beforeFrameExecute",
+  dequeuedFrame: "dequeuedFrame",
+  queuedFrame: "queuedFrame"
+
 };
 
 /**
@@ -6066,26 +5816,6 @@ BungieNet.Platform.authenticationType = {
 };
 
 /**
- * How the platform should handle throttled requests
- * @type {Object}
- */
-BungieNet.Platform.throttleAction = {
-
-  /**
-   * The platform will queue a request until no longer throttled
-   * @type {Number}
-   */
-  queue: 0,
-
-  /**
-   * The platform will drop/reject any requests while throttled
-   * @type {Number}
-   */
-  drop: 1
-
-};
-
-/**
  * Default platform options
  * @type {Object}
  */
@@ -6094,7 +5824,6 @@ BungieNet.Platform.defaultOptions = {
   authType: BungieNet.Platform.authenticationType.cookies,
   maxConcurrent: -1,
   paused: false,
-  respectThrottle: true,
   throttleAction: BungieNet.Platform.throttleAction.drop,
   timeout: 5000,
   userContext: true

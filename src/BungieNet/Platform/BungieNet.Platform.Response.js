@@ -48,4 +48,26 @@ BungieNet.Platform.Response = class {
 
   }
 
+  /**
+   * Parses a response from the bungie.net platform
+   * @param {String} text
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  static parse(text) {
+    return new Promise((resolve, reject) => {
+
+      let obj = void 0;
+
+      try {
+        obj = JSON.parse(text);
+      }
+      catch(err) {
+        return reject();
+      }
+
+      return resolve(new BungieNet.Platform.Response(obj));
+
+    });
+  }
+
 };
