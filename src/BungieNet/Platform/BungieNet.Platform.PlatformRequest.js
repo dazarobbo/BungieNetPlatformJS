@@ -5,15 +5,19 @@ BungieNet.Platform.PlatformRequest = class {
     this._frame = frame;
     this._frame.http = new BungieNet.Plaform.Http2(frame.request);
     this._events = new BungieNet.Platform.EventTarget([
+
       "httpUpdate",
       "httpError",
       "httpSuccess",
       "httpDone",
+
       "platformError",
       "platformSuccess",
       "platformDone",
+
       "error",
       "success"
+
     ]);
   }
 

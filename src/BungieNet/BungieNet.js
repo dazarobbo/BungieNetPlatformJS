@@ -174,8 +174,10 @@ BungieNet.enums = {
     group_topic_create: 21,
     group_reply_create: 22,
     reply: 23,
-    change_clan_name: 24,
-    group_alliance_rejected: 26
+    change_group_name: 24,
+    group_alliance_rejected: 26,
+    group_alliance_approved: 27,
+    group_alliance_broken: 28
   },
 
   adminHistoryItemFlags: {
@@ -426,7 +428,9 @@ BungieNet.enums = {
     mayhem_rumble: 27,
     zone_control: 28,
     racing: 29,
-    arena_elder_challenge: 30
+    arena_elder_challenge: 30,
+    supremacy: 31,
+    private_matches_all: 32
   },
 
   destinyCardRarity: {
@@ -522,7 +526,8 @@ BungieNet.enums = {
     destiny1: 1,
     the_dark_below: 2,
     house_of_wolves: 4,
-    comet: 8
+    comet: 8,
+    rise_of_iron: 16
   },
 
   destinyGender: {
@@ -589,6 +594,14 @@ BungieNet.enums = {
     incomplete: 0,
     complete: 1,
     redeemed: 2
+  },
+
+  destinyRecordUiStyle: {
+    integer: 0,
+    percentage: 1,
+    time_in_seconds: 2,
+    boolean: 3,
+    number_with_two_decimal_places: 4
   },
 
   destinyRewardSourceCategory: {
@@ -1248,6 +1261,11 @@ BungieNet.enums = {
     customer_service: 16
   },
 
+  partershipType: {
+    none: 0,
+    twitch: 1
+  },
+
   platformErrorCodes: {
     none: 0,
     success: 1,
@@ -1815,7 +1833,23 @@ BungieNet.enums = {
     discount_already_exists: 2043,
     api_exceeded_max_keys: 2100,
     api_invalid_or_expired_key: 2101,
-    api_key_missing_from_request: 2102
+    api_key_missing_from_request: 2102,
+    application_disabled: 2103,
+    application_exceeded_max: 2104,
+    application_disallowed_by_scope: 2105,
+    authorization_code_invalid: 2106,
+    origin_header_does_not_match_key: 2107,
+    access_not_permitted_by_application_scope: 2108,
+    application_name_is_taken: 2109,
+    refresh_token_not_yet_valid: 2110,
+    partnership_invalid_type: 2200,
+    partnership_validation_error: 2201,
+    partnership_validation_timeout: 2202,
+    partnership_access_failure: 2203,
+    partnership_account_invalid: 2204,
+    partnership_get_account_info_failure: 2205,
+    partnership_disabled: 2206,
+    partnership_already_exists: 2207
   },
 
   periodType: {

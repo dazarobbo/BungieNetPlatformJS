@@ -7,7 +7,6 @@
  * @param {BungieNet.Platform.authenticationType} [opts.authType = BungieNet.Platform.authenticationType.cookies] - authentication type the platform will use
  * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
  * @param {Boolean} [opts.paused = false] - whether the platform is paused to new requests
- * @param {Number} [opts.respectThrottle = true] - whether to respect bungie.net's throttling
  * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
  * @param {Boolean} [opts.anonymous = false] - whether the platform should make unidentified requests
  * @param {BungieNet.Platform.throttleAction} [opts.throttleAction = BungieNet.Platform.throttleAction.drop] - how the platform should handle throttles
@@ -153,6 +152,7 @@ BungieNet.Platform = class {
       //apply any/all http options
       frame.request.options.forEach(func => func(frame.http));
 
+      //listen for frame info
       frame.platformRequest.on("httpUpdate", this._frameHttpUpdate);
       frame.platformRequest.on("httpError", this._frameHttpError);
       frame.platformRequest.on("httpSuccess", this._frameHttpSuccess);
@@ -162,6 +162,10 @@ BungieNet.Platform = class {
       frame.platformRequest.on("platformDone", this._framePlatformDone);
       frame.platformRequest.on("error", this._frameError);
       frame.platformRequest.on("success", this._frameSuccess);
+
+      //resolve/reject handlers
+      frame.platformRequest.on("success", resolve);
+      frame.platformRequest.on("error", reject);
 
       //queue it, then try the queue
       this._queueFrame(frame).then(this._tryFrame);
@@ -200,10 +204,7 @@ BungieNet.Platform = class {
 
         //add api key header
         frame.request.options.add(http => {
-          http.addHeader(
-            BungieNet.Platform.headers.apiKey,
-            this._options.apiKey
-          );
+          http.addHeader(BungieNet.Platform.headers.apiKey, this._options.apiKey);
         });
 
         //add authentication if not anonymous
@@ -252,39 +253,57 @@ BungieNet.Platform = class {
   /// Private Event Handlers
 
   _frameHttpUpdate(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameHttpUpdate);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _frameHttpError(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameHttpError);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _frameHttpSuccess(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameHttpSuccess);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _frameHttpDone(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameHttpDone);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _framePlatformError(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.framePlatformError);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _framePlatformSuccess(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.framePlatformSuccess);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _framePlatformDone(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.framePlatformDone);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _frameError(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameError);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _frameSuccess(e) {
-
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameSuccess);
+    ev.target = e;
+    this._events.dispatch(ev);
   }
 
   _activeFrame(frame) {
@@ -406,8 +425,11 @@ BungieNet.Platform = class {
 
       let firstFrame = this._frames.getWaiting().front;
 
-      return this._dequeuedFrame(firstFrame)
-        .then(() => { resolve(firstFrame); });
+      return this
+        ._dequeuedFrame(firstFrame)
+        .then(() => {
+          return resolve(firstFrame);
+        });
 
     });
   }
@@ -444,7 +466,7 @@ BungieNet.Platform = class {
    * Number of active requests
    * @return {Number}
    */
-  get activeRequests() {
+  get activeRequestCount() {
     return this._frames.getActive().size;
   }
 
@@ -916,6 +938,17 @@ BungieNet.Platform = class {
 
   /**
    * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getPartnerships(p1) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/User/{p1}/Partnerships/", {
+        p1: p1
+      })
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
    * @example
    * Response: [
    *  {
@@ -994,6 +1027,22 @@ BungieNet.Platform = class {
   registerMobileAppPair() {
     return this._serviceRequest(new BungieNet.Platform.Request(
       new URI("/User/RegisterMobileAppPair/"),
+      "POST",
+      {
+
+      }
+    ));
+  }
+
+  /**
+   * @param {*} p1
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  removePartnership(p1) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/User/Partnerships/{p1}/Remove/", {
+        p1: p1
+      }),
       "POST",
       {
 
@@ -2451,7 +2500,24 @@ BungieNet.Platform = class {
   }
 
   /**
+   * @param {*} p1
+   * @param {*} p2
+   * @param {Number} [currentPage = 1]
    * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getApplicationActivityForUser(p1, p2, currentPage = 1) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/Activity/User/{p1}/Activities/Application/{p2}/{?page}", {
+        p1: p1,
+        p2: p2,
+        page: currentPage
+      })
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   * @deprecated 2016-09-10
    */
   getAggregatedActivitiesForCurrentUser(typeFilter, format) {
     return this._serviceRequest(new BungieNet.Platform.Request(
