@@ -1,15 +1,21 @@
 /* globals BungieNet */
 BungieNet.Platform.PlatformRequest = class {
 
-  constructor(frame) {
-    this._frame = frame;
-    this._frame.http = new BungieNet.Plaform.Http2(frame.request);
+  /**
+   * @param {BungieNet.Platform.Request} request
+   */
+  constructor(request) {
+    this._http = new BungieNet.Plaform.Http2(request);
     this._events = new BungieNet.Platform.EventTarget([
+
+      "beforeSend",
 
       "httpUpdate",
       "httpError",
       "httpSuccess",
       "httpDone",
+
+      "responseParsed",
 
       "platformError",
       "platformSuccess",
@@ -22,9 +28,23 @@ BungieNet.Platform.PlatformRequest = class {
   }
 
   _bind() {
-    this._frame.http.on("update", this._httpUpdate);
-    this._frame.http.on("success", this._httpSuccess);
-    this._frame.http.on("fail", this._httpFail);
+    this._http.on("update", this._httpUpdate);
+    this._http.on("success", this._httpSuccess);
+    this._http.on("fail", this._httpFail);
+  }
+
+  _beforeSend() {
+    return new Promise(resolve => {
+
+      let ev = new BungieNet.Platform.Event("beforeSend");
+      ev.http = this._http;
+      ev.target = this;
+      this._events.dispatch(ev);
+
+      return resolve();
+
+
+    });
   }
 
   _httpUpdate() {
@@ -32,7 +52,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("httpUpdate");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return resolve();
@@ -45,7 +64,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("httpSuccess");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       this._onHttpSuccess()
@@ -60,7 +78,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("httpError");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       this._onHttpDone()
@@ -74,7 +91,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("httpDone");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return resolve();
@@ -87,11 +103,10 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("httpUpdate");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       BungieNet.Platform.Response
-        .parse(this._frame.http.responseText)
+        .parse(this._http.responseText)
         .then(this._onResponseParsed, this._onResponseCorrupt)
         .then(resolve);
 
@@ -103,7 +118,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("platformError");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return this._onPlatformDone()
@@ -118,7 +132,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("platformSuccess");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return this._onPlatformDone()
@@ -133,7 +146,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("platformDone");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return resolve();
@@ -145,6 +157,10 @@ BungieNet.Platform.PlatformRequest = class {
     return new Promise(resolve => {
 
       let p = null;
+      let ev = new BungieNet.Platform.Event("responseParsed");
+      
+      ev.target = this;
+      this._events.dispatch(ev);
 
       if(response.isError) {
         p = this._onPlatformError();
@@ -172,7 +188,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("error");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return resolve();
@@ -185,7 +200,6 @@ BungieNet.Platform.PlatformRequest = class {
 
       let ev = new BungieNet.Platform.Event("success");
       ev.target = this;
-      ev.frame = this._frame;
       this._events.dispatch(ev);
 
       return resolve();
@@ -195,9 +209,14 @@ BungieNet.Platform.PlatformRequest = class {
 
   execute() {
     return new Promise(resolve => {
+
       this._bind();
-      this._frame.http.go();
-      return resolve();
+
+      this._beforeSend().then(() => {
+        this._http.go();
+        return resolve();
+      });
+
     });
   }
 

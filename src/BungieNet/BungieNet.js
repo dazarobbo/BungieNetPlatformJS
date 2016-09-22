@@ -177,7 +177,16 @@ BungieNet.enums = {
     change_group_name: 24,
     group_alliance_rejected: 26,
     group_alliance_approved: 27,
-    group_alliance_broken: 28
+    group_alliance_broken: 28,
+    transferFromVault: 1, //error?
+    transferToVault: 1001,
+    trackQuest: 1002,
+    untrackQuest: 1003,
+    equipItem: 1004,
+    buyItem: 1005,
+    lockItem: 1008,
+    unlockItem: 1009,
+    refundItem: 1010
   },
 
   adminHistoryItemFlags: {
@@ -236,7 +245,8 @@ BungieNet.enums = {
     topic: 2,
     group: 3,
     tag: 4,
-    community_content: 5
+    community_content: 5,
+    destiny: 6
   },
 
   bnetAccountPrivacy: {
@@ -313,6 +323,13 @@ BungieNet.enums = {
     trending: 0,
     latest: 1,
     highest_rated: 2
+  },
+
+  communityStatusSort: {
+    viewers: 0,
+    trending: 1,
+    overallViewers: 2,
+    followers: 3
   },
 
   contentDateRange: {

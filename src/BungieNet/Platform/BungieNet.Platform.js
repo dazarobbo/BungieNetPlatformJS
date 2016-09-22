@@ -4,12 +4,12 @@
  *
  * @param {Object} [opts = {}]
  * @param {String} [opts.apiKey = ""] bungie.net API key
+ * @param {BungieNet.Platform.Plugin[]} [opts.plugins = []] platform plugins
  * @param {BungieNet.Platform.authenticationType} [opts.authType = BungieNet.Platform.authenticationType.cookies] - authentication type the platform will use
  * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
  * @param {Boolean} [opts.paused = false] - whether the platform is paused to new requests
  * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
  * @param {Boolean} [opts.anonymous = false] - whether the platform should make unidentified requests
- * @param {BungieNet.Platform.throttleAction} [opts.throttleAction = BungieNet.Platform.throttleAction.drop] - how the platform should handle throttles
  *
  * Notes:
  * (a) platform request workflow is as follows:
@@ -69,6 +69,11 @@ BungieNet.Platform = class {
       BungieNet.Platform.events
     ));
 
+    /**
+     * @type {BungieNet.Platform.Plugin[]}
+     */
+    this._plugins = [];
+
     //copy any value in opts to this._options
     //only copy matching keys
     //DON'T use hasOwnProperty - opts could be any object
@@ -80,97 +85,42 @@ BungieNet.Platform = class {
 
   }
 
-
-  /// Authentication
-
-  /**
-   * Applies cookie-based authentication to the request
-   * @param {BungieNet.Platform.Request} request
-   * @return {Promise.<BungieNet.Platform.Request>}
-   */
-  _cookieAuthentication(request) {
-    return new Promise((resolve, reject) => {
-      BungieNet.CurrentUser.getCsrfToken()
-        .then(token => {
-
-          request.options.add(http => {
-            http.useCookies = true;
-            http.addHeader(BungieNet.Platform.headers.csrf, token);
-          });
-
-          return resolve(request);
-
-        }, () => {
-          return reject(new BungieNet.Error(
-            null,
-            BungieNet.Error.codes.no_csrf_token
-          ));
-        });
-    });
-  }
-
-  /**
-   * Applies OAuth-based authentication to the request
-   * @param {BungieNet.Platform.Request} request
-   * @return {Promise.<BungieNet.Platform.Request>}
-   */
-  _oauthAuthentication(request) {
-    return new Promise(resolve => {
-
-      request.options.add(http => {
-        http.addHeader(
-          BungieNet.Platform.headers.oauth,
-          `Bearer ${this._options.oauthToken}`
-        );
-      });
-
-      return resolve(request);
-
-    });
-  }
-
-
-
-  /// Network
-
   /**
    * Initiates the request and queues it
    * @param {BungieNet.Platform.Frame} frame
    * @return {Promise.<BungieNet.Platform.Frame>}
    */
   _httpRequest(frame) {
-    return new Promise((resolve, reject) => {
 
-      frame.platformRequest = new BungieNet.Platform.PlatformRequest(frame);
-      frame.http.timeout = this._options.timeout;
+    frame.platformRequest = new BungieNet.Platform.PlatformRequest(frame.request);
 
-      //add any predefined headers
-      for(let {name, value} of frame.request.headers) {
-        frame.http.addHeader(name, value);
-      }
-
-      //apply any/all http options
-      frame.request.options.forEach(func => func(frame.http));
-
-      //listen for frame info
-      frame.platformRequest.on("httpUpdate", this._frameHttpUpdate);
-      frame.platformRequest.on("httpError", this._frameHttpError);
-      frame.platformRequest.on("httpSuccess", this._frameHttpSuccess);
-      frame.platformRequest.on("httpDone", this._frameHttpDone);
-      frame.platformRequest.on("platformError", this._framePlatformError);
-      frame.platformRequest.on("platformSuccess", this._framePlatformSuccess);
-      frame.platformRequest.on("platformDone", this._framePlatformDone);
-      frame.platformRequest.on("error", this._frameError);
-      frame.platformRequest.on("success", this._frameSuccess);
-
-      //resolve/reject handlers
-      frame.platformRequest.on("success", resolve);
-      frame.platformRequest.on("error", reject);
-
-      //queue it, then try the queue
-      this._queueFrame(frame).then(this._tryFrame);
-
+    //set up a beforeSend handler to add other details
+    frame.platformRequest.on("beforeSend", e => {
+      e.http.timeout = this._options.timeout;
+      e.http.addHeader(BungieNet.Platform.headers.apiKey, this._options.apiKey);
+      this._beforeFrameExecute(e);
     });
+
+    //apply any/all http options
+    frame.request.options.forEach(f => f(frame.http));
+
+    //listen for frame info
+    frame.platformRequest.on("httpUpdate", this._frameHttpUpdate);
+    frame.platformRequest.on("httpError", this._frameHttpError);
+    frame.platformRequest.on("httpSuccess", this._frameHttpSuccess);
+    frame.platformRequest.on("httpDone", this._frameHttpDone);
+    frame.platformRequest.on("responseParsed", this._frameResponseParsed);
+    frame.platformRequest.on("platformError", this._framePlatformError);
+    frame.platformRequest.on("platformSuccess", this._framePlatformSuccess);
+    frame.platformRequest.on("platformDone", this._framePlatformDone);
+    frame.platformRequest.on("error", this._frameError);
+    frame.platformRequest.on("success", this._frameSuccess);
+
+    //queue it, then try the queue
+    return this
+      ._queueFrame(frame)
+      .then(this._tryFrame);
+
   }
 
   /**
@@ -180,77 +130,67 @@ BungieNet.Platform = class {
    */
   _serviceRequest(request) {
     return new Promise((resolve, reject) => {
-      BungieNet.getLocale().then(loc => {
 
-        let promises = [];
-        let frame = new BungieNet.Platform.Frame(request);
+      let frame = new BungieNet.Platform.Frame();
 
-        //construct the full path
-        //copy any query string params
-        //add the locale
-        frame.request.uri =
-          BungieNet.platformPath
-          .segment(request.uri.path())
-          .setSegment(request.uri.search(true))
-          .addSearch("lc", loc);
+      frame.serviceResolve = resolve;
+      frame.serviceReject = reject;
+      frame.request = request;
 
-        //urijs is smart enough to remove the trailing slash
-        //add it back in manually to avoid bungie.net redirects
-        if(frame.request.uri.path().endsWith("/")) {
-          frame.request.uri = frame.request.uri.path(
-            frame.request.uri.path() + "/"
-          );
-        }
+      //construct the full path
+      //copy any query string params
+      //add the locale
+      frame.request.uri =
+        BungieNet.platformPath
+        .segment(request.uri.path())
+        .setSegment(request.uri.search(true));
 
-        //add api key header
-        frame.request.options.add(http => {
-          http.addHeader(BungieNet.Platform.headers.apiKey, this._options.apiKey);
-        });
+      //urijs is smart enough to remove the trailing slash
+      //add it back in manually to avoid bungie.net redirects
+      if(frame.request.uri.path().endsWith("/")) {
+        frame.request.uri = frame.request.uri.path(
+          frame.request.uri.path() + "/"
+        );
+      }
 
-        //add authentication if not anonymous
-        if(!this._options.anonymous) {
-          switch(this._options.authType) {
+      this._modifyServiceRequest(frame).then(() => this._httpRequest(frame));
 
-            case BungieNet.Platform.authenticationType.cookies:
-              promises.push(this._cookieAuthentication(frame.request));
-              break;
-
-            case BungieNet.Platform.authenticationType.oauth:
-              promises.push(this._oauthAuthentication(frame.request));
-              break;
-
-            default: //superfluous, but just to make it clear...
-            case BungieNet.Platform.authenticationType.none:
-              //no need to do anything
-              break;
-
-          }
-        }
-
-        //when ready, do the request
-        Promise.all(promises).then(() => {
-
-          this._httpRequest(frame)
-            .then(frame => {
-              return new Promise(resolve => {
-                BungieNet.Platform
-                  .__parseResponse(frame.request.responseText)
-                  .then(response => { frame.response = response; })
-                  .then(() => { return resolve(frame); });
-                });
-            }, reject)
-            .then(this.__serviceRequestDone, reject)
-            .then(frame => { resolve(frame.response); });
-
-        }, reject);
-
-      });
     });
   }
 
 
 
   /// Private Event Handlers
+
+  /**
+   * Invokes any plugins with the given event name
+   * @param {String} eventName
+   * @param {*[]} args - array of arguments to be passed to plugin function
+   * @return {Promise}
+   */
+  _invokePlugins(eventName, args) {
+
+    let promises = this._plugins
+      .filter(p => eventName in p)
+      .map(p => Promise.resolve(p.getDelegate(eventName).apply(p, args)));
+
+    return Promise.all(promises);
+
+  }
+
+  _modifyServiceRequest(frame) {
+    return this._invokePlugins(
+      BungieNet.Platform.events.frameOnServiceRequest,
+      [frame]
+    );
+  }
+
+  _modifyHttpRequest(frame) {
+    return this._invokePlugins(
+      BungieNet.Platform.events.frameOnHttpRequest,
+      [frame]
+    );
+  }
 
   _frameHttpUpdate(e) {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameHttpUpdate);
@@ -276,6 +216,17 @@ BungieNet.Platform = class {
     this._events.dispatch(ev);
   }
 
+  _frameResponseParsed(e) {
+
+    let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameResponseParsed);
+
+
+
+    ev.target = e;
+    this._events.dispatch(ev);
+
+  }
+
   _framePlatformError(e) {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.framePlatformError);
     ev.target = e;
@@ -298,12 +249,14 @@ BungieNet.Platform = class {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameError);
     ev.target = e;
     this._events.dispatch(ev);
+    e.frame.serviceReject();
   }
 
   _frameSuccess(e) {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameSuccess);
     ev.target = e;
     this._events.dispatch(ev);
+    e.frame.serviceResolve();
   }
 
   _activeFrame(frame) {
@@ -353,7 +306,7 @@ BungieNet.Platform = class {
     });
   }
 
-  _queuedFrame(frame) {
+  _queueFrame(frame) {
     return new Promise(resolve => {
 
       frame.state = BungieNet.Platform.Frame.state.waiting;
@@ -427,14 +380,10 @@ BungieNet.Platform = class {
 
       return this
         ._dequeuedFrame(firstFrame)
-        .then(() => {
-          return resolve(firstFrame);
-        });
+        .then(resolve);
 
     });
   }
-
-
 
 
 
@@ -5698,6 +5647,40 @@ BungieNet.Platform = class {
   /**
    * @return {Promise.<BungieNet.Platform.Response>}
    */
+  adminSetCommunityLiveMemberBanStatus(p1, p2, p3) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/Partnerships/{p1}/{p2}/Ban/{p3}/", {
+        p1: p1,
+        p2: p2,
+        p3: p3
+      }),
+      "POST",
+      {
+
+      }
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  adminSetCommunityLiveMemberFeatureStatus(p1, p2, p3) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/Partnerships/{p1}/{p2}/Feature/{p3}/", {
+        p1: p1,
+        p2: p2,
+        p3: p3
+      }),
+      "POST",
+      {
+
+      }
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   alterApprovalState(p1) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/AlterApprovalState/{p1}/", {
@@ -5728,6 +5711,23 @@ BungieNet.Platform = class {
   /**
    * @return {Promise.<BungieNet.Platform.Response>}
    */
+  getAdminCommunityLiveStatuses(p1, p2, name) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/Admin/{p1}/{p2}/{?name}", {
+        p1: p1,
+        p2: p2,
+        name: name
+      }),
+      "POST",
+      {
+
+      }
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
   getApprovalQueue(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/Queue/{p1}/{p2}/{p3}/", {
@@ -5744,6 +5744,59 @@ BungieNet.Platform = class {
   getCommunityContent(p1, p2, p3) {
     return this._serviceRequest(new BungieNet.Platform.Request(
       URI.expand("/CommunityContent/Get/{p1}/{p2}/{p3}/", {
+        p1: p1,
+        p2: p2,
+        p3: p3
+      })
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getCommunityLiveStatuses(p1, p2, p3, modeHash) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/All/{p1}/{p2}/{p3}/{?modeHash}", {
+        p1: p1,
+        p2: p2,
+        p3: p3,
+        modeHash: modeHash
+      })
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getCommunityLiveStatusesForClanmates(p1, p2, p3) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/Clan/{p1}/{p2}/{p3}/", {
+        p1: p1,
+        p2: p2,
+        p3: p3
+      })
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getCommunityLiveStatusesForFriends(p1, p2, p3) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/Friends/{p1}/{p2}/{p3}/", {
+        p1: p1,
+        p2: p2,
+        p3: p3
+      })
+    ));
+  }
+
+  /**
+   * @return {Promise.<BungieNet.Platform.Response>}
+   */
+  getFeaturedCommunityLiveStatuses(p1, p2, p3) {
+    return this._serviceRequest(new BungieNet.Platform.Request(
+      URI.expand("/CommunityContent/Live/Features/{p1}/{p2}/{p3}/", {
         p1: p1,
         p2: p2,
         p3: p3
@@ -5837,6 +5890,10 @@ BungieNet.Platform.headers = {
  * @type {Object}
  */
 BungieNet.Platform.events = {
+
+  frameOnServiceRequest: "frameOnServiceRequest",
+  frameOnHttpRequest: "frameOnHttpRequest",
+  frameBeforeSend: "frameBeforeSend",
 
   frameHttpUpdate: "frameUpdate",
   frameHttpError: "frameHttpError",
