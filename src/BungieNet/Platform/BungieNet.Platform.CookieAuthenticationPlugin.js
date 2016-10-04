@@ -12,7 +12,7 @@ BungieNet.Platform.Plugins.CookieAuthenticationPlugin =
     frameOnHttpRequest(frame) {
       return BungieNet.CurrentUser.getCsrfToken().then(token => {
         frame.http.useCookies = true;
-        frame.http.addHeader("X-CSRF", token);
+        frame.http.setRequestHeader("X-CSRF", token);
       });
     }
 

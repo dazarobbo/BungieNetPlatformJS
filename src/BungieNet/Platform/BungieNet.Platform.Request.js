@@ -25,19 +25,7 @@ BungieNet.Platform.Request = class {
     this.method = method;
     this.data = data;
     this.headers = headers;
-
-    //Set of http specific options to be set
-    this.options = new Set();
-
-  }
-
-  /**
-   * Internal set of function callbacks to set http-specific options before the
-   * request is sent. Function should be Promise-d.
-   * @return {Set}
-   */
-  get options() {
-    return this.options;
+    
   }
 
 };

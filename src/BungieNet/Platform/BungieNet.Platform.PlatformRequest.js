@@ -4,8 +4,10 @@ BungieNet.Platform.PlatformRequest = class {
   /**
    * @param {BungieNet.Platform.Request} request
    */
-  constructor(request) {
-    this._http = new BungieNet.Plaform.Http2(request);
+  constructor(frame) {
+
+    this._frame = frame;
+    this._http = new BungieNet.Plaform.Http2();
     this._events = new BungieNet.Platform.EventTarget([
 
       "beforeSend",
@@ -25,19 +27,36 @@ BungieNet.Platform.PlatformRequest = class {
       "success"
 
     ]);
+
+  }
+
+  get frame() {
+    return this._frame;
+  }
+
+  get http() {
+    return this._http;
+  }
+
+  get eventTarget() {
+    return this._events;
   }
 
   _bind() {
+
+    //update the http info with the frame info
+    this._http.request = this._frame.request;
+
     this._http.on("update", this._httpUpdate);
     this._http.on("success", this._httpSuccess);
     this._http.on("fail", this._httpFail);
+    
   }
 
   _beforeSend() {
     return new Promise(resolve => {
 
       let ev = new BungieNet.Platform.Event("beforeSend");
-      ev.http = this._http;
       ev.target = this;
       this._events.dispatch(ev);
 
@@ -158,7 +177,7 @@ BungieNet.Platform.PlatformRequest = class {
 
       let p = null;
       let ev = new BungieNet.Platform.Event("responseParsed");
-      
+
       ev.target = this;
       this._events.dispatch(ev);
 
@@ -210,9 +229,8 @@ BungieNet.Platform.PlatformRequest = class {
   execute() {
     return new Promise(resolve => {
 
-      this._bind();
-
       this._beforeSend().then(() => {
+        this._bind();
         this._http.go();
         return resolve();
       });

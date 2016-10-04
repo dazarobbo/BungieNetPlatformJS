@@ -11,7 +11,9 @@ BungieNet.Platform.OAuthAuthenticationPlugin =
     }
 
     frameOnHttpRequest(frame) {
-      frame.http.addHeader("Authorization", `Bearer ${this._oauthToken}`);
+      frame.http.setRequestHeader(
+        "Authorization",
+        `Bearer ${this._oauthToken}`);
     }
 
 };

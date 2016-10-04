@@ -12,31 +12,17 @@
  * @param {Boolean} [opts.anonymous = false] - whether the platform should make unidentified requests
  *
  * Notes:
- * (a) platform request workflow is as follows:
- *  1. when an endpoint has been invoked
- *  2. a service request is created
- *  3. the request is passed to a HTTP routine
- *  4. the HTTP routine create a HTTP request
- *  5. the HTTP request is added to a wait queue
- *  6. when appropriate, the HTTP request is dequeued frm the wait queue
- *  7. the HTTP request is added to the active pool
- *  8. the HTTP request is initiated
- *  ...
- *  (i) when the HTTP request finishes
- *  (ii) the response is parsed into a response
  *
- * (b) certain operations/situations will trigger the platform into trying to
- * dequeue from the wait queue. These are:
- * - when the platform detects a request 'done'-ing;
- * - when maxConcurrent is updated;
- * - when the platform is unpaused; and
- * - when respectThrottle is updated.
+ * ===== Plugins =====
+ * Plugins extend and dictate the operation of the platform. A platform instance
+ * can have 0 or more plugins.
+ *
+ * The platform will invoke the predefined methods of any and all plugins and
+ * pass any relevant data to it for the plugin to examine, alter, etc...
  *
  *
- * @todo design a workflow for requests, responses
- * @todo split platform into separate components
- * @todo is anonymous superfluous?
- * @todo remove throttling
+ *
+ *
  *
  * @example
  * let p = new BungieNet.Platform({
@@ -55,12 +41,20 @@
  */
 BungieNet.Platform = class {
 
-  constructor(opts = {}) {
+  /**
+   * Initialise objects
+   */
+  _init() {
 
     /**
      * @type {BungieNet.Platform.FrameSet}
      */
     this._frames = new BungieNet.Platform.FrameSet();
+
+    /**
+     * @type {BungieNet.Platform.FrameManager}
+     */
+    this._frameManager = new BungieNet.Platform.FrameManager(this._frames);
 
     /**
      * @type {BungieNet.Platform.EventTarget}
@@ -70,13 +64,19 @@ BungieNet.Platform = class {
     ));
 
     /**
-     * @type {BungieNet.Platform.Plugin[]}
+     * @type {Set<BungieNet.Platform.Plugin>}
      */
-    this._plugins = [];
+    this._plugins = new Set();
+
+  }
+
+  constructor(opts = {}) {
+
+    this._init();
 
     //copy any value in opts to this._options
     //only copy matching keys
-    //DON'T use hasOwnProperty - opts could be any object
+    //DON'T use hasOwnProperty - opts could be any object and that's OK
     //
     //NOTE: Object.assign is shallow; defaults are primitives anyway so it's OK
     Object.keys(Object.assign({}, BungieNet.Platform.defaultOptions))
@@ -90,36 +90,38 @@ BungieNet.Platform = class {
    * @param {BungieNet.Platform.Frame} frame
    * @return {Promise.<BungieNet.Platform.Frame>}
    */
-  _httpRequest(frame) {
+  _wrapRequest(frame) {
 
-    frame.platformRequest = new BungieNet.Platform.PlatformRequest(frame.request);
+    frame.platformRequest = new BungieNet.Platform.PlatformRequest(frame);
 
     //set up a beforeSend handler to add other details
     frame.platformRequest.on("beforeSend", e => {
-      e.http.timeout = this._options.timeout;
-      e.http.addHeader(BungieNet.Platform.headers.apiKey, this._options.apiKey);
-      this._beforeFrameExecute(e);
-    });
 
-    //apply any/all http options
-    frame.request.options.forEach(f => f(frame.http));
+      e.target.http.timeout = this._options.timeout;
+      e.target.http.setRequestHeader(
+        BungieNet.Platform.headers.apiKey, this._options.apiKey);
+
+      this._beforeFrameExecute(e.target.frame);
+
+    });
 
     //listen for frame info
     frame.platformRequest.on("httpUpdate", this._frameHttpUpdate);
     frame.platformRequest.on("httpError", this._frameHttpError);
     frame.platformRequest.on("httpSuccess", this._frameHttpSuccess);
     frame.platformRequest.on("httpDone", this._frameHttpDone);
+
     frame.platformRequest.on("responseParsed", this._frameResponseParsed);
+
     frame.platformRequest.on("platformError", this._framePlatformError);
     frame.platformRequest.on("platformSuccess", this._framePlatformSuccess);
     frame.platformRequest.on("platformDone", this._framePlatformDone);
+
     frame.platformRequest.on("error", this._frameError);
     frame.platformRequest.on("success", this._frameSuccess);
 
     //queue it, then try the queue
-    return this
-      ._queueFrame(frame)
-      .then(this._tryFrame);
+    return this._queueFrame(frame).then(this._tryFrame);
 
   }
 
@@ -153,7 +155,8 @@ BungieNet.Platform = class {
         );
       }
 
-      this._modifyServiceRequest(frame).then(() => this._httpRequest(frame));
+      this._modifyServiceRequest(frame)
+        .then(() => this._wrapRequest(frame));
 
     });
   }
@@ -192,6 +195,7 @@ BungieNet.Platform = class {
     );
   }
 
+
   _frameHttpUpdate(e) {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameHttpUpdate);
     ev.target = e;
@@ -216,6 +220,7 @@ BungieNet.Platform = class {
     this._events.dispatch(ev);
   }
 
+
   _frameResponseParsed(e) {
 
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameResponseParsed);
@@ -226,6 +231,7 @@ BungieNet.Platform = class {
     this._events.dispatch(ev);
 
   }
+
 
   _framePlatformError(e) {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.framePlatformError);
@@ -245,6 +251,7 @@ BungieNet.Platform = class {
     this._events.dispatch(ev);
   }
 
+
   _frameError(e) {
     let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.frameError);
     ev.target = e;
@@ -259,11 +266,12 @@ BungieNet.Platform = class {
     e.frame.serviceResolve();
   }
 
+
   _activeFrame(frame) {
     return new Promise(resolve => {
 
       frame.state = BungieNet.Platform.Frame.state.active;
-      frame.http.go(); //start the request
+      frame.platformRequest.execute();
 
       let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.activeFrame);
       ev.target = this;
@@ -293,24 +301,11 @@ BungieNet.Platform = class {
     });
   }
 
-  _dequeuedFrame(frame) {
-    return new Promise(resolve => {
-
-      let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.dequeuedRequest);
-      ev.target = this;
-      ev.frame = frame;
-      this._events.dispatch(ev);
-
-      return resolve();
-
-    });
-  }
-
   _queueFrame(frame) {
     return new Promise(resolve => {
 
       frame.state = BungieNet.Platform.Frame.state.waiting;
-      this._frames.enqueue(frame);
+      this._frameManager.addFrame(frame);
 
       let ev = new BungieNet.Platform.Event(BungieNet.Platform.events.queuedFrame);
       ev.target = this;
@@ -321,10 +316,6 @@ BungieNet.Platform = class {
 
     });
   }
-
-
-
-  /// Event helpers
 
   /**
    * Attempts to begin a request, taking any conditiions into account
@@ -338,11 +329,6 @@ BungieNet.Platform = class {
         return reject();
       }
 
-      //check if any waiting requests
-      if(this._frames.getWaiting().empty) {
-        return reject();
-      }
-
       //check if too many ongoing requests
       if(this._options.maxConcurrent !== -1) {
         if(this._frames.getActive().size >= this._options.maxConcurrent) {
@@ -350,37 +336,15 @@ BungieNet.Platform = class {
         }
       }
 
-      //try get a request from the queue
-      return this._tryDequeueFrame().then(firstFrame => {
+      return this._frameManager.getFrame().then(frame => {
 
-        this._beforeFrameExecute(firstFrame).then(() => {
-          this._setActiveFrame(firstFrame);
-          //DON'T RESOLVE HERE!
-        });
+        if(frame === null) {
+          return reject();
+        }
 
-        return resolve();
+        return this._activeFrame(frame);
 
       }, reject);
-
-    });
-  }
-
-  /**
-   * Attempts to dequeue a request from the wait list
-   * @return {Promise.<BungieNet.Platform.Frame>}
-   */
-  _tryDequeueFrame() {
-    return new Promise((resolve, reject) => {
-
-      if(this._frames.getWaiting().empty) {
-        return reject();
-      }
-
-      let firstFrame = this._frames.getWaiting().front;
-
-      return this
-        ._dequeuedFrame(firstFrame)
-        .then(resolve);
 
     });
   }

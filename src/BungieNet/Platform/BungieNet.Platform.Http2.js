@@ -8,12 +8,14 @@
  *  3. "fail", for when the request fails
  *  4. "done", for when the request succeeds or fails
  *
- * @param {BungieNet.Platform.Request} request - request to make
+ * @param {BungieNet.Platform.Request} [request = null] - request to make
  * @param {Object} [options = {}]
  */
 BungieNet.Platform.Http2 = class extends XMLHttpRequest {
 
-  constructor(request) {
+  constructor(request = null) {
+
+    super();
 
     this._request = request;
 
@@ -40,6 +42,10 @@ BungieNet.Platform.Http2 = class extends XMLHttpRequest {
    */
   get request() {
     return this._request;
+  }
+
+  set request(r) {
+    this._request = r;
   }
 
   /**
