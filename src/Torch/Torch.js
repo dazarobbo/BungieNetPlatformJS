@@ -1,24 +1,28 @@
+"use strict";
+
+import { Platform } from "bungienetplatformjs";
+
 /**
  * BungieNet Platform middleware
  */
-export class Torch {
+export default class Torch {
 
   /**
-   * @param {BungieNet.Platform} p
+   * @param {Platform} p
    */
   constructor(p) {
     this._platform = p;
   }
 
   /**
-   * @type {BungieNet.Platform}
+   * @type {Platform}
    */
   get platform() {
     return this._platform;
   }
 
   /**
-   * @param {BungieNet.Platform}
+   * @param {Platform}
    */
   set platform(p) {
     this._platform = p;

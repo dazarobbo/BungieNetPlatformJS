@@ -1,7 +1,7 @@
 {
   "name": "bungienetplatformjs",
   "description": "JavaScript API for the Bungie.net Platform",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "license": "MIT",
   "author": "dazarobbo",
   "keywords": [
@@ -21,21 +21,30 @@
     "url": "https://github.com/dazarobbo/BungieNetPlatformJS/issues"
   },
   "main": "",
-  "bin": {
-
+  "bin": {},
+  "scripts": {
+    "build": "babel src -d build --source-maps"
   },
   "man": "",
-  "config": {
-
-  },
+  "config": {},
   "devDependencies": {
+    "babel-cli": "^6.18.0",
     "babel-preset-es2015": "^6.9.0",
     "babelify": "7.3.0",
     "grunt": "^0.4.5",
-    "grunt-bower-concat": "^1.0.0",
     "grunt-browserify": "3.6.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify": "~0.5.0"
   },
-  "private": false
+  "private": false,
+  "dependencies": {
+    "babel-polyfill": "^6.20.0",
+    "bignumber.js": "^3.0.1",
+    "dotenv": "^2.0.0",
+    "events": "^1.1.1",
+    "extendable-error-class": "^0.1.1",
+    "request": "^2.79.0",
+    "request-debug": "^0.2.0",
+    "urijs": "^1.18.4"
+  }
 }

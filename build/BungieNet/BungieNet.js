@@ -1,69 +1,111 @@
 "use strict";
 
-import URI from "urijs";
-import winston from "winston";
-import CurrentUser from "./CurrentUser";
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _urijs = require("urijs");
+
+var _urijs2 = _interopRequireDefault(_urijs);
+
+var _winston = require("winston");
+
+var _winston2 = _interopRequireDefault(_winston);
+
+var _CurrentUser = require("./CurrentUser");
+
+var _CurrentUser2 = _interopRequireDefault(_CurrentUser);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
  * BungieNet
  */
-export default class BungieNet {
-
-  /**
-   * Gets the base bungie.net URI
-   * @return {URI}
-   */
-  static get base() {
-    return new URI({
-      protocol: BungieNet.scheme,
-      hostname: BungieNet.host
-    });
+var BungieNet = function () {
+  function BungieNet() {
+    _classCallCheck(this, BungieNet);
   }
 
-  /**
-   * Fully qualified hostname
-   * @return {String}
-   */
-  static get host() {
-    return `www.${BungieNet.domain}`;
-  }
+  _createClass(BungieNet, null, [{
+    key: "getLocaleBase",
 
-  /**
-   * Generates the most appropriate locale-aware base URI
-   * @return {Promise.<URI>}
-   */
-  static getLocaleBase() {
-    return new Promise(resolve => {
-      BungieNet.getLocale().then(loc => {
-        return resolve(BungieNet.base.segment(loc));
+
+    /**
+     * Generates the most appropriate locale-aware base URI
+     * @return {Promise.<URI>}
+     */
+    value: function getLocaleBase() {
+      return new Promise(function (resolve) {
+        BungieNet.getLocale().then(function (loc) {
+          return resolve(BungieNet.base.segment(loc));
+        });
       });
-    });
-  }
+    }
 
-  /**
-   * Base platform URI
-   * @return {URI}
-   */
-  static get platformPath() {
-    return BungieNet.base.segment("Platform");
-  }
+    /**
+     * Base platform URI
+     * @return {URI}
+     */
 
-  /**
-   * Find the most appropriate locale to use, taking into account any
-   * currently detected user
-   * @return {Promise.<String>}
-   */
-  static getLocale() {
-    return new Promise(resolve => {
-      //use the current user's default locale if it exists
-      //otherwise use the default locale
-      CurrentUser.getLocale().then(resolve, () => {
-        return resolve(BungieNet.defaultLocale);
+  }, {
+    key: "getLocale",
+
+
+    /**
+     * Find the most appropriate locale to use, taking into account any
+     * currently detected user
+     * @return {Promise.<String>}
+     */
+    value: function getLocale() {
+      return new Promise(function (resolve) {
+        //use the current user's default locale if it exists
+        //otherwise use the default locale
+        _CurrentUser2.default.getLocale().then(resolve, function () {
+          return resolve(BungieNet.defaultLocale);
+        });
       });
-    });
-  }
+    }
+  }, {
+    key: "base",
 
-};
+
+    /**
+     * Gets the base bungie.net URI
+     * @return {URI}
+     */
+    get: function get() {
+      return new _urijs2.default({
+        protocol: BungieNet.scheme,
+        hostname: BungieNet.host
+      });
+    }
+
+    /**
+     * Fully qualified hostname
+     * @return {String}
+     */
+
+  }, {
+    key: "host",
+    get: function get() {
+      return "www." + BungieNet.domain;
+    }
+  }, {
+    key: "platformPath",
+    get: function get() {
+      return BungieNet.base.segment("Platform");
+    }
+  }]);
+
+  return BungieNet;
+}();
+
+exports.default = BungieNet;
+;
 
 /**
  * @type {String}
@@ -2096,4 +2138,5 @@ BungieNet.enums = {
  * Logger class {@link https://github.com/winstonjs/winston}
  * @type {winston}
  */
-BungieNet.logger = new (winston.Logger)({});
+BungieNet.logger = new _winston2.default.Logger({});
+//# sourceMappingURL=BungieNet.js.map

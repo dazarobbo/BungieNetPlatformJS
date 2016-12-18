@@ -22,8 +22,7 @@
   "nonew": true,
   "notypeof": true,
   "predef": [
-    "URI",
-    "BigNumber"
+    
   ],
   "shadow": false,
   "singleGroups": true,
