@@ -22,10 +22,6 @@ var _request = require("request");
 
 var _request2 = _interopRequireDefault(_request);
 
-var _requestDebug = require("request-debug");
-
-var _requestDebug2 = _interopRequireDefault(_requestDebug);
-
 var _Response = require("./Response");
 
 var _Response2 = _interopRequireDefault(_Response);
@@ -51,13 +47,11 @@ var PlatformRequest = function (_EventEmitter) {
   function PlatformRequest(frame) {
     _classCallCheck(this, PlatformRequest);
 
-    var _this = _possibleConstructorReturn(this, (PlatformRequest.__proto__ || Object.getPrototypeOf(PlatformRequest)).call(this));
-
-    (0, _requestDebug2.default)(_request2.default, _this._networkDebug);
-
     /**
      * @type {Platform.Frame}
      */
+    var _this = _possibleConstructorReturn(this, (PlatformRequest.__proto__ || Object.getPrototypeOf(PlatformRequest)).call(this));
+
     _this._frame = frame;
 
     /**
@@ -327,19 +321,6 @@ var PlatformRequest = function (_EventEmitter) {
     key: "options",
     get: function get() {
       return this._options;
-    }
-
-    /**
-     * @param {String} type -
-     * @param {Object} data -
-     * @param {String} r -
-     * @return {undefined}
-     */
-
-  }], [{
-    key: "_networkDebug",
-    value: function _networkDebug(type, data, r) {
-      _BungieNet2.default.logger.log("verbose", type, data);
     }
   }]);
 
