@@ -1,5 +1,3 @@
-"use strict";
-
 import BungieNet from "./BungieNet.js";
 import Error from "./Error.js";
 
@@ -29,8 +27,8 @@ export default class Cookies {
 
   /**
    * Returns the cookie with the given name
-   * @param  {String} name
-   * @return {Promise.<Cookie>}
+   * @param  {String} name cookie name
+   * @return {Promise.<Cookie>} cookie
    */
   static get(name) {
     return new Promise((resolve, reject) => {

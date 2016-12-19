@@ -11,6 +11,7 @@
     }
   },
   "env": {
+    "es6": true,
     "node": true
   },
   "extends": "eslint:recommended",
@@ -55,7 +56,17 @@
     "no-labels": "error",
     "no-lone-blocks": "error",
     "no-loop-func": "error",
-    "no-magic-numbers": "error",
+    "no-magic-numbers": [
+      "error",
+      {
+        "ignore": [
+          -1,
+          0,
+          1
+        ],
+        "ignoreArrayIndexes": true
+      }
+    ],
     "no-multi-spaces": "error",
     "no-multi-str": "error",
     "no-new-func": "error",
@@ -83,6 +94,7 @@
     "require-await": "error",
     "vars-on-top": "error",
     "wrap-iife": "error",
+    "yoda": "error",
 
     "strict": "error",
 
@@ -109,7 +121,9 @@
     "array-bracket-spacing": [
       "error",
       "never",
-      { "singleValue": false }
+      {
+        "singleValue": false
+      }
     ],
     "block-spacing": [
       "error",
@@ -171,11 +185,22 @@
         "mode": "strict"
       }
     ],
-    "keyword-spacing": [
+    "keyword-spacing ": [
       "error",
       {
         "before": true,
-        "after": true
+        "after": true,
+        "overrides": {
+          "if": {
+            "after": false
+          },
+          "for": {
+            "after": false
+          },
+          "while": {
+            "after": false
+          }
+        }
       }
     ],
     "line-comment-position": [

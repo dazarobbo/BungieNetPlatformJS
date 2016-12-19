@@ -1,11 +1,8 @@
-"use strict";
-
 import "babel-polyfill";
 
+/**
+ * Common functions and includes/imports/requires
+ */
 export default class Common {
-
-  constructor(){
-
-  }
 
 }
