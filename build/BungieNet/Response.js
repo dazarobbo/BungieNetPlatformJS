@@ -25,7 +25,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Response = function () {
 
   /**
-   * @param {Object} o
+   * @param {Object} o -
    */
   function Response(o) {
     _classCallCheck(this, Response);
@@ -52,7 +52,7 @@ var Response = function () {
 
     /**
      * Whether this response was throttled
-     * @return {Boolean}
+     * @return {Boolean} -
      */
 
   }, {
@@ -66,27 +66,27 @@ var Response = function () {
         case _BungieNet2.default.enums.platformErrorCodes.throttle_limit_exceeded_momentarily:
         case _BungieNet2.default.enums.platformErrorCodes.per_endpoint_request_throttle_exceeded:
           return true;
+        default:
+          return false;
       }
-
-      return false;
     }
 
     /**
      * Parses a response from the bungie.net platform
-     * @param {String} text
-     * @return {Promise.<BungieNet.Platform.Response>}
+     * @param {String} text -
+     * @return {Promise.<BungieNet.Platform.Response>} -
      */
 
   }], [{
     key: "parse",
     value: function parse(text) {
 
-      var obj = void 0;
+      var obj = undefined;
 
       try {
         obj = JSON.parse(text);
       } catch (err) {
-        return reject();
+        return Promise.reject(undefined);
       }
 
       return Promise.resolve(new Response(obj));
@@ -97,5 +97,4 @@ var Response = function () {
 }();
 
 exports.default = Response;
-;
 //# sourceMappingURL=Response.js.map

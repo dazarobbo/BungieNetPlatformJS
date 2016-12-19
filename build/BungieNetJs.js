@@ -5,9 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
-var _Common = require("./BungieNet/Common.js");
-
-var _Common2 = _interopRequireDefault(_Common);
+require("./BungieNet/Common.js");
 
 var _BungieNet = require("./BungieNet/BungieNet.js");
 

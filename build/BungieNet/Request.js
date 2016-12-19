@@ -1,5 +1,11 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /**
  * Platform.Request
  *
@@ -12,13 +18,6 @@
  *
  * This type complements Platform.Response.
  */
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var Request =
 
 /**
@@ -28,7 +27,7 @@ var Request =
  */
 function Request(uri) {
   var method = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "GET";
-  var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : void 0;
+  var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
 
   _classCallCheck(this, Request);
 
@@ -38,5 +37,4 @@ function Request(uri) {
 };
 
 exports.default = Request;
-;
 //# sourceMappingURL=Request.js.map

@@ -4,7 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); //workaround for the enums
+/*eslint camelcase: "off"*/
 
 var _urijs = require("urijs");
 
@@ -35,8 +36,7 @@ var BungieNet = function () {
 
 
     /**
-     * Generates the most appropriate locale-aware base URI
-     * @return {Promise.<URI>}
+     * @returns {Promise.<URI>} Generates most appropriate locale-aware base URI
      */
     value: function getLocaleBase() {
       return new Promise(function (resolve) {
@@ -47,8 +47,7 @@ var BungieNet = function () {
     }
 
     /**
-     * Base platform URI
-     * @return {URI}
+     * @returns {URI} Base platform URI
      */
 
   }, {
@@ -58,7 +57,7 @@ var BungieNet = function () {
     /**
      * Find the most appropriate locale to use, taking into account any
      * currently detected user
-     * @return {Promise.<String>}
+     * @returns {Promise.<String>} locale
      */
     value: function getLocale() {
       return new Promise(function (resolve) {
@@ -74,8 +73,7 @@ var BungieNet = function () {
 
 
     /**
-     * Gets the base bungie.net URI
-     * @return {URI}
+     * @returns {URI} Gets the base bungie.net URI
      */
     get: function get() {
       return new _urijs2.default({
@@ -85,8 +83,7 @@ var BungieNet = function () {
     }
 
     /**
-     * Fully qualified hostname
-     * @return {String}
+     * @returns {String} Fully qualified hostname
      */
 
   }, {
@@ -104,12 +101,12 @@ var BungieNet = function () {
   return BungieNet;
 }();
 
-exports.default = BungieNet;
-;
-
 /**
  * @type {String}
  */
+
+
+exports.default = BungieNet;
 BungieNet.defaultLocale = "en";
 
 /**
@@ -201,7 +198,7 @@ BungieNet.enums = {
     none: -1,
     create: 0,
     edit: 1,
-    "delete": 2,
+    delete: 2,
     rate: 3,
     follow: 4,
     unfollow: 5,
@@ -227,7 +224,7 @@ BungieNet.enums = {
     group_alliance_rejected: 26,
     group_alliance_approved: 27,
     group_alliance_broken: 28,
-    transferFromVault: 1, //error?
+    transferFromVault: 1,
     transferToVault: 1001,
     trackQuest: 1002,
     untrackQuest: 1003,
@@ -336,7 +333,7 @@ BungieNet.enums = {
   },
 
   bnetAccountPrivacy: {
-    "default": 0,
+    default: 0,
     show_destiny_inventory: 1,
     hide_destiny_activity_history_feed: 2,
     hide_destiny_advisors: 4,
@@ -479,7 +476,7 @@ BungieNet.enums = {
     kinetic: 1,
     arc: 2,
     thermal: 3,
-    "void": 4,
+    void: 4,
     raid: 5
   },
 
@@ -559,7 +556,7 @@ BungieNet.enums = {
     none: 0,
     activity: 1,
     activity_type: 2,
-    "class": 3,
+    class: 3,
     gender: 4,
     inventory_bucket: 5,
     inventory_item: 6,
@@ -995,7 +992,7 @@ BungieNet.enums = {
 
   forumPostPopularity: {
     empty: 0,
-    "default": 1,
+    default: 1,
     discussed: 2,
     cool_story: 3,
     heating_up: 4,
@@ -1003,7 +1000,7 @@ BungieNet.enums = {
   },
 
   forumPostSortEnum: {
-    "default": 0,
+    default: 0,
     oldest_first: 1
   },
 
@@ -1060,7 +1057,7 @@ BungieNet.enums = {
   },
 
   forumTopicsSort: {
-    "default": 0,
+    default: 0,
     last_replied: 1,
     most_replied: 2,
     popularity: 3,
@@ -1071,7 +1068,7 @@ BungieNet.enums = {
   },
 
   forumTopicsSortEnum: {
-    "default": 0,
+    default: 0,
     last_replied: 1,
     most_replied: 2,
     popularity: 3,
@@ -1081,7 +1078,7 @@ BungieNet.enums = {
   },
 
   forumTypeEnum: {
-    "public": 0,
+    public: 0,
     news: 1,
     group: 2,
     alliance: 3,

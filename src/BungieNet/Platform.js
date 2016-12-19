@@ -1,6 +1,5 @@
-"use strict";
+/*eslint valid-jsdoc: off, require-jsdoc: off*/
 
-import BigNumber from "bignumber.js";
 import BungieNet from "./BungieNet.js";
 import Frame from "./Frame.js";
 import FrameSet from "./FrameSet.js";
@@ -13,11 +12,6 @@ import URITemplate from "urijs/src/URITemplate";
 
 /**
  * Platform
- *
- * @param {Object} [opts = {}]
- * @param {String} [opts.apiKey = ""] bungie.net API key
- * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
- * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
  *
  * Notes:
  *
@@ -48,6 +42,7 @@ export default class Platform {
 
   /**
    * Initialise objects
+   * @return {undefined}
    */
   _init() {
 
@@ -79,6 +74,12 @@ export default class Platform {
 
   }
 
+  /**
+  * @param {Object} opts = {}
+  * @param {String} [opts.apiKey = ""] bungie.net API key
+  * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
+  * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
+   */
   constructor(opts = {}) {
 
     this._init();
@@ -90,14 +91,16 @@ export default class Platform {
     //NOTE: Object.assign is shallow; defaults are primitives anyway so it's OK
     Object.keys(this._options)
       .filter(x => x in opts)
-      .forEach(x => this._options[x] = opts[x]);
+      .forEach(x => {
+        this._options[x] = opts[x];
+      });
 
   }
 
   /**
    * Prepares the request and queues it
-   * @param {Platform.Frame} frame
-   * @return {Promise.<Platform.Frame>}
+   * @param {Platform.Frame} frame - frame to prepare
+   * @return {undefined}
    */
   _prepareRequest(frame) {
 
@@ -118,43 +121,43 @@ export default class Platform {
 
     //listen for frame info
     const listeners = {
-        [PlatformRequest.events.beforeSend]: this._frameBeforeSend,
-        [PlatformRequest.events.httpSuccess]: this._frameHttpSuccess,
-        [PlatformRequest.events.httpError]: this._frameHttpError,
-        [PlatformRequest.events.httpDone]: this._frameHttpDone,
-        [PlatformRequest.events.responseParsed]: this._frameResponseParsed,
-        [PlatformRequest.events.error]: this._frameError,
-        [PlatformRequest.events.success]: this._frameSuccess,
-        [PlatformRequest.events.done]: this._frameDone
+      [PlatformRequest.events.beforeSend]: this._frameBeforeSend,
+      [PlatformRequest.events.httpSuccess]: this._frameHttpSuccess,
+      [PlatformRequest.events.httpError]: this._frameHttpError,
+      [PlatformRequest.events.httpDone]: this._frameHttpDone,
+      [PlatformRequest.events.responseParsed]: this._frameResponseParsed,
+      [PlatformRequest.events.error]: this._frameError,
+      [PlatformRequest.events.success]: this._frameSuccess,
+      [PlatformRequest.events.done]: this._frameDone
     };
 
-    for(let [eventName, handler] of Object.entries(listeners)) {
+    for(const [eventName, handler] of Object.entries(listeners)) {
       frame.platformRequest.on(eventName, p => handler.call(this, p));
     }
 
     //queue it, then try the queue
-    this._queueFrame(frame)
+    this._queueFrame(frame);
     this._tryFrame();
 
   }
 
   /**
    * API-level request method
-   * @param  {Platform.Request} request
+   * @param  {Platform.Request} req
    * @return {Promise.<Platform.Response>}
    */
-  _serviceRequest(request) {
+  _serviceRequest(req) {
     return new Promise((resolve, reject) => {
 
       const frame = new Frame();
 
       BungieNet.logger.log("info", "Received service request", {
-        endpoint: request.uri.toString(),
+        endpoint: req.uri.toString(),
         frameId: frame.id
       });
 
       frame.platform = this;
-      frame.request = request;
+      frame.request = req;
       frame.serviceResolve = resolve;
       frame.serviceReject = reject;
 
@@ -163,13 +166,13 @@ export default class Platform {
       //add the locale
       frame.request.uri =
         BungieNet.platformPath
-        .segment(request.uri.path())
-        .setSearch(request.uri.search(true));
+        .segment(req.uri.path())
+        .setSearch(req.uri.search(true));
 
       //urijs is smart enough to remove the trailing forwards-slash
       //so add it back in manually
       if(!frame.request.uri.path().endsWith("/")) {
-        frame.request.uri.path(frame.request.uri.path() + "/");
+        frame.request.uri.path(`${ frame.request.uri.path() }/`);
       }
 
       this._prepareRequest(frame);
@@ -177,7 +180,10 @@ export default class Platform {
     });
   }
 
-  _activeFrame(frame) {
+  /**
+   * @param {Frame} frame - frame to set as active
+   */
+  static _activeFrame(frame) {
 
     BungieNet.logger.log("verbose", "Frame is active", {
       frameId: frame.id
@@ -188,6 +194,9 @@ export default class Platform {
 
   }
 
+  /**
+   * @param {Frame} frame - frame to queue
+   */
   _queueFrame(frame) {
 
     BungieNet.logger.log("verbose", "Frame queued", {
@@ -222,7 +231,7 @@ export default class Platform {
         return reject();
       }
 
-      return Promise.resolve(this._activeFrame(frame));
+      return Promise.resolve(Platform._activeFrame(frame));
 
     });
   }
@@ -235,7 +244,7 @@ export default class Platform {
    */
   _notifyPlugins(eventName, ...args) {
     for(const p of this._plugins) {
-      p.update.apply(p, [eventName, ...args]);
+      p.update(eventName, ...args);
     }
   }
 
@@ -353,14 +362,17 @@ export default class Platform {
   /// Application Service
 
   /**
+   * @param {Number} ownerMembershipId - member id to search apps for
+   * @param {Number} currentPage - result page
    * @return {Promise.<Platform.Response>}
    */
-  applicationSearch() {
+  applicationSearch(ownerMembershipId, currentPage = 0) {
     return this._serviceRequest(new Request(
       new URI("/App/Search/"),
       "POST",
       {
-
+        ownerMembershipId,
+        currentPage
       }
     ));
   }
@@ -368,59 +380,72 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  changeApiKeyStatus(p1, p2) {
+  changeApiKeyStatus(keyId, state) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/ChangeApiKeyState/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+      URI.expand("/App/ChangeApiKeyState/{keyId}/{state}/", {
+        keyId,
+        state
       }),
       "POST",
-      {
-
-      }
+      null
     ));
   }
 
   /**
+   * Response: {
+   *  apiKey: "-new-api-key",
+   *  apiKeyId: 783639,
+   *  authorizationUrl: "https://www.bungie.net/en/Application/Authorize/783639",
+   *  creationDate: "2016-12-19T11:05:41.603Z",
+   *  status: 1
+   * }
    * @return {Promise.<Platform.Response>}
    */
-  createApiKey(p1) {
+  createApiKey(appId) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/CreateApiKey/{p1}/", {
-        p1: p1
+      URI.expand("/App/CreateApiKey/{appId}/", {
+        appId
       }),
       "POST",
-      {
-
-      }
+      null
     ));
   }
 
   /**
+   * @param {Object} details
+   * @param {Boolean} details.agreedToCurrentEula - true to agree
+   * @param {String} details.link - website link for appId
+   * @param {String} details.name - name of app
+   * @param {String} details.origin - origin header
+   * @param {String} details.redirectUrl - oauth redirect url
+   * @param {BigNumber} details.scope - scope of app access
    * @return {Promise.<Platform.Response>}
    */
-  createApplication() {
+  createApplication(details) {
     return this._serviceRequest(new Request(
       new URI("/App/CreateApplication/"),
       "POST",
-      {
-
-      }
+      details
     ));
   }
 
   /**
+   * @param {Object} details
+   * @param {String} details.link - website link for app
+   * @param {String} details.name - name of app
+   * @param {String} details.origin - origin header
+   * @param {String} details.redirectUrl - oauth redirect url
+   * @param {BigNumber} details.scope - scope of app access
+   * @param {BigNumber} details.status - app status
    * @return {Promise.<Platform.Response>}
    */
-  editApplication(p1) {
+  editApplication(appId, details) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/EditApplication/{p1}/", {
-        p1: p1
+      URI.expand("/App/EditApplication/{appId}/", {
+        appId
       }),
       "POST",
-      {
-
-      }
+      details
     ));
   }
 
@@ -451,12 +476,13 @@ export default class Platform {
   }
 
   /**
+   * @param {Number} appId
    * @return {Promise.<Platform.Response>}
    */
-  getApplication(p1) {
+  getApplication(appId) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/Application/{p1}/", {
-        p1: p1
+      URI.expand("/App/Application/{appId}/", {
+        appId
       })
     ));
   }
@@ -467,7 +493,7 @@ export default class Platform {
   getApplicationApiKeys(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/App/ApplicationApiKeys/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -478,8 +504,8 @@ export default class Platform {
   getAuthorizationForUserAndApplication(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/App/Authorization/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -490,7 +516,7 @@ export default class Platform {
   getAuthorizations(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/App/Authorizations/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -514,8 +540,8 @@ export default class Platform {
   revokeAuthorization(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/App/RevokeAuthorization/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       }),
       "POST",
       {
@@ -547,7 +573,7 @@ export default class Platform {
   editSuccessMessageFlags(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/User/MessageFlags/Success/Update/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -571,7 +597,7 @@ export default class Platform {
   getAvailableAvatarsAdmin(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/User/GetAvailableAvatarsAdmin/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -592,8 +618,8 @@ export default class Platform {
   getBungieAccount(membershipId, membershipType) {
     return this._serviceRequest(new Request(
       URI.expand("/User/GetBungieAccount/{membershipId}/{membershipType}/", {
-          membershipId: membershipId.toString(),
-          membershipType: membershipType
+        membershipId: membershipId.toString(),
+        membershipType
       })
     ));
   }
@@ -727,7 +753,7 @@ export default class Platform {
   getPartnerships(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/User/{p1}/Partnerships/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -788,7 +814,7 @@ export default class Platform {
   getUserMembershipIds(excludeBungieNet = false) {
     return this._serviceRequest(new Request(
       URI.expand("/User/GetMembershipIds/{?excludebungienet}", {
-        excludeBungieNet: excludeBungieNet
+        excludeBungieNet
       })
     ));
   }
@@ -826,7 +852,7 @@ export default class Platform {
   removePartnership(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/User/Partnerships/{p1}/Remove/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -862,7 +888,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/User/SearchUsersPaged/{searchTerm}/{page}/", {
         searchTerm: username,
-        page: page
+        page
       })
     ));
   }
@@ -878,8 +904,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/User/SearchUsersPaged/{searchTerm}/{page}/{p3}/", {
         searchTerm: username,
-        page: page,
-        p3: p3
+        page,
+        p3
       })
     ));
   }
@@ -890,7 +916,7 @@ export default class Platform {
   setAcknowledged(ackId) {
     return this._serviceRequest(new Request(
       URI.expand("/User/Acknowledged/{ackId}/", {
-        ackId: ackId
+        ackId
       }),
       "POST",
       {
@@ -905,7 +931,7 @@ export default class Platform {
   unregisterMobileAppPair(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/User/UnregisterMobileAppPair/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -973,7 +999,7 @@ export default class Platform {
   updateUserAdmin(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/User/UpdateUserAdmin/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -997,7 +1023,7 @@ export default class Platform {
       "POST",
       {
         membersToId: membersTo.map(bn => bn.toString()),
-        body: body
+        body
       }
     ));
   }
@@ -1021,8 +1047,8 @@ export default class Platform {
   getAllianceInvitedToJoinInvitations(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/AllianceInvitations/InvitationsToJoinAnotherGroup/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -1033,8 +1059,8 @@ export default class Platform {
   getAllianceJoinInvitations(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/AllianceInvitations/RequestsToJoinYourGroup/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -1069,8 +1095,8 @@ export default class Platform {
   getConversationsV2(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/GetConversationsV2/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -1081,8 +1107,8 @@ export default class Platform {
   getConversationsV3(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/GetConversationsV3/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -1093,7 +1119,7 @@ export default class Platform {
   getConversationsV4(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/GetConversationsV4/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1105,7 +1131,7 @@ export default class Platform {
   getConversationsV5(page = 1) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/GetConversationsV5/{page}/", {
-        page: page
+        page
       })
     ));
   }
@@ -1116,36 +1142,34 @@ export default class Platform {
   getConversationThreadV2(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/GetConversationThreadV2/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
 
   /**
    * Get a page of a conversation
-   * @param  {BigNumber} id - conversation id
-   * @param  {Number} [page = 1] - page to return
-   * @param  {BigNumber} [before = (2^63) - 1] - message id filter
-   * @param  {BigNumber} [after = 0] - message id filter
+   * params.before can be set using BigNumber like so:
+   * (new BigNumber(2)).pow(63).minus(1)
+   * @param {Object} params
+   * @param {BigNumber} params.id - conversation id
+   * @param {Number} params.page - page to return
+   * @param {BigNumber} params.before - message id filter
+   * @param {BigNumber} params.after - message id filter
    * @return {Promise.<Platform.Response>}
    */
-  getConversationThreadV3(
-    id,
-    page = 1,
-    after = new BigNumber("0"),
-    before = (new BigNumber(2)).pow(63).minus(1)
-  ) {
+  getConversationThreadV3(params) {
     return this._serviceRequest(new Request(
       URI.expand(
         "/Message/GetConversationThreadV3/{id}/{page}/{?after,before}", {
-        id: id.toString(),
-        page: page,
-        after: after.toString(),
-        before: before.toString()
-      })
-    ));
+          id: params.id.toString(),
+          page: params.page,
+          after: params.after.toString(),
+          before: params.before.toString()
+        })
+      ));
   }
 
   /**
@@ -1179,7 +1203,7 @@ export default class Platform {
   getGroupConversations(page = 1) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/GetGroupConversations/{page}/", {
-        page: page
+        page
       })
     ));
   }
@@ -1190,7 +1214,7 @@ export default class Platform {
   getInvitationDetails(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/Invitations/{p1}/Details/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1275,8 +1299,8 @@ export default class Platform {
   reviewAllInvitations(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/Invitations/ReviewAllDirect/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       }),
       "POST",
       {
@@ -1291,9 +1315,9 @@ export default class Platform {
   reviewInvitation(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/Invitations/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       }),
       "POST",
       {
@@ -1324,7 +1348,7 @@ export default class Platform {
   reviewInvitations(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Message/Invitations/ReviewListDirect/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -1357,7 +1381,7 @@ export default class Platform {
       new URI("/Message/SaveMessageV3/"),
       "POST",
       {
-        body: body,
+        body,
         conversationId: conversationId.toString()
       }
     ));
@@ -1376,8 +1400,8 @@ export default class Platform {
       "POST",
       {
         conversationId: conversationId.toString(),
-        body: body,
-        subject: subject
+        body,
+        subject
       }
     ));
   }
@@ -1424,7 +1448,7 @@ export default class Platform {
   getRealTimeEvents(p1, p2, timeout) {
     return this._serviceRequest(new Request(
       URI.expand("/Notification/Events/{p1}/{p2}/{?timeout}", {
-        timeout: timeout
+        timeout
       })
     ));
   }
@@ -1513,9 +1537,9 @@ export default class Platform {
   getContentById(p1, p2, head) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/GetContentById/{p1}/{p2}/{?head}", {
-        p1: p1,
-        p2: p2,
-        head: head
+        p1,
+        p2,
+        head
       })
     ));
   }
@@ -1523,13 +1547,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getContentByTagAndType(p1, p2, p3, head) {
+  getContentByTagAndType(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/GetContentByTagAndType/{p1}/{p2}/{p3}/{?,head}", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        head: head
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        head: params.head
       })
     ));
   }
@@ -1540,7 +1564,7 @@ export default class Platform {
   getContentType(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/GetContentType/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1551,7 +1575,7 @@ export default class Platform {
   getDestinyContent(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/Destiny/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1562,7 +1586,7 @@ export default class Platform {
   getDestinyContentV2(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/Destiny/V2/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1582,7 +1606,7 @@ export default class Platform {
   getHomepageContent(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/Homepage/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1602,21 +1626,22 @@ export default class Platform {
   getJobs(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/Jobs/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
 
   /**
    * @return {Promise.<Platform.Response>}
+   * @param {Number} currentPage = 1
    */
-  getNews(p1, p2, itemsPerPage, currentPage = 1) {
+  getNews(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/News/{p1}/{p2}/{?itemsperpage,currentpage}", {
-        p1: p1,
-        p2: p2,
-        itemsperpage: itemsPerPage,
-        currentpage: currentPage
+        p1: params.p1,
+        p2: params.p2,
+        itemsperpage: params.itemsPerPage,
+        currentpage: params.currentPage
       })
     ));
   }
@@ -1636,7 +1661,7 @@ export default class Platform {
   getPublications(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/Publications/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1656,15 +1681,15 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  searchContentByTagAndType(p1, p2, p3, head, currentPage, itemsPerPage) {
+  searchContentByTagAndType(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/SearchContentByTagAndType/{p1}/{p2}/{p3}/{?head,currentpage,itemsperpage}", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        head: head,
-        currentpage: currentPage,
-        itemsperpage: itemsPerPage
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        head: params.head,
+        currentpage: params.currentPage,
+        itemsperpage: params.itemsPerPage
       })
     ));
   }
@@ -1675,8 +1700,8 @@ export default class Platform {
   searchContentEx(p1, head) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/SearchEx/{p1}/{?,head}", {
-        p1: p1,
-        head: head
+        p1,
+        head
       })
     ));
   }
@@ -1684,15 +1709,15 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  searchContentWithText(p1, head, cType, tag, currentPage, searchText) {
+  searchContentWithText(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Content/Site/Homepage/{p1}/{?head,ctype,tag,currentpage,searchtext}/", {
-        p1: p1,
-        head: head,
-        ctype: cType,
-        tag: tag,
-        currentpage: currentPage,
-        searchtext: searchText
+        p1: params.p1,
+        head: params.head,
+        ctype: params.cType,
+        tag: params.tag,
+        currentpage: params.currentPage,
+        searchtext: params.searchText
       }),
       "POST",
       {
@@ -1711,8 +1736,8 @@ export default class Platform {
   getAggregatedSocialFeed(p1, types) {
     return this._serviceRequest(new Request(
       URI.expand("/ExternalSocial/GetAggregatedSocialFeed/{p1}/{?,types}", {
-        p1: p1,
-        types: types
+        p1,
+        types
       })
     ));
   }
@@ -1740,7 +1765,7 @@ export default class Platform {
   approveFireteamThread(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/Recruit/Approve/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -1755,8 +1780,8 @@ export default class Platform {
   changeLockState(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/ChangeLockState/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       }),
       "POST",
       {
@@ -1771,8 +1796,8 @@ export default class Platform {
   changePinState(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/ChangePinState/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       }),
       "POST",
       {
@@ -1881,13 +1906,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getCoreTopicsPaged(p1, p2, p3, p4) {
+  getCoreTopicsPaged(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetCoreTopicsPaged/{p1}/{p2}/{p3}/{p4}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        p4: p4
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        p4: params.p4
       })
     ));
   }
@@ -1898,7 +1923,7 @@ export default class Platform {
   getForumTagCountEstimate(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetForumTagCountEstimate/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -1934,8 +1959,8 @@ export default class Platform {
   getPopularTags(quantity, tagsSinceDate) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetPopularTags/{?quantity,tagsSinceDate}", {
-        quantity: quantity,
-        tagsSinceDate: tagsSinceDate
+        quantity,
+        tagsSinceDate
       })
     ));
   }
@@ -1960,8 +1985,8 @@ export default class Platform {
   getPostAndParentAwaitingApproval(childPostId, showBanned) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetPostAndParentAwaitingApproval/{childPostId}/{?,showbanned}", {
-        childPostId: childPostId,
-        showbanned: showBanned
+        childPostId,
+        showBanned
       })
     ));
   }
@@ -1969,26 +1994,17 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getPostsThreadedPaged(
-    parentPostId,
-    page,
-    pageSize,
-    replySize,
-    getParentPost,
-    rootThreadMode,
-    sortMode,
-    showBanned
-  ) {
+  getPostsThreadedPaged(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetPostsThreadedPaged/{parentPostId}/{page}/{pageSize}/{replySize}/{getParentPost}/{rootThreadMode}/{sortMode}/{?showbanned}", {
-        parentPostId: parentPostId,
-        page: page,
-        pageSize: pageSize,
-        replySize: replySize,
-        getParentPost: getParentPost,
-        rootThreadMode: rootThreadMode,
-        sortMode: sortMode,
-        showbanned: showBanned
+        parentPostId: params.parentPostId,
+        page: params.page,
+        pageSize: params.pageSize,
+        replySize: params.replySize,
+        getParentPost: params.getParentPost,
+        rootThreadMode: params.rootThreadMode,
+        sortMode: params.sortMode,
+        showbanned: params.showBanned
       })
     ));
   }
@@ -1996,24 +2012,16 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getPostsThreadedPagedFromChild(
-    childPostId,
-    page,
-    pageSize,
-    replySize,
-    rootThreadMode,
-    sortMode,
-    showBanned
-  ) {
+  getPostsThreadedPagedFromChild(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetPostsThreadedPagedFromChild/{childPostId}/{page}/{pageSize}/{replySize}/{rootThreadMode}/{sortMode}/{?showbanned}", {
-        childPostId: childPostId,
-        page: page,
-        pageSize: pageSize,
-        replySize: replySize,
-        rootThreadMode: rootThreadMode,
-        sortMode: sortMode,
-        showbanned: showBanned
+        childPostId: params.childPostId,
+        page: params.page,
+        pageSize: params.pageSize,
+        replySize: params.replySize,
+        rootThreadMode: params.rootThreadMode,
+        sortMode: params.sortMode,
+        showbanned: params.showBanned
       })
     ));
   }
@@ -2037,7 +2045,7 @@ export default class Platform {
   getTopicForContent(contentId) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetTopicForContent/{contentId}/", {
-        contentId: contentId
+        contentId
       })
     ));
   }
@@ -2045,24 +2053,16 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getTopicsPaged(
-    page,
-    pageSize,
-    group,
-    sort,
-    quickDate,
-    categoryFilter,
-    tagString
-  ) {
+  getTopicsPaged(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/GetTopicsPaged/{page}/{pageSize}/{group}/{sort}/{quickDate}/{categoryFilter}/{?tagstring}", {
-        page: page,
-        pageSize: pageSize,
-        group: group,
-        sort: sort,
-        quickDate: quickDate,
-        categoryFilter: categoryFilter,
-        tagstring: tagString
+        page: params.page,
+        pageSize: params.pageSize,
+        group: params.group,
+        sort: params.sort,
+        quickDate: params.quickDate,
+        categoryFilter: params.categoryFilter,
+        tagstring: params.tagString
       })
     ));
   }
@@ -2144,25 +2144,18 @@ export default class Platform {
    * @param {BungieNet.enums.requestedPunishment} [requestedPunishment = BungieNet.enums.requestedPunishment.ban]
    * @return {Promise.<Platform.Response>}
    */
-  moderateGroupPost(
-    postId,
-    moderatedItemId,
-    reason = 1,
-    comments = "group post ban",
-    moderatedItemType = BungieNet.enums.affectedItemType.post,
-    requestedPunishment = BungieNet.enums.requestedPunishment.ban
-  ) {
+  moderateGroupPost(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/Post/{postId}/GroupModerate/", {
-        postId: postId.toString()
+        postId: params.postId.toString()
       }),
       "POST",
       {
-        comments: comments,
-        moderatedItemId: moderatedItemId.toString(),
-        moderatedItemType: moderatedItemType,
-        reason: reason,
-        requestedPunishment: requestedPunishment
+        comments: params.comments,
+        moderatedItemId: params.moderatedItemId.toString(),
+        moderatedItemType: params.moderatedItemType,
+        reason: params.reason,
+        requestedPunishment: params.requestedPunishment
       }
     ));
   }
@@ -2174,7 +2167,7 @@ export default class Platform {
   moderatePost(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/Post/{p1}/Moderate/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -2189,7 +2182,7 @@ export default class Platform {
   moderateTag(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/Tags/{p1}/Moderate/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -2209,7 +2202,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/Poll/Vote/{pollId}/{index}/", {
         pollId: pollId.toString(),
-        optionIndex: optionIndex
+        optionIndex
       }),
       "POST",
       {
@@ -2227,7 +2220,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Forum/RatePost/{postId}/{rating}/", {
         postId: postId.toString(),
-        rating: rating
+        rating
       }),
       "POST",
       {
@@ -2259,7 +2252,7 @@ export default class Platform {
   followTag(tag) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Tag/Follow/{?tag}", {
-        tag: tag
+        tag
       }),
       "POST",
       {
@@ -2293,8 +2286,8 @@ export default class Platform {
   getApplicationActivityForUser(p1, p2, currentPage = 1) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Activities/Application/{p2}/{?page}", {
-        p1: p1,
-        p2: p2,
+        p1,
+        p2,
         page: currentPage
       })
     ));
@@ -2308,7 +2301,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Aggregation/{?typefilter,format}", {
         typefilter: typeFilter,
-        format: format
+        format
       })
     ));
   }
@@ -2328,8 +2321,8 @@ export default class Platform {
   getEntitiesFollowedByCurrentUserV2(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Following/V2/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -2340,7 +2333,7 @@ export default class Platform {
   getEntitiesFollowedByUser(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Following/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -2351,9 +2344,9 @@ export default class Platform {
   getEntitiesFollowedByUserV2(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Following/V2/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
@@ -2364,7 +2357,7 @@ export default class Platform {
   getFollowersOfTag(tag, itemsPerPage, currentPage) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Tag/Followers/{?tag,itemsperpage,currentpage}", {
-        tag: tag,
+        tag,
         itemsperpage: itemsPerPage,
         currentpage: currentPage
       })
@@ -2377,7 +2370,7 @@ export default class Platform {
   getFollowersOfUser(membershipId, itemsPerPage, currentPage) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{membershipId}/Followers/{?itemsperpage,currentpage}", {
-        membershipId: membershipId,
+        membershipId,
         itemsperpage: itemsPerPage,
         currentpage: currentPage
       })
@@ -2387,13 +2380,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getForumActivitiesForUser(p1, itemsPerPage, currentPage, format) {
+  getForumActivitiesForUser(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/{?itemsperpage,currentpage,format}", {
-        p1: p1,
-        itemsperpage: itemsPerPage,
-        currentpage: currentPage,
-        format: format
+        p1: params.p1,
+        itemsperpage: params.itemsPerPage,
+        currentpage: params.currentPage,
+        format: params.format
       })
     ));
   }
@@ -2404,9 +2397,9 @@ export default class Platform {
   getForumActivitiesForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Activities/ForumsV2/{?currentpage,format}", {
-        p1: p1,
+        p1,
         currentpage: currentPage,
-        format: format
+        format
       })
     ));
   }
@@ -2426,7 +2419,7 @@ export default class Platform {
   getFriendsAllNoPresence(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Friends/AllNoPresence/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -2437,8 +2430,8 @@ export default class Platform {
   getFriendsPaged(membershipType, page) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Friends/{membershipType}/{page}/", {
-        membershipType: membershipType,
-        page: page
+        membershipType,
+        page
       })
     ));
   }
@@ -2470,7 +2463,7 @@ export default class Platform {
   getGroupsFollowedPagedByCurrentUser(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Following/Groups/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -2481,8 +2474,8 @@ export default class Platform {
   getGroupsFollowedPagedByUser(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Following/Groups/Paged/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       })
     ));
   }
@@ -2490,13 +2483,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getLikeAndShareActivityForUser(p1, itemsPerPage, currentPage, format) {
+  getLikeAndShareActivityForUser(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Activities/LikesAndShares/{?itemsperpage,currentpage,format}", {
-        p1: p1,
-        itemsperpage: itemsPerPage,
-        currentpage: currentPage,
-        format: format
+        p1: params.p1,
+        itemsperpage: params.itemsPerPage,
+        currentpage: params.currentPage,
+        format: params.format
       })
     ));
   }
@@ -2507,9 +2500,9 @@ export default class Platform {
   getLikeAndShareActivityForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Activities/LikesAndSharesV2/{?currentpage,format}", {
-        p1: p1,
+        p1,
         currentpage: currentPage,
-        format: format
+        format
       })
     ));
   }
@@ -2520,9 +2513,9 @@ export default class Platform {
   getLikeShareAndForumActivityForUser(p1, currentPage, format) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/User/{p1}/Activities/LikeShareAndForum/{?currentpage,format}", {
-        p1: p1,
+        p1,
         currentpage: currentPage,
-        format: format
+        format
       })
     ));
   }
@@ -2543,7 +2536,7 @@ export default class Platform {
   unfollowTag(tag) {
     return this._serviceRequest(new Request(
       URI.expand("/Activity/Tag/Unfollow/{?tag}", {
-        tag: tag
+        tag
       }),
       "POST",
       {
@@ -2584,7 +2577,7 @@ export default class Platform {
       }),
       "POST",
       {
-        message: message
+        message
       }
     ));
   }
@@ -2621,7 +2614,7 @@ export default class Platform {
       }),
       "POST",
       {
-        message: message
+        message
       }
     ));
   }
@@ -2640,7 +2633,7 @@ export default class Platform {
       "POST",
       {
         membershipIds: membershipIds.map(bn => bn.toString()),
-        message: message
+        message
       }
     ));
   }
@@ -2652,16 +2645,16 @@ export default class Platform {
    * @param {BungieNet.enums.moderatorRequestedPunishment} - might not be right enum
    * @return {Promise.<Platform.Response>}
    */
-  banMember(groupId, membershipId, comment, length) {
+  banMember(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/Ban/", {
-        groupId: groupId.toString(),
-        membershipId: membershipId.toString()
+        groupId: params.groupId.toString(),
+        membershipId: params.membershipId.toString()
       }),
       "POST",
       {
-        comment: comment,
-        length: length
+        comment: params.comment,
+        length: params.length
       }
     ));
   }
@@ -2765,7 +2758,7 @@ export default class Platform {
       }),
       "POST",
       {
-        message: message
+        message
       }
     ));
   }
@@ -2802,7 +2795,7 @@ export default class Platform {
       }),
       "POST",
       {
-        message: message
+        message
       }
     ));
   }
@@ -2820,7 +2813,7 @@ export default class Platform {
       }),
       "POST",
       {
-        message: message,
+        message,
         membershipIds: membershipIds.map(bn => bn.toString())
       }
     ));
@@ -2835,7 +2828,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Clans/Disable/{clanMembershipType}/", {
         groupId: groupId.toString(),
-        clanMembershipType: clanMembershipType
+        clanMembershipType
       }),
       "POST",
       {
@@ -2883,13 +2876,13 @@ export default class Platform {
    * @param {*} [clanPlatformType = 0]
    * @return {Promise.<Platform.Response>}
    */
-  editGroupMembership(groupId, membershipId, groupMembershipType, clanPlatformType = 0) {
+  editGroupMembership(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Members/{membershipId}/SetMembershipType/{groupMembershipType}/{?clanPlatformType}", {
-        groupId: groupId.toString(),
-        membershipId: membershipId.toString(),
-        groupMembershipType: groupMembershipType,
-        clanPlatformType: clanPlatformType
+        groupId: params.groupId.toString(),
+        membershipId: params.membershipId.toString(),
+        groupMembershipType: params.groupMembershipType,
+        clanPlatformType: params.clanPlatformType
       }),
       "POST",
       {
@@ -2937,8 +2930,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Clans/Enable/{clanMembershipType}/{?clanName}", {
         groupId: groupId.toString(),
-        clanMembershipType: clanMembershipType,
-        clanName: clanName
+        clanMembershipType,
+        clanName
       }),
       "POST",
       {
@@ -2991,8 +2984,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Admins/{?itemsPerPage,currentPage}", {
         groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage
+        itemsPerPage,
+        currentPage
       })
     ));
   }
@@ -3007,8 +3000,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/AdminsV2/{?itemsPerPage,currentPage}", {
         groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage
+        itemsPerPage,
+        currentPage
       })
     ));
   }
@@ -3050,7 +3043,7 @@ export default class Platform {
       URI.expand("/Group/User/{membershipId}/All/{?clanonly,populatefriends}", {
         membershipId: membershipId.toString(),
         clanonly: clanOnly,
-        populateFriends: populateFriends
+        populateFriends
       })
     ));
   }
@@ -3065,7 +3058,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Allies/{?currentPage,populatefriends}", {
         groupId: groupId.toString(),
-        currentPage: currentPage,
+        currentPage,
         populatefriends: populateFriends
       })
     ));
@@ -3099,8 +3092,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Banned/{?itemsPerPage,currentPage}", {
         groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage
+        itemsPerPage,
+        currentPage
       })
     ));
   }
@@ -3115,8 +3108,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/BannedV2/{?itemsPerPage,currentPage}", {
         groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage
+        itemsPerPage,
+        currentPage
       })
     ));
   }
@@ -3146,18 +3139,13 @@ export default class Platform {
    * @param {Boolean} [populateFriends = false]
    * @return {Promise.<Platform.Response>}
    */
-  getFoundedGroupsForMember(
-    membershipId,
-    currentPage,
-    clanOnly = false,
-    populateFriends = false
-  ) {
+  getFoundedGroupsForMember(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/User/{membershipId}/Founded/{currentPage}/{?clanonly,populatefriends}", {
-        membershipId: membershipId.toString(),
-        currentPage: currentPage,
-        clanonly: clanOnly,
-        populatefriends: populateFriends
+        membershipId: params.membershipId.toString(),
+        currentPage: params.currentPage,
+        clanonly: params.clanOnly,
+        populatefriends: params.populateFriends
       })
     ));
   }
@@ -3184,7 +3172,7 @@ export default class Platform {
   getGroupByName(groupName, populateFriends = false) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/Name/{groupName}/{?populatefriends}", {
-        groupName: groupName,
+        groupName,
         populatefriends: populateFriends
       })
     ));
@@ -3200,7 +3188,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Following/{currentPage}/{?populatefriends}", {
         groupId: groupId.toString(),
-        currentPage: currentPage,
+        currentPage,
         populatefriends: populateFriends
       })
     ));
@@ -3216,7 +3204,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/FollowedBy/{currentPage}/{?populatefriends}", {
         groupId: groupId.toString(),
-        currentPage: currentPage,
+        currentPage,
         populatefriends: populateFriends
       })
     ));
@@ -3257,7 +3245,7 @@ export default class Platform {
   getJoinedGroupsForCurrentMemberV2(currentPage, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/MyGroups/V2/{currentPage}/{?clanonly,populatefriends}", {
-        currentPage: currentPage,
+        currentPage,
         clanonly: clanOnly,
         populatefriends: populateFriends
       })
@@ -3287,18 +3275,13 @@ export default class Platform {
    * @param {Boolean} [populateFriends = false]
    * @return {Promise.<Platform.Response>}
    */
-  getJoinedGroupsForMemberV2(
-    membershipId,
-    currentPage,
-    clanOnly = false,
-    populateFriends = false
-  ) {
+  getJoinedGroupsForMemberV2(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/User/{membershipId}/Joined/{currentPage}/{?clanonly,populatefriends}", {
-        membershipId: membershipId.toString(),
-        currentPage: currentPage,
-        clanonly: clanOnly,
-        populatefriends: populateFriends
+        membershipId: params.membershipId.toString(),
+        currentPage: params.currentPage,
+        clanonly: params.clanOnly,
+        populatefriends: params.populateFriends
       })
     ));
   }
@@ -3313,7 +3296,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/User/{membershipId}/JoinedV3/{currentPage}/{?populatefriends}", {
         membershipId: membershipId.toString(),
-        currentPage: currentPage,
+        currentPage,
         populatefriends: populateFriends
       })
     ));
@@ -3327,14 +3310,14 @@ export default class Platform {
    * @param {BungieNet.enums.bungieMembershipType} platformType
    * @return {Promise.<Platform.Response>}
    */
-  getMembersOfClan(groupId, currentPage, memberType, sort, platformType) {
+  getMembersOfClan(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/ClanMembers/{?currentPage,memberType,sort,platformType}", {
-        groupId: groupId.toString(),
-        currentPage: currentPage,
-        memberType: memberType,
-        sort: sort,
-        platformType: platformType
+        groupId: params.groupId.toString(),
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        sort: params.sort,
+        platformType: params.platformType
       })
     ));
   }
@@ -3348,15 +3331,15 @@ export default class Platform {
    * @param {*} sort
    * @return {Promise.<Platform.Response>}
    */
-  getMembersOfGroup(groupId, currentPage, itemsPerPage, memberType, platformType, sort) {
+  getMembersOfGroup(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Members/{?itemsPerPage,currentPage,memberType,platformType,sort}", {
-        groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage,
-        memberType: memberType,
-        platformType: platformType,
-        sort: sort
+        groupId: params.groupId.toString(),
+        itemsPerPage: params.itemsPerPage,
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        platformType: params.platformType,
+        sort: params.sort
       })
     ));
   }
@@ -3370,15 +3353,15 @@ export default class Platform {
    * @param {*} sort
    * @return {Promise.<Platform.Response>}
    */
-  getMembersOfGroupV2(groupId, currentPage, itemsPerPage, memberType, platformType, sort) {
+  getMembersOfGroupV2(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/MembersV2/{?itemsPerPage,currentPage,memberType,platformType,sort}", {
-        groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage,
-        memberType: memberType,
-        platformType: platformType,
-        sort: sort
+        groupId: params.groupId.toString(),
+        itemsPerPage: params.itemsPerPage,
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        platformType: params.platformType,
+        sort: params.sort
       })
     ));
   }
@@ -3393,24 +3376,16 @@ export default class Platform {
    * @param {String} nameSearch
    * @return {Promise.<Platform.Response>}
    */
-  getMembersOfGroupV3(
-    groupId,
-    currentPage,
-    itemsPerPage,
-    memberType,
-    platformType,
-    sort,
-    nameSearch
-  ) {
+  getMembersOfGroupV3(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/MembersV3/{?itemsPerPage,currentPage,memberType,platformType,sort,nameSearch}", {
-        groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage,
-        memberType: memberType,
-        platformType: platformType,
-        sort: sort,
-        nameSearch: nameSearch
+        groupId: params.groupId.toString(),
+        itemsPerPage: params.itemsPerPage,
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        platformType: params.platformType,
+        sort: params.sort,
+        nameSearch: params.nameSearch
       })
     ));
   }
@@ -3442,8 +3417,8 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Clan/{clanMembershipType}/Pending/{currentPage}/", {
         groupId: groupId.toString(),
-        clanMembershipType: clanMembershipType,
-        currentPage: currentPage
+        clanMembershipType,
+        currentPage
       })
     ));
   }
@@ -3468,7 +3443,7 @@ export default class Platform {
   getPendingGroupsForCurrentMemberV2(currentPage, populateFriends = false) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/MyPendingGroupsV2/{currentPage}/{?populatefriends}", {
-        currentPage: currentPage,
+        currentPage,
         populatefriends: populateFriends
       })
     ));
@@ -3496,7 +3471,7 @@ export default class Platform {
   getPendingGroupsForMemberV2(currentPage, populateFriends) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/MyPendingGroups/V2/{currentPage}/{?populatefriends}", {
-        currentPage: currentPage,
+        currentPage,
         populatefriends: populateFriends
       })
     ));
@@ -3525,7 +3500,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Members/PendingV2/{?populatefriends}", {
         groupId: groupId.toString(),
-        currentPage: currentPage,
+        currentPage
       })
     ));
   }
@@ -3580,17 +3555,17 @@ export default class Platform {
    * @param {String} message
    * @return {Promise.<Platform.Response>}
    */
-  inviteClanMember(groupId, membershipId, clanMembershipType, title, message) {
+  inviteClanMember(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/InviteToClan/{membershipId}/{clanMembershipType}/", {
-        groupId: groupId,
-        membershipId: membershipId.toString(),
-        clanMembershipType: clanMembershipType
+        groupId: params.groupId,
+        membershipId: params.membershipId.toString(),
+        clanMembershipType: params.clanMembershipType
       }),
       "POST",
       {
-        title: title,
-        message: message
+        title: params.title,
+        message: params.message
       }
     ));
   }
@@ -3602,16 +3577,16 @@ export default class Platform {
    * @param {String} message
    * @return {Promise.<Platform.Response>}
    */
-  inviteGroupMember(groupId, membershipId, title, message) {
+  inviteGroupMember(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Invite/{membershipId}/", {
-        groupId: groupId.toString(),
-        membershipId: membershipId.toString()
+        groupId: params.groupId.toString(),
+        membershipId: params.membershipId.toString()
       }),
       "POST",
       {
-        title: title,
-        message: message
+        title: params.title,
+        message: params.message
       }
     ));
   }
@@ -3631,7 +3606,7 @@ export default class Platform {
       {
         targetIds: targetIds.map(bn => bn.toString()),
         messageContent: {
-          message: message
+          message
         }
       }
     ));
@@ -3665,11 +3640,11 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/{clanMembershipType}/", {
         groupId: groupId.toString(),
-        clanMembershipType: clanMembershipType
+        clanMembershipType
       }),
       "POST",
       {
-        message: message
+        message
       }
     ));
   }
@@ -3685,7 +3660,7 @@ export default class Platform {
       URI.expand("/Group/{groupId}/Members/{membershipId}/Kick/{?clanPlatformType}", {
         groupId: groupId.toString(),
         membershipId: membershipId.toString(),
-        clanPlatformType: clanPlatformType
+        clanPlatformType
       }),
       "POST",
       {
@@ -3703,7 +3678,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Clans/Leave/{clanMembershipType}/", {
         groupId: groupId.toString(),
-        clanMembershipType: clanMembershipType
+        clanMembershipType
       }),
       "POST",
       {
@@ -3718,9 +3693,9 @@ export default class Platform {
   migrate(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{p1}/Migrate/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       }),
       "POST",
       {
@@ -3738,7 +3713,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Admin/FounderOverride/{membershipType}/", {
         groupId: groupId.toString(),
-        membershipType: membershipType
+        membershipType
       }),
       "POST",
       {
@@ -3754,7 +3729,7 @@ export default class Platform {
   refreshClanSettingsInDestiny(clanMembershipType) {
     return this._serviceRequest(new Request(
       URI.expand("/Group/MyClans/Refresh/{clanMembershipType}/", {
-        clanMembershipType: clanMembershipType
+        clanMembershipType
       }),
       "POST",
       {
@@ -3860,7 +3835,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Group/{groupId}/Privacy/{p2}/", {
         groupId: groupId.toString(),
-        p2: p2
+        p2
       }),
       "POST",
       {
@@ -4012,7 +3987,7 @@ export default class Platform {
   getReportContext(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Ignore/ReportContext/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -4020,26 +3995,18 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  ignoreItem(
-    ignoredItemId,
-    ignoredItemType,
-    comment,
-    reason,
-    itemContextId,
-    itemContextType,
-    moderatorRequest
-  ) {
+  ignoreItem(params) {
     return this._serviceRequest(new Request(
       new URI("/Ignore/Ignore/"),
       "POST",
       {
-        ignoredItemId: ignoredItemId,
-        ignoredItemType: ignoredItemType,
-        comment: comment,
-        reason: reason,
-        itemContextId: itemContextId,
-        itemContextType: itemContextType,
-        ModeratorRequest: moderatorRequest
+        ignoredItemId: params.ignoredItemId,
+        ignoredItemType: params.ignoredItemType,
+        comment: params.comment,
+        reason: params.reason,
+        itemContextId: params.itemContextId,
+        itemContextType: params.itemContextType,
+        ModeratorRequest: params.moderatorRequest
       }
     ));
   }
@@ -4076,7 +4043,7 @@ export default class Platform {
   getPlayerGamesById(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Game/GetPlayerGamesById/{p1}/", {
-        p1: p1
+        p1
       })
     ));
   }
@@ -4087,7 +4054,7 @@ export default class Platform {
   reachModelSneakerNet(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Game/ReachModelSneakerNet/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -4107,7 +4074,7 @@ export default class Platform {
   adminUserSearch(username) {
     return this._serviceRequest(new Request(
       URI.expand("/Admin/Member/Search/{?username}", {
-        username: username
+        username
       })
     ));
   }
@@ -4128,14 +4095,14 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getAdminHistory(p1, p2, membershipFilter, startDate, endDate) {
+  getAdminHistory(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Admin/GlobalHistory/{p1}/{p2}/{?membershipFilter,startdate,enddate}", {
-        p1: p1,
-        p2: p2,
-        membershipFilter: membershipFilter,
-        startdate: startDate,
-        enddate: endDate
+        p1: params.p1,
+        p2: params.p2,
+        membershipFilter: params.membershipFilter,
+        startdate: params.startDate,
+        enddate: params.endDate
       })
     ));
   }
@@ -4166,8 +4133,8 @@ export default class Platform {
       }),
       "POST",
       {
-        currentPage: currentPage,
-        itemsPerPage: itemsPerPage
+        currentPage,
+        itemsPerPage
       }
     ));
   }
@@ -4181,7 +4148,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Admin/Member/{id}/RecentIncludingFlags/{p2}/", {
         id: membershipId.toString(),
-        p2: p2
+        p2
       })
     ));
   }
@@ -4340,16 +4307,16 @@ export default class Platform {
    * @param {BigNumber} reportId
    * @return {Promise.<Platform.Response>}
    */
-  resolveReport(reportId, reason, banLength, result, comments) {
+  resolveReport(params) {
     return this._serviceRequest(new Request(
       new URI("/Admin/Assigned/Resolve/"),
       "POST",
       {
-        banLength: banLength.toString(),
-        comments: comments,
-        reason: reason.toString(),
-        reportId: reportId.toString(),
-        result: result
+        banLength: params.banLength.toString(),
+        comments: params.comments,
+        reason: params.reason.toString(),
+        reportId: params.reportId.toString(),
+        result: params.result
       }
     ));
   }
@@ -4364,8 +4331,8 @@ export default class Platform {
   applyOfferToCurrentDestinyMembership(p1, p2) {
     return this._serviceRequest(new Request(
       URI.expand("/Tokens/ApplyOfferToCurrentDestinyMembership/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
+        p1,
+        p2
       }),
       "POST",
       {
@@ -4393,11 +4360,11 @@ export default class Platform {
   claimAndApplyOnToken(tokenType, redeemCode) {
     return this._serviceRequest(new Request(
       URI.expand("/Tokens/ClaimAndApplyToken/{tokenType}/", {
-        tokenType: tokenType
+        tokenType
       }),
       "POST",
       {
-        redeemCode: redeemCode
+        redeemCode
       }
     ));
   }
@@ -4410,7 +4377,7 @@ export default class Platform {
       new URI("/Tokens/Claim/"),
       "POST",
       {
-        redeemCode: redeemCode
+        redeemCode
       }
     ));
   }
@@ -4421,9 +4388,9 @@ export default class Platform {
   consumeMarketplacePlatformCodeOffer(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/Tokens/ConsumeMarketplacePlatformCodeOffer/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       }),
       "POST",
       {
@@ -4495,7 +4462,7 @@ export default class Platform {
   rafGenerateReferralCode(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Tokens/RAF/GenerateReferralCode/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -4563,7 +4530,7 @@ export default class Platform {
       new URI("/Destiny/EquipItem/"),
       "POST",
       {
-        membershipType: membershipType,
+        membershipType,
         itemId: itemId.toString(),
         characterId: characterId.toString()
       }
@@ -4581,7 +4548,7 @@ export default class Platform {
       new URI("/Destiny/EquipItems/"),
       "POST",
       {
-        membershipType: membershipType,
+        membershipType,
         characterId: characterId.toString(),
         itemIds: itemIds.map(bn => bn.toString())
       }
@@ -4596,7 +4563,7 @@ export default class Platform {
   getAccount(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString()
       })
     ));
@@ -4610,7 +4577,7 @@ export default class Platform {
   getAccountSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Summary/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString()
       })
     ));
@@ -4622,7 +4589,7 @@ export default class Platform {
   getActivityBlob(e) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/GetActivityBlob/{e}/", {
-        e: e
+        e
       })
     ));
   }
@@ -4636,22 +4603,15 @@ export default class Platform {
    * @param {Number} [page = 1] 1-based
    * @return {Promise.<Platform.Response>}
    */
-  getActivityHistory(
-    membershipType,
-    destinyMembershipId,
-    characterId,
-    mode = BungieNet.enums.destinyActivityModeType.none,
-    count = 25,
-    page = 1
-  ) {
+  getActivityHistory(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/ActivityHistory/{membershipType}/{destinyMembershipId}/{characterId}/{?mode,count,page}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        characterId: characterId.toString(),
-        mode: mode,
-        count: count,
-        page: page
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        characterId: params.characterId.toString(),
+        mode: params.mode,
+        count: params.count,
+        page: params.page
       })
     ));
   }
@@ -4664,7 +4624,7 @@ export default class Platform {
   getAdvisorsForAccount(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Advisors/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString()
       })
     ));
@@ -4679,7 +4639,7 @@ export default class Platform {
   getAdvisorsForCharacter(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Advisors/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4695,7 +4655,7 @@ export default class Platform {
   getAdvisorsForCharacterV2(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Advisors/V2/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4710,7 +4670,7 @@ export default class Platform {
   getAdvisorsForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Advisors/", {
-        membershipType: membershipType,
+        membershipType,
         characterId: characterId.toString()
       })
     ));
@@ -4724,7 +4684,7 @@ export default class Platform {
   getAllItemsSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Items/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString()
       })
     ));
@@ -4738,7 +4698,7 @@ export default class Platform {
   getAllVendorsForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendors/", {
-        membershipType: membershipType,
+        membershipType,
         characterId: characterId.toString()
       })
     ));
@@ -4751,7 +4711,7 @@ export default class Platform {
   getBondAdvisors(membershipType) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Advisors/Bonds/", {
-        membershipType: membershipType
+        membershipType
       })
     ));
   }
@@ -4765,7 +4725,7 @@ export default class Platform {
   getCharacter(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Complete/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4781,7 +4741,7 @@ export default class Platform {
   getCharacterActivities(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Activities/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4797,7 +4757,7 @@ export default class Platform {
   getCharacterInventory(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4813,7 +4773,7 @@ export default class Platform {
   getCharacterInventorySummary(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/Summary/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4829,7 +4789,7 @@ export default class Platform {
   getCharacterProgression(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Progression/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4845,7 +4805,7 @@ export default class Platform {
   getCharacterSummary(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4855,13 +4815,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getClanLeaderboards(p1, modes, statid, maxtop) {
+  getClanLeaderboards(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/ClanLeaderboards/{p1}/{?modes,statid,maxtop}", {
-        p1: p1,
-        modes: modes,
-        statid: statid,
-        maxtop: maxtop
+        p1: params.p1,
+        modes: params.modes,
+        statid: params.statid,
+        maxtop: params.maxtop
       })
     ));
   }
@@ -4875,7 +4835,7 @@ export default class Platform {
   getDestinyAggregateActivityStats(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/AggregateActivityStats/{membershipType}/{destinyMembershipId}/{characterId}/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -4888,7 +4848,7 @@ export default class Platform {
   getDestinyExplorerItems(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Explorer/Items/{?params*}", {
-        params: params
+        params
       })
     ));
   }
@@ -4899,7 +4859,7 @@ export default class Platform {
   getDestinyExplorerTalentNodeSteps(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Explorer/TalentNodeSteps/{?params*}", {
-        params: params
+        params
       })
     ));
   }
@@ -4928,9 +4888,9 @@ export default class Platform {
   getDestinySingleDefinition(definitionType, definitionId, version) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Manifest/{definitionType}/{definitionId}/{?version}", {
-        definitionType: definitionType,
-        definitionId: definitionId,
-        version: version
+        definitionType,
+        definitionId,
+        version
       })
     ));
   }
@@ -4943,7 +4903,7 @@ export default class Platform {
   getExcellenceBadges(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/GetExcellenceBadges/{membershipType}/{destinyMembershipId}/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString()
       })
     ));
@@ -4952,13 +4912,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getGrimoireByMembership(membershipType, destinyMembershipId, flavour, single) {
+  getGrimoireByMembership(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Vanguard/Grimoire/{membershipType}/{destinyMembershipId}/{?flavour,single}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        flavour: flavour,
-        single: single
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId,
+        flavour: params.flavour,
+        single: params.single
       })
     ));
   }
@@ -5021,9 +4981,9 @@ export default class Platform {
   getHistoricalStatsForAccount(membershipType, destinyMembershipId, groups) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/Account/{membershipType}/{destinyMembershipId}/{?groups}", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
-        groups: groups
+        groups
       })
     ));
   }
@@ -5035,13 +4995,13 @@ export default class Platform {
    * @param {BigNumber} itemInstanceId
    * @return {Promise.<Platform.Response>}
    */
-  getItemDetail(membershipType, destinyMembershipId, characterId, itemInstanceId) {
+  getItemDetail(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/{itemInstanceId}/", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        characterId: characterId.toString(),
-        itemInstanceId: itemInstanceId.toString()
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        characterId: params.characterId.toString(),
+        itemInstanceId: params.itemInstanceId.toString()
       })
     ));
   }
@@ -5049,13 +5009,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getItemReferenceDetail(p1, p2, p3, p4) {
+  getItemReferenceDetail(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{p1}/Account/{p2}/Character/{p3}/ItemReference/{p4}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        p4: p4
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        p4: params.p4
       })
     ));
   }
@@ -5068,14 +5028,14 @@ export default class Platform {
    * @param {*} maxtop
    * @return {Promise.<Platform.Response>}
    */
-  getLeaderboards(membershipType, destinyMembershipId, modes, statid, maxtop) {
+  getLeaderboards(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/Leaderboards/{membershipType}/{destinyMembershipId}/{?modes,statid,maxtop}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        modes: modes.join(","),
-        statid: statid,
-        maxtop: maxtop
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        modes: params.modes.join(","),
+        statid: params.statid,
+        maxtop: params.maxtop
       })
     ));
   }
@@ -5089,15 +5049,15 @@ export default class Platform {
    * @param {*} maxtop
    * @return {Promise.<Platform.Response>}
    */
-  getLeaderboardsForCharacter(membershipType, destinyMembershipId, characterId, modes, statid, maxtop) {
+  getLeaderboardsForCharacter(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/Leaderboards/{membershipType}/{destinyMembershipId}/{characterId}/{?modes,statid,maxtop}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        characterId: characterId.toString(),
-        modes: modes.join(","),
-        statid: statid,
-        maxtop: maxtop
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        characterId: params.characterId.toString(),
+        modes: params.modes.join(","),
+        statid: params.statid,
+        maxtop: params.maxtop
       })
     ));
   }
@@ -5111,7 +5071,7 @@ export default class Platform {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/LeaderboardsForPsn/{?modes,code}", {
         modes: modes.join(","),
-        code: code
+        code
       })
     ));
   }
@@ -5125,8 +5085,8 @@ export default class Platform {
   getMembershipIdByDisplayName(membershipType, displayName, ignoreCase) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Stats/GetMembershipIdByDisplayName/{displayName}/{?ignorecase}", {
-        membershipType: membershipType,
-        displayName: displayName,
+        membershipType,
+        displayName,
         ignorecase: ignoreCase
       })
     ));
@@ -5141,9 +5101,9 @@ export default class Platform {
   getMyGrimoire(membershipType, flavour, single) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Vanguard/Grimoire/{membershipType}/{?flavour,single}", {
-        membershipType: membershipType,
-        flavour: flavour,
-        single: single
+        membershipType,
+        flavour,
+        single
       })
     ));
   }
@@ -5219,7 +5179,7 @@ export default class Platform {
   getRecordBookCompletionStatus(membershipType, recordBookHash) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/RecordBooks/{recordBookHash}/Completition/", {
-        membershipType: membershipType,
+        membershipType,
         recordBookHash: recordBookHash.toString()
       })
     ));
@@ -5242,7 +5202,7 @@ export default class Platform {
   getTriumphs(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Triumphs/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString()
       })
     ));
@@ -5257,7 +5217,7 @@ export default class Platform {
   getUniqueWeaponHistory(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/Stats/UniqueWeapons/{membershipType}/{destinyMembershipId}/{characterId}/", {
-        membershipType: membershipType,
+        membershipType,
         destinyMembershipId: destinyMembershipId.toString(),
         characterId: characterId.toString()
       })
@@ -5272,7 +5232,7 @@ export default class Platform {
   getVault(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Vault/{?accountId}", {
-        membershipType: membershipType,
+        membershipType,
         accountId: destinyMembershipId.toString()
       })
     ));
@@ -5286,7 +5246,7 @@ export default class Platform {
   getVaultSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Vault/Summary/{?accountId}", {
-        membershipType: membershipType,
+        membershipType,
         accountId: destinyMembershipId.toString()
       })
     ));
@@ -5301,7 +5261,7 @@ export default class Platform {
   getVendorForCurrentCharacter(membershipType, characterId, vendorId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/", {
-        membershipType: membershipType,
+        membershipType,
         characterId: characterId.toString(),
         vendorId: vendorId.toString()
       })
@@ -5317,7 +5277,7 @@ export default class Platform {
   getVendorForCurrentCharacterWithMetadata(membershipType, characterId, vendorId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Metadata/", {
-        membershipType: membershipType,
+        membershipType,
         characterId: characterId.toString(),
         vendorId: vendorId.toString()
       })
@@ -5331,13 +5291,13 @@ export default class Platform {
    * @param {BigNumber} itemId
    * @return {Promise.<Platform.Response>}
    */
-  getVendorItemDetailForCurrentUser(membershipType, characterId, vendorId, itemId) {
+  getVendorItemDetailForCurrentUser(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/", {
-        membershipType: membershipType,
-        characterId: characterId.toString(),
-        vendorId: vendorId.toString(),
-        itemId: itemId.toString()
+        membershipType: params.membershipType,
+        characterId: params.characterId.toString(),
+        vendorId: params.vendorId.toString(),
+        itemId: params.itemId.toString()
       })
     ));
   }
@@ -5349,13 +5309,13 @@ export default class Platform {
    * @param {BigNumber} itemId
    * @return {Promise.<Platform.Response>}
    */
-  getVendorItemDetailForCurrentUserWithMetadata(membershipType, characterId, vendorId, itemId) {
+  getVendorItemDetailForCurrentUserWithMetadata(params) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/Metadata/", {
-        membershipType: membershipType,
-        characterId: characterId.toString(),
-        vendorId: vendorId.toString(),
-        itemId: itemId.toString()
+        membershipType: params.membershipType,
+        characterId: params.characterId.toString(),
+        vendorId: params.vendorId.toString(),
+        itemId: params.itemId.toString()
       })
     ));
   }
@@ -5368,7 +5328,7 @@ export default class Platform {
   getVendorSummariesForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendors/Summaries/", {
-        membershipType: membershipType,
+        membershipType,
         characterId: characterId.toString()
       })
     ));
@@ -5380,7 +5340,7 @@ export default class Platform {
   refundItem(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/{p1}/RefundItem/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -5397,8 +5357,8 @@ export default class Platform {
   searchDestinyPlayer(membershipType, displayName) {
     return this._serviceRequest(new Request(
       URI.expand("/Destiny/SearchDestinyPlayer/{membershipType}/{displayName}/", {
-        membershipType: membershipType,
-        displayName: displayName
+        membershipType,
+        displayName
       })
     ));
   }
@@ -5410,15 +5370,15 @@ export default class Platform {
    * @param {Boolean} state - true to lock, false to unlock
    * @return {Promise.<Platform.Response>}
    */
-  setItemLockState(membershipType, itemId, characterId, state) {
+  setItemLockState(params) {
     return this._serviceRequest(new Request(
       new URI("/Destiny/SetLockState/"),
       "POST",
       {
-        membershipType: membershipType,
-        itemId: itemId.toString(),
-        characterId: characterId.toString(),
-        state: state
+        membershipType: params.membershipType,
+        itemId: params.itemId.toString(),
+        characterId: params.characterId.toString(),
+        state: params.state
       }
     ));
   }
@@ -5431,16 +5391,16 @@ export default class Platform {
    * @param {Boolean} state - true to track, false to not track
    * @return {Promise.<Platform.Response>}
    */
-  setQuestTrackedState(membershipType, membershipId, characterId, itemId, state) {
+  setQuestTrackedState(params) {
     return this._serviceRequest(new Request(
       new URI("/Destiny/SetQuestTrackedState/"),
       "POST",
       {
-        membershipType: membershipType,
-        membershipId: membershipId.toString(),
-        characterId: characterId.toString(),
-        itemId: itemId.toString(),
-        state: state
+        membershipType: params.membershipType,
+        membershipId: params.membershipId.toString(),
+        characterId: params.characterId.toString(),
+        itemId: params.itemId.toString(),
+        state: params.state
       }
     ));
   }
@@ -5454,24 +5414,17 @@ export default class Platform {
    * @param {Boolean} transferToVault
    * @return {Promise.<Platform.Response>}
    */
-  transferItem(
-    membershipType,
-    itemReferenceHash,
-    itemId,
-    stackSize,
-    characterId,
-    transferToVault
-  ) {
+  transferItem(params) {
     return this._serviceRequest(new Request(
       new URI("/Destiny/TransferItem/"),
       "POST",
       {
-        membershipType: membershipType.toString(),
-        itemReferenceHash: itemReferenceHash,
-        itemId: itemId.toString(),
-        stackSize: stackSize,
-        characterId: characterId.toString(),
-        transferToVault: transferToVault
+        membershipType: params.membershipType.toString(),
+        itemReferenceHash: params.itemReferenceHash,
+        itemId: params.itemId.toString(),
+        stackSize: params.stackSize,
+        characterId: params.characterId.toString(),
+        transferToVault: params.transferToVault
       }
     ));
   }
@@ -5486,9 +5439,9 @@ export default class Platform {
   adminSetCommunityLiveMemberBanStatus(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/Partnerships/{p1}/{p2}/Ban/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       }),
       "POST",
       {
@@ -5503,9 +5456,9 @@ export default class Platform {
   adminSetCommunityLiveMemberFeatureStatus(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/Partnerships/{p1}/{p2}/Feature/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       }),
       "POST",
       {
@@ -5520,7 +5473,7 @@ export default class Platform {
   alterApprovalState(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/AlterApprovalState/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -5535,7 +5488,7 @@ export default class Platform {
   editContent(p1) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Edit/{p1}/", {
-        p1: p1
+        p1
       }),
       "POST",
       {
@@ -5550,9 +5503,9 @@ export default class Platform {
   getAdminCommunityLiveStatuses(p1, p2, name) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/Admin/{p1}/{p2}/{?name}", {
-        p1: p1,
-        p2: p2,
-        name: name
+        p1,
+        p2,
+        name
       }),
       "POST",
       {
@@ -5567,9 +5520,9 @@ export default class Platform {
   getApprovalQueue(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Queue/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
@@ -5580,9 +5533,9 @@ export default class Platform {
   getCommunityContent(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Get/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
@@ -5599,13 +5552,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getCommunityLiveStatuses(p1, p2, p3, modeHash) {
+  getCommunityLiveStatuses(params) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/All/{p1}/{p2}/{p3}/{?modeHash}", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        modeHash: modeHash
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        modeHash: params.modeHash
       })
     ));
   }
@@ -5616,9 +5569,9 @@ export default class Platform {
   getCommunityLiveStatusesForClanmates(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/Clan/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
@@ -5629,9 +5582,9 @@ export default class Platform {
   getCommunityLiveStatusesForFriends(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/Friends/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
@@ -5642,9 +5595,9 @@ export default class Platform {
   getFeaturedCommunityLiveStatuses(p1, p2, p3) {
     return this._serviceRequest(new Request(
       URI.expand("/CommunityContent/Live/Features/{p1}/{p2}/{p3}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3
+        p1,
+        p2,
+        p3
       })
     ));
   }
@@ -5718,7 +5671,7 @@ export default class Platform {
   getSystemStatus(p1) {
     return this._serviceRequest(new Request(
       new URI("").path(URITemplate.expand("//Status/{p1}/", {
-        p1: p1
+        p1
       }))
     ));
   }
@@ -5734,7 +5687,7 @@ export default class Platform {
     ));
   }
 
-};
+}
 
 /**
  * Header key-name pairs

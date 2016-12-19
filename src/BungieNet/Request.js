@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Platform.Request
  *
@@ -19,10 +17,10 @@ export default class Request {
    * @param  {String} [method = "GET"] - HTTP method
    * @param  {String} [data = void 0] - data to send to the server
    */
-  constructor(uri, method = "GET", data = void 0) {
+  constructor(uri, method = "GET", data = undefined) {
     this.uri = uri;
     this.method = method;
     this.data = data;
   }
 
-};
+}

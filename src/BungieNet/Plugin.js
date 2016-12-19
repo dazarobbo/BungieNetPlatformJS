@@ -1,5 +1,3 @@
-"use strict";
-
 import request from "request";
 import BungieNet from "./BungieNet.js";
 
@@ -10,38 +8,50 @@ import BungieNet from "./BungieNet.js";
  */
 export default class Plugin {
 
-  constructor() {
-
-  }
-
-};
+}
 
 Plugin.CookieJarMemoryPlugin = class extends Plugin {
 
+  /**
+   *
+   */
   constructor() {
     super();
     this.jar = request.jar();
   }
 
+  /**
+   * @param {String} eventName -
+   * @param {Object} e -
+   * @return {undefined}
+   */
   update(eventName, e) {
     if(eventName === BungieNet.Platform.events.frameBeforeSend) {
       e.target.options.jar = this.jar;
     }
   }
 
-}
+};
 
 Plugin.OAuthPlugin = class extends Plugin {
 
+  /**
+   * @param {String} accessToken - oauth access token
+   */
   constructor(accessToken) {
     super();
     this.accessToken = accessToken;
   }
 
+  /**
+   * @param {String} eventName -
+   * @param {Object} e -
+   * @return {undefined}
+   */
   update(eventName, e) {
     if(eventName === BungieNet.Platform.events.frameBeforeSend) {
-      e.target.options.headers["Authorization"] = `Bearer ${this.accessToken}`;
+      e.target.options.headers.Authorization = `Bearer ${ this.accessToken }`;
     }
   }
 
-}
+};

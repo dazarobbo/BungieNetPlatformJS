@@ -1,5 +1,3 @@
-"use strict";
-
 import Frame from "./Frame.js";
 
 /**
@@ -17,27 +15,24 @@ export default class FrameManager {
   /**
    * Generate a FrameSet containing all waiting frames from the inner
    * FrameSet. NOTE: frames within the returned set are mutable!
-   * @return {Platform.FrameSet}
+   * @return {Platform.FrameSet} frames currently waiting
    */
   getWaiting() {
-    return this._frameSet.filter(f => {
-      return f.state === Frame.state.waiting;
-    });
+    return this._frameSet.filter(f => f.state === Frame.state.waiting);
   }
 
   /**
    * Generate a FrameSet containing all active frames from the inner
    * FrameSet. NOTE: frames within the returned set are mutable!
-   * @return {Platform.FrameSet}
+   * @return {Platform.FrameSet} frames currently active
    */
   getActive() {
-    return this._frameSet.filter(f => {
-      return f.state === Frame.state.active;
-    });
+    return this._frameSet.filter(f => f.state === Frame.state.active);
   }
 
   /**
    * @param {Platform.Frame} frame - frame to add
+   * @return {undefined}
    */
   addFrame(frame) {
     this._frameSet.enqueue(frame);
@@ -45,6 +40,7 @@ export default class FrameManager {
 
   /**
    * @param {Platform.Frame} frame - frame to remove
+   * @return {undefined}
    */
   removeFrame(frame) {
     this._frameSet.remove(frame);
@@ -52,7 +48,7 @@ export default class FrameManager {
 
   /**
    * Returns the "next" waiting frame
-   * @return {Promise<Platform.Frame>}
+   * @return {Promise<Platform.Frame>} the next frame in the wait list
    */
   getFrame() {
 
@@ -66,4 +62,4 @@ export default class FrameManager {
 
   }
 
-};
+}

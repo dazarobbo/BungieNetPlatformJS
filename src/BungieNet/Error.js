@@ -1,5 +1,3 @@
-"use strict";
-
 import ExtendableError from "extendable-error-class";
 
 /**
@@ -7,17 +5,19 @@ import ExtendableError from "extendable-error-class";
  */
 export default class Error extends ExtendableError {
 
-  constructor(
-      message = "",
-      code = Error.codes.unknown,
-      data = void 0
-    ) {
-      super(message);
-      this.code = code;
-      this.data = data;
+
+  /**
+   * @param {String} message - error message
+   * @param {Error.codes} code - error code
+   * @param {*} data - any associated data
+   */
+  constructor(message = "", code = Error.codes.unknown, data = undefined) {
+    super(message);
+    this.code = code;
+    this.data = data;
   }
 
-};
+}
 
 /**
  * Associated exception codes for BungieNet.Error exceptions
@@ -29,31 +29,31 @@ Error.codes = {
    * Cookies cannot be found
    * @type {Number}
    */
-  no_cookie_by_name: 1,
+  noCookieByName: 1,
 
   /**
    * Network failure
    * @type {Number}
    */
-  network_error: 2,
+  networkError: 2,
 
   /**
    * Value required for X-CSRF header not found
    * @type {Number}
    */
-  no_csrf_token: 3,
+  noCsrfToken: 3,
 
   /**
    * Response from bungie.net could not be parsed as valid JSON
    * @type {Number}
    */
-  corrupt_response: 4,
+  corruptResponse: 4,
 
   /**
    * An invalid cookie provider was set or used
    * @type {Number}
    */
-  no_cookie_provider: 5,
+  noCookieProvider: 5,
 
   /**
    * Generic error

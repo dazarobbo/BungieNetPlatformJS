@@ -1,5 +1,3 @@
-"use strict";
-
 import Cookies from "./Cookies.js";
 
 /**
@@ -11,38 +9,38 @@ export default class CurrentUser {
 
   /**
    * Returns a bool for whether the user is signed in based on cookie existence
-   * @return {Promise.<Boolean>}
+   * @return {Promise.<Boolean>} bool
    */
   static authenticated() {
-    return new Promise(resolve => {
+    return new Promise(resolve =>
 
       //if cookie found, resolve as true
       //if it isn't found, resolve as false
-      //TODO: does this make sense?
-      return Cookies
+      Cookies
         .get("bungleatk")
-        .then(() => resolve(true), () => resolve(false));
+        .then(() => resolve(true), () => resolve(false))
 
-    });
+    );
   }
 
   /**
    * Whether there is any trace of an existing user
-   * @return {Promise.<Cookie[]>}
+   * @return {Promise.<Cookie[]>} cookie
    */
   static exists() {
     return new Promise((resolve, reject) => {
       Cookies
         .getMatching(c => c)
-        .then(cookies => {
-          return resolve(cookies.length > 0);
-        }, reject);
+        .then(
+          cookies => resolve(cookies.length > 0),
+          reject
+        );
     });
   }
 
   /**
    * Returns the CSRF token for API requests
-   * @return {Promise.<String>}
+   * @return {Promise.<String>} string
    */
   static getCsrfToken() {
     //token is the value of the bungled cookie
@@ -51,7 +49,7 @@ export default class CurrentUser {
 
   /**
    * Returns the member id of the current user
-   * @return {Promise.<Number>}
+   * @return {Promise.<Number>} id
    */
   static getMembershipId() {
     return new Promise((resolve, reject) => {
@@ -63,10 +61,10 @@ export default class CurrentUser {
 
   /**
    * Returns the set bungie.net theme
-   * @return {Promise.<String>}
+   * @return {Promise.<String>} theme
    */
   static getTheme() {
-    return cookies.getValue("bungletheme");
+    return Cookies.getValue("bungletheme");
   }
 
   /**
@@ -76,22 +74,21 @@ export default class CurrentUser {
    */
   static getLocale() {
     return new Promise((resolve, reject) => {
-      Cookies.getValue("bungleloc")
-        .then(str => {
+      Cookies.getValue("bungleloc").then(str => {
 
-            //parse the locale from the cookie
-            const arr = /&?lc=(.+?)(?:$|&)/i.exec(str);
+        //parse the locale from the cookie
+        const arr = /&?lc=(.+?)(?:$|&)/i.exec(str);
 
-            //if successful, resolve it
-            if(arr.length >= 1) {
-              return resolve(arr[1]);
-            }
+        //if successful, resolve it
+        if(arr.length >= 1) {
+          return resolve(arr[1]);
+        }
 
-            //otherwise reject as unable to find
-            return reject(null);
+        //otherwise reject as unable to find
+        return reject(null);
 
-        }, () => reject(null));
+      }, () => reject(null));
     });
   }
 
-};
+}

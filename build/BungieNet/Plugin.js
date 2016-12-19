@@ -32,11 +32,14 @@ var Plugin = function Plugin() {
 };
 
 exports.default = Plugin;
-;
+
 
 Plugin.CookieJarMemoryPlugin = function (_Plugin) {
   _inherits(_class, _Plugin);
 
+  /**
+   *
+   */
   function _class() {
     _classCallCheck(this, _class);
 
@@ -45,6 +48,13 @@ Plugin.CookieJarMemoryPlugin = function (_Plugin) {
     _this.jar = _request2.default.jar();
     return _this;
   }
+
+  /**
+   * @param {String} eventName -
+   * @param {Object} e -
+   * @return {undefined}
+   */
+
 
   _createClass(_class, [{
     key: "update",
@@ -61,6 +71,9 @@ Plugin.CookieJarMemoryPlugin = function (_Plugin) {
 Plugin.OAuthPlugin = function (_Plugin2) {
   _inherits(_class2, _Plugin2);
 
+  /**
+   * @param {String} accessToken - oauth access token
+   */
   function _class2(accessToken) {
     _classCallCheck(this, _class2);
 
@@ -70,11 +83,18 @@ Plugin.OAuthPlugin = function (_Plugin2) {
     return _this2;
   }
 
+  /**
+   * @param {String} eventName -
+   * @param {Object} e -
+   * @return {undefined}
+   */
+
+
   _createClass(_class2, [{
     key: "update",
     value: function update(eventName, e) {
       if (eventName === _BungieNet2.default.Platform.events.frameBeforeSend) {
-        e.target.options.headers["Authorization"] = "Bearer " + this.accessToken;
+        e.target.options.headers.Authorization = "Bearer " + this.accessToken;
       }
     }
   }]);

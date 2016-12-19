@@ -31,7 +31,7 @@ var FrameManager = function () {
   /**
    * Generate a FrameSet containing all waiting frames from the inner
    * FrameSet. NOTE: frames within the returned set are mutable!
-   * @return {Platform.FrameSet}
+   * @return {Platform.FrameSet} frames currently waiting
    */
 
 
@@ -46,7 +46,7 @@ var FrameManager = function () {
     /**
      * Generate a FrameSet containing all active frames from the inner
      * FrameSet. NOTE: frames within the returned set are mutable!
-     * @return {Platform.FrameSet}
+     * @return {Platform.FrameSet} frames currently active
      */
 
   }, {
@@ -59,6 +59,7 @@ var FrameManager = function () {
 
     /**
      * @param {Platform.Frame} frame - frame to add
+     * @return {undefined}
      */
 
   }, {
@@ -69,6 +70,7 @@ var FrameManager = function () {
 
     /**
      * @param {Platform.Frame} frame - frame to remove
+     * @return {undefined}
      */
 
   }, {
@@ -79,7 +81,7 @@ var FrameManager = function () {
 
     /**
      * Returns the "next" waiting frame
-     * @return {Promise<Platform.Frame>}
+     * @return {Promise<Platform.Frame>} the next frame in the wait list
      */
 
   }, {
@@ -100,5 +102,4 @@ var FrameManager = function () {
 }();
 
 exports.default = FrameManager;
-;
 //# sourceMappingURL=FrameManager.js.map

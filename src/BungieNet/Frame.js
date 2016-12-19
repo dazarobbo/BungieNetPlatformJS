@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Platform.Frame
  *
@@ -7,6 +5,9 @@
  */
 export default class Frame {
 
+  /**
+   *
+   */
   constructor() {
 
     /**
@@ -56,18 +57,23 @@ export default class Frame {
 
   }
 
+  /**
+   * @return {Number} - frame id number
+   */
   get id() {
     return this._id;
   }
 
   /**
    * Generates a global id value for a Frame
+   * @return {Number} new frame id
    */
   static generateId() {
-    return ++Frame.id;
+    Frame.id += 1;
+    return Frame.id;
   }
 
-};
+}
 
 /**
  * Static id variable to tag Frames with

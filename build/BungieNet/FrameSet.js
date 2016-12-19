@@ -1,14 +1,5 @@
 "use strict";
 
-/**
- * FrameSet
- *
- * By default, this set will act in FIFO mode. If custom, set the operation
- * type to custom and set a comparer function
- *
- * @param {Number} [maxSize = -1] - maximum size of the set, -1 is no limit
- */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -17,7 +8,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+/**
+ * FrameSet
+ *
+ * By default, this set will act in FIFO mode. If custom, set the operation
+ * type to custom and set a comparer function
+ */
 var FrameSet = function () {
+
+  /**
+   * @param {Number} [maxSize = -1] - maximum size of the set, -1 is no limit
+   */
   function FrameSet() {
     var maxSize = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -1;
 
@@ -30,6 +31,7 @@ var FrameSet = function () {
 
   /**
    * Iterate over the inner array
+   * @return {undefined}
    */
 
 
@@ -52,6 +54,7 @@ var FrameSet = function () {
 
     /**
      * Clear all items in the set
+     * @return {undefined}
      */
 
   }, {
@@ -62,7 +65,8 @@ var FrameSet = function () {
 
     /**
      * Add an item to the end of the queue
-     * @param {Platform.Frame} frame
+     * @param {Platform.Frame} frame - frame to add
+     * @return {undefined}
      */
 
   }, {
@@ -78,7 +82,7 @@ var FrameSet = function () {
 
     /**
      * Remove and return the item at the front of the set
-     * @return {Platform.Frame}
+     * @return {Platform.Frame} frame to return
      */
 
   }, {
@@ -98,7 +102,8 @@ var FrameSet = function () {
 
     /**
      * Remove a given frame from the set
-     * @param {Platform.Frame} frame
+     * @param {Platform.Frame} frame - frame to remove
+     * @return {undefined}
      */
     value: function remove(frame) {
       this._arr = this._arr.filter(function (f) {
@@ -117,18 +122,29 @@ var FrameSet = function () {
 
     /**
      * Sorts the items in this queue according to the comparer
+     * @return {undefined}
      */
     value: function sort() {
       this._arr.sort(this._comparer);
     }
+
+    /**
+     * Filter the set by the given function; return true to keep
+     * @param {Function} func - filter function
+     * @return {FrameSet} filtered set
+     */
+
   }, {
     key: "filter",
     value: function filter(func) {
+
       var fs = new FrameSet();
+
       fs._arr = this._arr.filter(func);
       fs._operation = this._operation;
       fs._maxSize = this._maxSize;
       fs._comparer = this._comparer;
+
       return fs;
     }
   }, {
@@ -194,7 +210,7 @@ var FrameSet = function () {
 
     /**
      * Sets the maximum number of items this set can hold
-     * @param  {Number} ms
+     * @param {Number} ms - maximum size
      */
     ,
     set: function set(ms) {
@@ -208,7 +224,7 @@ var FrameSet = function () {
 
     /**
      * Sets the comparer function for items
-     * @param  {Function} func
+     * @param {Function} func - comparer function
      */
     ,
     set: function set(func) {
@@ -220,5 +236,4 @@ var FrameSet = function () {
 }();
 
 exports.default = FrameSet;
-;
 //# sourceMappingURL=FrameSet.js.map

@@ -51,8 +51,8 @@ export default class Cookies {
 
   /**
    * Returns an array of cookies which pass the predicate function
-   * @param  {Function} predicate
-   * @return {Promise.<Cookie[]>}
+   * @param  {Function} predicate return true to include
+   * @return {Promise.<Cookie[]>} array
    */
   static getMatching(predicate) {
     return new Promise((resolve, reject) => {
@@ -74,7 +74,7 @@ export default class Cookies {
 
   /**
    * Returns an array of session cookies
-   * @return {Promise.<Cookie[]>}
+   * @return {Promise.<Cookie[]>} array
    */
   static getSessionCookies() {
     return Cookies.getMatching(c => c.session);
@@ -83,7 +83,7 @@ export default class Cookies {
   /**
    * Returns the value for a given cookie name
    * @param  {String} name - name of cookie
-   * @return {Promise.<String>}
+   * @return {Promise.<String>} string
    */
   static getValue(name) {
     return new Promise((resolve, reject) => {
@@ -93,7 +93,7 @@ export default class Cookies {
     });
   }
 
-};
+}
 
 /**
  * Cookie provider interface

@@ -6,11 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _bignumber = require("bignumber.js");
-
-var _bignumber2 = _interopRequireDefault(_bignumber);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /*eslint valid-jsdoc: off, require-jsdoc: off*/
 
 var _BungieNet = require("./BungieNet.js");
 
@@ -57,11 +53,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 /**
  * Platform
  *
- * @param {Object} [opts = {}]
- * @param {String} [opts.apiKey = ""] bungie.net API key
- * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
- * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
- *
  * Notes:
  *
  * ===== Plugins =====
@@ -94,6 +85,7 @@ var Platform = function () {
 
     /**
      * Initialise objects
+     * @return {undefined}
      */
     value: function _init() {
 
@@ -123,6 +115,14 @@ var Platform = function () {
        */
       this._internalCookieJar = _request2.default.jar();
     }
+
+    /**
+    * @param {Object} opts = {}
+    * @param {String} [opts.apiKey = ""] bungie.net API key
+    * @param {Number} [opts.maxConcurrent = -1] - maximum concurrent requests, default is no limit
+    * @param {Number} [opts.timeout = 5000] - network timeout in milliseconds
+     */
+
   }]);
 
   function Platform() {
@@ -142,14 +142,14 @@ var Platform = function () {
     Object.keys(this._options).filter(function (x) {
       return x in opts;
     }).forEach(function (x) {
-      return _this._options[x] = opts[x];
+      _this._options[x] = opts[x];
     });
   }
 
   /**
    * Prepares the request and queues it
-   * @param {Platform.Frame} frame
-   * @return {Promise.<Platform.Frame>}
+   * @param {Platform.Frame} frame - frame to prepare
+   * @return {undefined}
    */
 
 
@@ -217,13 +217,13 @@ var Platform = function () {
 
     /**
      * API-level request method
-     * @param  {Platform.Request} request
+     * @param  {Platform.Request} req
      * @return {Promise.<Platform.Response>}
      */
 
   }, {
     key: "_serviceRequest",
-    value: function _serviceRequest(request) {
+    value: function _serviceRequest(req) {
       var _this3 = this;
 
       return new Promise(function (resolve, reject) {
@@ -231,19 +231,19 @@ var Platform = function () {
         var frame = new _Frame2.default();
 
         _BungieNet2.default.logger.log("info", "Received service request", {
-          endpoint: request.uri.toString(),
+          endpoint: req.uri.toString(),
           frameId: frame.id
         });
 
         frame.platform = _this3;
-        frame.request = request;
+        frame.request = req;
         frame.serviceResolve = resolve;
         frame.serviceReject = reject;
 
         //construct the full path
         //copy any query string params
         //add the locale
-        frame.request.uri = _BungieNet2.default.platformPath.segment(request.uri.path()).setSearch(request.uri.search(true));
+        frame.request.uri = _BungieNet2.default.platformPath.segment(req.uri.path()).setSearch(req.uri.search(true));
 
         //urijs is smart enough to remove the trailing forwards-slash
         //so add it back in manually
@@ -254,19 +254,18 @@ var Platform = function () {
         _this3._prepareRequest(frame);
       });
     }
-  }, {
-    key: "_activeFrame",
-    value: function _activeFrame(frame) {
 
-      _BungieNet2.default.logger.log("verbose", "Frame is active", {
-        frameId: frame.id
-      });
+    /**
+     * @param {Frame} frame - frame to set as active
+     */
 
-      frame.state = _Frame2.default.state.active;
-      frame.platformRequest.execute();
-    }
   }, {
     key: "_queueFrame",
+
+
+    /**
+     * @param {Frame} frame - frame to queue
+     */
     value: function _queueFrame(frame) {
 
       _BungieNet2.default.logger.log("verbose", "Frame queued", {
@@ -305,7 +304,7 @@ var Platform = function () {
           return reject();
         }
 
-        return Promise.resolve(_this4._activeFrame(frame));
+        return Promise.resolve(Platform._activeFrame(frame));
       });
     }
 
@@ -419,10 +418,17 @@ var Platform = function () {
     /// Application Service
 
     /**
+     * @param {Number} ownerMembershipId - member id to search apps for
+     * @param {Number} currentPage - result page
      * @return {Promise.<Platform.Response>}
      */
-    value: function applicationSearch() {
-      return this._serviceRequest(new _Request2.default(new _urijs2.default("/App/Search/"), "POST", {}));
+    value: function applicationSearch(ownerMembershipId) {
+      var currentPage = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+      return this._serviceRequest(new _Request2.default(new _urijs2.default("/App/Search/"), "POST", {
+        ownerMembershipId: ownerMembershipId,
+        currentPage: currentPage
+      }));
     }
 
     /**
@@ -431,45 +437,66 @@ var Platform = function () {
 
   }, {
     key: "changeApiKeyStatus",
-    value: function changeApiKeyStatus(p1, p2) {
-      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/ChangeApiKeyState/{p1}/{p2}/", {
-        p1: p1,
-        p2: p2
-      }), "POST", {}));
+    value: function changeApiKeyStatus(keyId, state) {
+      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/ChangeApiKeyState/{keyId}/{state}/", {
+        keyId: keyId,
+        state: state
+      }), "POST", null));
     }
 
     /**
+     * Response: {
+     *  apiKey: "-new-api-key",
+     *  apiKeyId: 783639,
+     *  authorizationUrl: "https://www.bungie.net/en/Application/Authorize/783639",
+     *  creationDate: "2016-12-19T11:05:41.603Z",
+     *  status: 1
+     * }
      * @return {Promise.<Platform.Response>}
      */
 
   }, {
     key: "createApiKey",
-    value: function createApiKey(p1) {
-      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/CreateApiKey/{p1}/", {
-        p1: p1
-      }), "POST", {}));
+    value: function createApiKey(appId) {
+      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/CreateApiKey/{appId}/", {
+        appId: appId
+      }), "POST", null));
     }
 
     /**
+     * @param {Object} details
+     * @param {Boolean} details.agreedToCurrentEula - true to agree
+     * @param {String} details.link - website link for appId
+     * @param {String} details.name - name of app
+     * @param {String} details.origin - origin header
+     * @param {String} details.redirectUrl - oauth redirect url
+     * @param {BigNumber} details.scope - scope of app access
      * @return {Promise.<Platform.Response>}
      */
 
   }, {
     key: "createApplication",
-    value: function createApplication() {
-      return this._serviceRequest(new _Request2.default(new _urijs2.default("/App/CreateApplication/"), "POST", {}));
+    value: function createApplication(details) {
+      return this._serviceRequest(new _Request2.default(new _urijs2.default("/App/CreateApplication/"), "POST", details));
     }
 
     /**
+     * @param {Object} details
+     * @param {String} details.link - website link for app
+     * @param {String} details.name - name of app
+     * @param {String} details.origin - origin header
+     * @param {String} details.redirectUrl - oauth redirect url
+     * @param {BigNumber} details.scope - scope of app access
+     * @param {BigNumber} details.status - app status
      * @return {Promise.<Platform.Response>}
      */
 
   }, {
     key: "editApplication",
-    value: function editApplication(p1) {
-      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/EditApplication/{p1}/", {
-        p1: p1
-      }), "POST", {}));
+    value: function editApplication(appId, details) {
+      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/EditApplication/{appId}/", {
+        appId: appId
+      }), "POST", details));
     }
 
     /**
@@ -493,14 +520,15 @@ var Platform = function () {
     }
 
     /**
+     * @param {Number} appId
      * @return {Promise.<Platform.Response>}
      */
 
   }, {
     key: "getApplication",
-    value: function getApplication(p1) {
-      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/Application/{p1}/", {
-        p1: p1
+    value: function getApplication(appId) {
+      return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/App/Application/{appId}/", {
+        appId: appId
       })));
     }
 
@@ -1163,25 +1191,24 @@ var Platform = function () {
 
     /**
      * Get a page of a conversation
-     * @param  {BigNumber} id - conversation id
-     * @param  {Number} [page = 1] - page to return
-     * @param  {BigNumber} [before = (2^63) - 1] - message id filter
-     * @param  {BigNumber} [after = 0] - message id filter
+     * params.before can be set using BigNumber like so:
+     * (new BigNumber(2)).pow(63).minus(1)
+     * @param {Object} params
+     * @param {BigNumber} params.id - conversation id
+     * @param {Number} params.page - page to return
+     * @param {BigNumber} params.before - message id filter
+     * @param {BigNumber} params.after - message id filter
      * @return {Promise.<Platform.Response>}
      */
 
   }, {
     key: "getConversationThreadV3",
-    value: function getConversationThreadV3(id) {
-      var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-      var after = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new _bignumber2.default("0");
-      var before = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : new _bignumber2.default(2).pow(63).minus(1);
-
+    value: function getConversationThreadV3(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Message/GetConversationThreadV3/{id}/{page}/{?after,before}", {
-        id: id.toString(),
-        page: page,
-        after: after.toString(),
-        before: before.toString()
+        id: params.id.toString(),
+        page: params.page,
+        after: params.after.toString(),
+        before: params.before.toString()
       })));
     }
 
@@ -1558,12 +1585,12 @@ var Platform = function () {
 
   }, {
     key: "getContentByTagAndType",
-    value: function getContentByTagAndType(p1, p2, p3, head) {
+    value: function getContentByTagAndType(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Content/GetContentByTagAndType/{p1}/{p2}/{p3}/{?,head}", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        head: head
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        head: params.head
       })));
     }
 
@@ -1649,18 +1676,17 @@ var Platform = function () {
 
     /**
      * @return {Promise.<Platform.Response>}
+     * @param {Number} currentPage = 1
      */
 
   }, {
     key: "getNews",
-    value: function getNews(p1, p2, itemsPerPage) {
-      var currentPage = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
-
+    value: function getNews(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Content/Site/News/{p1}/{p2}/{?itemsperpage,currentpage}", {
-        p1: p1,
-        p2: p2,
-        itemsperpage: itemsPerPage,
-        currentpage: currentPage
+        p1: params.p1,
+        p2: params.p2,
+        itemsperpage: params.itemsPerPage,
+        currentpage: params.currentPage
       })));
     }
 
@@ -1705,14 +1731,14 @@ var Platform = function () {
 
   }, {
     key: "searchContentByTagAndType",
-    value: function searchContentByTagAndType(p1, p2, p3, head, currentPage, itemsPerPage) {
+    value: function searchContentByTagAndType(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Content/SearchContentByTagAndType/{p1}/{p2}/{p3}/{?head,currentpage,itemsperpage}", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        head: head,
-        currentpage: currentPage,
-        itemsperpage: itemsPerPage
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        head: params.head,
+        currentpage: params.currentPage,
+        itemsperpage: params.itemsPerPage
       })));
     }
 
@@ -1735,14 +1761,14 @@ var Platform = function () {
 
   }, {
     key: "searchContentWithText",
-    value: function searchContentWithText(p1, head, cType, tag, currentPage, searchText) {
+    value: function searchContentWithText(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Content/Site/Homepage/{p1}/{?head,ctype,tag,currentpage,searchtext}/", {
-        p1: p1,
-        head: head,
-        ctype: cType,
-        tag: tag,
-        currentpage: currentPage,
-        searchtext: searchText
+        p1: params.p1,
+        head: params.head,
+        ctype: params.cType,
+        tag: params.tag,
+        currentpage: params.currentPage,
+        searchtext: params.searchText
       }), "POST", {}));
     }
 
@@ -1908,12 +1934,12 @@ var Platform = function () {
 
   }, {
     key: "getCoreTopicsPaged",
-    value: function getCoreTopicsPaged(p1, p2, p3, p4) {
+    value: function getCoreTopicsPaged(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Forum/GetCoreTopicsPaged/{p1}/{p2}/{p3}/{p4}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        p4: p4
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        p4: params.p4
       })));
     }
 
@@ -1995,7 +2021,7 @@ var Platform = function () {
     value: function getPostAndParentAwaitingApproval(childPostId, showBanned) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Forum/GetPostAndParentAwaitingApproval/{childPostId}/{?,showbanned}", {
         childPostId: childPostId,
-        showbanned: showBanned
+        showBanned: showBanned
       })));
     }
 
@@ -2005,16 +2031,16 @@ var Platform = function () {
 
   }, {
     key: "getPostsThreadedPaged",
-    value: function getPostsThreadedPaged(parentPostId, page, pageSize, replySize, getParentPost, rootThreadMode, sortMode, showBanned) {
+    value: function getPostsThreadedPaged(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Forum/GetPostsThreadedPaged/{parentPostId}/{page}/{pageSize}/{replySize}/{getParentPost}/{rootThreadMode}/{sortMode}/{?showbanned}", {
-        parentPostId: parentPostId,
-        page: page,
-        pageSize: pageSize,
-        replySize: replySize,
-        getParentPost: getParentPost,
-        rootThreadMode: rootThreadMode,
-        sortMode: sortMode,
-        showbanned: showBanned
+        parentPostId: params.parentPostId,
+        page: params.page,
+        pageSize: params.pageSize,
+        replySize: params.replySize,
+        getParentPost: params.getParentPost,
+        rootThreadMode: params.rootThreadMode,
+        sortMode: params.sortMode,
+        showbanned: params.showBanned
       })));
     }
 
@@ -2024,15 +2050,15 @@ var Platform = function () {
 
   }, {
     key: "getPostsThreadedPagedFromChild",
-    value: function getPostsThreadedPagedFromChild(childPostId, page, pageSize, replySize, rootThreadMode, sortMode, showBanned) {
+    value: function getPostsThreadedPagedFromChild(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Forum/GetPostsThreadedPagedFromChild/{childPostId}/{page}/{pageSize}/{replySize}/{rootThreadMode}/{sortMode}/{?showbanned}", {
-        childPostId: childPostId,
-        page: page,
-        pageSize: pageSize,
-        replySize: replySize,
-        rootThreadMode: rootThreadMode,
-        sortMode: sortMode,
-        showbanned: showBanned
+        childPostId: params.childPostId,
+        page: params.page,
+        pageSize: params.pageSize,
+        replySize: params.replySize,
+        rootThreadMode: params.rootThreadMode,
+        sortMode: params.sortMode,
+        showbanned: params.showBanned
       })));
     }
 
@@ -2064,15 +2090,15 @@ var Platform = function () {
 
   }, {
     key: "getTopicsPaged",
-    value: function getTopicsPaged(page, pageSize, group, sort, quickDate, categoryFilter, tagString) {
+    value: function getTopicsPaged(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Forum/GetTopicsPaged/{page}/{pageSize}/{group}/{sort}/{quickDate}/{categoryFilter}/{?tagstring}", {
-        page: page,
-        pageSize: pageSize,
-        group: group,
-        sort: sort,
-        quickDate: quickDate,
-        categoryFilter: categoryFilter,
-        tagstring: tagString
+        page: params.page,
+        pageSize: params.pageSize,
+        group: params.group,
+        sort: params.sort,
+        quickDate: params.quickDate,
+        categoryFilter: params.categoryFilter,
+        tagstring: params.tagString
       })));
     }
 
@@ -2144,20 +2170,15 @@ var Platform = function () {
 
   }, {
     key: "moderateGroupPost",
-    value: function moderateGroupPost(postId, moderatedItemId) {
-      var reason = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
-      var comments = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "group post ban";
-      var moderatedItemType = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : _BungieNet2.default.enums.affectedItemType.post;
-      var requestedPunishment = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : _BungieNet2.default.enums.requestedPunishment.ban;
-
+    value: function moderateGroupPost(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Forum/Post/{postId}/GroupModerate/", {
-        postId: postId.toString()
+        postId: params.postId.toString()
       }), "POST", {
-        comments: comments,
-        moderatedItemId: moderatedItemId.toString(),
-        moderatedItemType: moderatedItemType,
-        reason: reason,
-        requestedPunishment: requestedPunishment
+        comments: params.comments,
+        moderatedItemId: params.moderatedItemId.toString(),
+        moderatedItemType: params.moderatedItemType,
+        reason: params.reason,
+        requestedPunishment: params.requestedPunishment
       }));
     }
 
@@ -2375,12 +2396,12 @@ var Platform = function () {
 
   }, {
     key: "getForumActivitiesForUser",
-    value: function getForumActivitiesForUser(p1, itemsPerPage, currentPage, format) {
+    value: function getForumActivitiesForUser(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Activity/User/{p1}/{?itemsperpage,currentpage,format}", {
-        p1: p1,
-        itemsperpage: itemsPerPage,
-        currentpage: currentPage,
-        format: format
+        p1: params.p1,
+        itemsperpage: params.itemsPerPage,
+        currentpage: params.currentPage,
+        format: params.format
       })));
     }
 
@@ -2487,12 +2508,12 @@ var Platform = function () {
 
   }, {
     key: "getLikeAndShareActivityForUser",
-    value: function getLikeAndShareActivityForUser(p1, itemsPerPage, currentPage, format) {
+    value: function getLikeAndShareActivityForUser(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Activity/User/{p1}/Activities/LikesAndShares/{?itemsperpage,currentpage,format}", {
-        p1: p1,
-        itemsperpage: itemsPerPage,
-        currentpage: currentPage,
-        format: format
+        p1: params.p1,
+        itemsperpage: params.itemsPerPage,
+        currentpage: params.currentPage,
+        format: params.format
       })));
     }
 
@@ -2641,13 +2662,13 @@ var Platform = function () {
 
   }, {
     key: "banMember",
-    value: function banMember(groupId, membershipId, comment, length) {
+    value: function banMember(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/Members/{membershipId}/Ban/", {
-        groupId: groupId.toString(),
-        membershipId: membershipId.toString()
+        groupId: params.groupId.toString(),
+        membershipId: params.membershipId.toString()
       }), "POST", {
-        comment: comment,
-        length: length
+        comment: params.comment,
+        length: params.length
       }));
     }
 
@@ -2847,14 +2868,12 @@ var Platform = function () {
 
   }, {
     key: "editGroupMembership",
-    value: function editGroupMembership(groupId, membershipId, groupMembershipType) {
-      var clanPlatformType = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-
+    value: function editGroupMembership(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/Members/{membershipId}/SetMembershipType/{groupMembershipType}/{?clanPlatformType}", {
-        groupId: groupId.toString(),
-        membershipId: membershipId.toString(),
-        groupMembershipType: groupMembershipType,
-        clanPlatformType: clanPlatformType
+        groupId: params.groupId.toString(),
+        membershipId: params.membershipId.toString(),
+        groupMembershipType: params.groupMembershipType,
+        clanPlatformType: params.clanPlatformType
       }), "POST", {}));
     }
 
@@ -3119,15 +3138,12 @@ var Platform = function () {
 
   }, {
     key: "getFoundedGroupsForMember",
-    value: function getFoundedGroupsForMember(membershipId, currentPage) {
-      var clanOnly = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var populateFriends = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
+    value: function getFoundedGroupsForMember(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/User/{membershipId}/Founded/{currentPage}/{?clanonly,populatefriends}", {
-        membershipId: membershipId.toString(),
-        currentPage: currentPage,
-        clanonly: clanOnly,
-        populatefriends: populateFriends
+        membershipId: params.membershipId.toString(),
+        currentPage: params.currentPage,
+        clanonly: params.clanOnly,
+        populatefriends: params.populateFriends
       })));
     }
 
@@ -3284,15 +3300,12 @@ var Platform = function () {
 
   }, {
     key: "getJoinedGroupsForMemberV2",
-    value: function getJoinedGroupsForMemberV2(membershipId, currentPage) {
-      var clanOnly = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var populateFriends = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
+    value: function getJoinedGroupsForMemberV2(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/User/{membershipId}/Joined/{currentPage}/{?clanonly,populatefriends}", {
-        membershipId: membershipId.toString(),
-        currentPage: currentPage,
-        clanonly: clanOnly,
-        populatefriends: populateFriends
+        membershipId: params.membershipId.toString(),
+        currentPage: params.currentPage,
+        clanonly: params.clanOnly,
+        populatefriends: params.populateFriends
       })));
     }
 
@@ -3326,13 +3339,13 @@ var Platform = function () {
 
   }, {
     key: "getMembersOfClan",
-    value: function getMembersOfClan(groupId, currentPage, memberType, sort, platformType) {
+    value: function getMembersOfClan(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/ClanMembers/{?currentPage,memberType,sort,platformType}", {
-        groupId: groupId.toString(),
-        currentPage: currentPage,
-        memberType: memberType,
-        sort: sort,
-        platformType: platformType
+        groupId: params.groupId.toString(),
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        sort: params.sort,
+        platformType: params.platformType
       })));
     }
 
@@ -3348,14 +3361,14 @@ var Platform = function () {
 
   }, {
     key: "getMembersOfGroup",
-    value: function getMembersOfGroup(groupId, currentPage, itemsPerPage, memberType, platformType, sort) {
+    value: function getMembersOfGroup(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/Members/{?itemsPerPage,currentPage,memberType,platformType,sort}", {
-        groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage,
-        memberType: memberType,
-        platformType: platformType,
-        sort: sort
+        groupId: params.groupId.toString(),
+        itemsPerPage: params.itemsPerPage,
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        platformType: params.platformType,
+        sort: params.sort
       })));
     }
 
@@ -3371,14 +3384,14 @@ var Platform = function () {
 
   }, {
     key: "getMembersOfGroupV2",
-    value: function getMembersOfGroupV2(groupId, currentPage, itemsPerPage, memberType, platformType, sort) {
+    value: function getMembersOfGroupV2(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/MembersV2/{?itemsPerPage,currentPage,memberType,platformType,sort}", {
-        groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage,
-        memberType: memberType,
-        platformType: platformType,
-        sort: sort
+        groupId: params.groupId.toString(),
+        itemsPerPage: params.itemsPerPage,
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        platformType: params.platformType,
+        sort: params.sort
       })));
     }
 
@@ -3395,15 +3408,15 @@ var Platform = function () {
 
   }, {
     key: "getMembersOfGroupV3",
-    value: function getMembersOfGroupV3(groupId, currentPage, itemsPerPage, memberType, platformType, sort, nameSearch) {
+    value: function getMembersOfGroupV3(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/MembersV3/{?itemsPerPage,currentPage,memberType,platformType,sort,nameSearch}", {
-        groupId: groupId.toString(),
-        itemsPerPage: itemsPerPage,
-        currentPage: currentPage,
-        memberType: memberType,
-        platformType: platformType,
-        sort: sort,
-        nameSearch: nameSearch
+        groupId: params.groupId.toString(),
+        itemsPerPage: params.itemsPerPage,
+        currentPage: params.currentPage,
+        memberType: params.memberType,
+        platformType: params.platformType,
+        sort: params.sort,
+        nameSearch: params.nameSearch
       })));
     }
 
@@ -3591,14 +3604,14 @@ var Platform = function () {
 
   }, {
     key: "inviteClanMember",
-    value: function inviteClanMember(groupId, membershipId, clanMembershipType, title, message) {
+    value: function inviteClanMember(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/InviteToClan/{membershipId}/{clanMembershipType}/", {
-        groupId: groupId,
-        membershipId: membershipId.toString(),
-        clanMembershipType: clanMembershipType
+        groupId: params.groupId,
+        membershipId: params.membershipId.toString(),
+        clanMembershipType: params.clanMembershipType
       }), "POST", {
-        title: title,
-        message: message
+        title: params.title,
+        message: params.message
       }));
     }
 
@@ -3612,13 +3625,13 @@ var Platform = function () {
 
   }, {
     key: "inviteGroupMember",
-    value: function inviteGroupMember(groupId, membershipId, title, message) {
+    value: function inviteGroupMember(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Group/{groupId}/Invite/{membershipId}/", {
-        groupId: groupId.toString(),
-        membershipId: membershipId.toString()
+        groupId: params.groupId.toString(),
+        membershipId: params.membershipId.toString()
       }), "POST", {
-        title: title,
-        message: message
+        title: params.title,
+        message: params.message
       }));
     }
 
@@ -3979,15 +3992,15 @@ var Platform = function () {
 
   }, {
     key: "ignoreItem",
-    value: function ignoreItem(ignoredItemId, ignoredItemType, comment, reason, itemContextId, itemContextType, moderatorRequest) {
+    value: function ignoreItem(params) {
       return this._serviceRequest(new _Request2.default(new _urijs2.default("/Ignore/Ignore/"), "POST", {
-        ignoredItemId: ignoredItemId,
-        ignoredItemType: ignoredItemType,
-        comment: comment,
-        reason: reason,
-        itemContextId: itemContextId,
-        itemContextType: itemContextType,
-        ModeratorRequest: moderatorRequest
+        ignoredItemId: params.ignoredItemId,
+        ignoredItemType: params.ignoredItemType,
+        comment: params.comment,
+        reason: params.reason,
+        itemContextId: params.itemContextId,
+        itemContextType: params.itemContextType,
+        ModeratorRequest: params.moderatorRequest
       }));
     }
 
@@ -4068,13 +4081,13 @@ var Platform = function () {
 
   }, {
     key: "getAdminHistory",
-    value: function getAdminHistory(p1, p2, membershipFilter, startDate, endDate) {
+    value: function getAdminHistory(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Admin/GlobalHistory/{p1}/{p2}/{?membershipFilter,startdate,enddate}", {
-        p1: p1,
-        p2: p2,
-        membershipFilter: membershipFilter,
-        startdate: startDate,
-        enddate: endDate
+        p1: params.p1,
+        p2: params.p2,
+        membershipFilter: params.membershipFilter,
+        startdate: params.startDate,
+        enddate: params.endDate
       })));
     }
 
@@ -4265,13 +4278,13 @@ var Platform = function () {
 
   }, {
     key: "resolveReport",
-    value: function resolveReport(reportId, reason, banLength, result, comments) {
+    value: function resolveReport(params) {
       return this._serviceRequest(new _Request2.default(new _urijs2.default("/Admin/Assigned/Resolve/"), "POST", {
-        banLength: banLength.toString(),
-        comments: comments,
-        reason: reason.toString(),
-        reportId: reportId.toString(),
-        result: result
+        banLength: params.banLength.toString(),
+        comments: params.comments,
+        reason: params.reason.toString(),
+        reportId: params.reportId.toString(),
+        result: params.result
       }));
     }
 
@@ -4542,18 +4555,14 @@ var Platform = function () {
 
   }, {
     key: "getActivityHistory",
-    value: function getActivityHistory(membershipType, destinyMembershipId, characterId) {
-      var mode = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : _BungieNet2.default.enums.destinyActivityModeType.none;
-      var count = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 25;
-      var page = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 1;
-
+    value: function getActivityHistory(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/Stats/ActivityHistory/{membershipType}/{destinyMembershipId}/{characterId}/{?mode,count,page}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        characterId: characterId.toString(),
-        mode: mode,
-        count: count,
-        page: page
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        characterId: params.characterId.toString(),
+        mode: params.mode,
+        count: params.count,
+        page: params.page
       })));
     }
 
@@ -4772,12 +4781,12 @@ var Platform = function () {
 
   }, {
     key: "getClanLeaderboards",
-    value: function getClanLeaderboards(p1, modes, statid, maxtop) {
+    value: function getClanLeaderboards(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/Stats/ClanLeaderboards/{p1}/{?modes,statid,maxtop}", {
-        p1: p1,
-        modes: modes,
-        statid: statid,
-        maxtop: maxtop
+        p1: params.p1,
+        modes: params.modes,
+        statid: params.statid,
+        maxtop: params.maxtop
       })));
     }
 
@@ -4877,12 +4886,12 @@ var Platform = function () {
 
   }, {
     key: "getGrimoireByMembership",
-    value: function getGrimoireByMembership(membershipType, destinyMembershipId, flavour, single) {
+    value: function getGrimoireByMembership(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/Vanguard/Grimoire/{membershipType}/{destinyMembershipId}/{?flavour,single}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId,
-        flavour: flavour,
-        single: single
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId,
+        flavour: params.flavour,
+        single: params.single
       })));
     }
 
@@ -4965,12 +4974,12 @@ var Platform = function () {
 
   }, {
     key: "getItemDetail",
-    value: function getItemDetail(membershipType, destinyMembershipId, characterId, itemInstanceId) {
+    value: function getItemDetail(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Inventory/{itemInstanceId}/", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        characterId: characterId.toString(),
-        itemInstanceId: itemInstanceId.toString()
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        characterId: params.characterId.toString(),
+        itemInstanceId: params.itemInstanceId.toString()
       })));
     }
 
@@ -4980,12 +4989,12 @@ var Platform = function () {
 
   }, {
     key: "getItemReferenceDetail",
-    value: function getItemReferenceDetail(p1, p2, p3, p4) {
+    value: function getItemReferenceDetail(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/{p1}/Account/{p2}/Character/{p3}/ItemReference/{p4}/", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        p4: p4
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        p4: params.p4
       })));
     }
 
@@ -5000,13 +5009,13 @@ var Platform = function () {
 
   }, {
     key: "getLeaderboards",
-    value: function getLeaderboards(membershipType, destinyMembershipId, modes, statid, maxtop) {
+    value: function getLeaderboards(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/Stats/Leaderboards/{membershipType}/{destinyMembershipId}/{?modes,statid,maxtop}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        modes: modes.join(","),
-        statid: statid,
-        maxtop: maxtop
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        modes: params.modes.join(","),
+        statid: params.statid,
+        maxtop: params.maxtop
       })));
     }
 
@@ -5022,14 +5031,14 @@ var Platform = function () {
 
   }, {
     key: "getLeaderboardsForCharacter",
-    value: function getLeaderboardsForCharacter(membershipType, destinyMembershipId, characterId, modes, statid, maxtop) {
+    value: function getLeaderboardsForCharacter(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/Stats/Leaderboards/{membershipType}/{destinyMembershipId}/{characterId}/{?modes,statid,maxtop}", {
-        membershipType: membershipType,
-        destinyMembershipId: destinyMembershipId.toString(),
-        characterId: characterId.toString(),
-        modes: modes.join(","),
-        statid: statid,
-        maxtop: maxtop
+        membershipType: params.membershipType,
+        destinyMembershipId: params.destinyMembershipId.toString(),
+        characterId: params.characterId.toString(),
+        modes: params.modes.join(","),
+        statid: params.statid,
+        maxtop: params.maxtop
       })));
     }
 
@@ -5282,12 +5291,12 @@ var Platform = function () {
 
   }, {
     key: "getVendorItemDetailForCurrentUser",
-    value: function getVendorItemDetailForCurrentUser(membershipType, characterId, vendorId, itemId) {
+    value: function getVendorItemDetailForCurrentUser(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/", {
-        membershipType: membershipType,
-        characterId: characterId.toString(),
-        vendorId: vendorId.toString(),
-        itemId: itemId.toString()
+        membershipType: params.membershipType,
+        characterId: params.characterId.toString(),
+        vendorId: params.vendorId.toString(),
+        itemId: params.itemId.toString()
       })));
     }
 
@@ -5301,12 +5310,12 @@ var Platform = function () {
 
   }, {
     key: "getVendorItemDetailForCurrentUserWithMetadata",
-    value: function getVendorItemDetailForCurrentUserWithMetadata(membershipType, characterId, vendorId, itemId) {
+    value: function getVendorItemDetailForCurrentUserWithMetadata(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/Destiny/{membershipType}/MyAccount/Character/{characterId}/Vendor/{vendorId}/Item/{itemId}/Metadata/", {
-        membershipType: membershipType,
-        characterId: characterId.toString(),
-        vendorId: vendorId.toString(),
-        itemId: itemId.toString()
+        membershipType: params.membershipType,
+        characterId: params.characterId.toString(),
+        vendorId: params.vendorId.toString(),
+        itemId: params.itemId.toString()
       })));
     }
 
@@ -5362,12 +5371,12 @@ var Platform = function () {
 
   }, {
     key: "setItemLockState",
-    value: function setItemLockState(membershipType, itemId, characterId, state) {
+    value: function setItemLockState(params) {
       return this._serviceRequest(new _Request2.default(new _urijs2.default("/Destiny/SetLockState/"), "POST", {
-        membershipType: membershipType,
-        itemId: itemId.toString(),
-        characterId: characterId.toString(),
-        state: state
+        membershipType: params.membershipType,
+        itemId: params.itemId.toString(),
+        characterId: params.characterId.toString(),
+        state: params.state
       }));
     }
 
@@ -5382,13 +5391,13 @@ var Platform = function () {
 
   }, {
     key: "setQuestTrackedState",
-    value: function setQuestTrackedState(membershipType, membershipId, characterId, itemId, state) {
+    value: function setQuestTrackedState(params) {
       return this._serviceRequest(new _Request2.default(new _urijs2.default("/Destiny/SetQuestTrackedState/"), "POST", {
-        membershipType: membershipType,
-        membershipId: membershipId.toString(),
-        characterId: characterId.toString(),
-        itemId: itemId.toString(),
-        state: state
+        membershipType: params.membershipType,
+        membershipId: params.membershipId.toString(),
+        characterId: params.characterId.toString(),
+        itemId: params.itemId.toString(),
+        state: params.state
       }));
     }
 
@@ -5404,14 +5413,14 @@ var Platform = function () {
 
   }, {
     key: "transferItem",
-    value: function transferItem(membershipType, itemReferenceHash, itemId, stackSize, characterId, transferToVault) {
+    value: function transferItem(params) {
       return this._serviceRequest(new _Request2.default(new _urijs2.default("/Destiny/TransferItem/"), "POST", {
-        membershipType: membershipType.toString(),
-        itemReferenceHash: itemReferenceHash,
-        itemId: itemId.toString(),
-        stackSize: stackSize,
-        characterId: characterId.toString(),
-        transferToVault: transferToVault
+        membershipType: params.membershipType.toString(),
+        itemReferenceHash: params.itemReferenceHash,
+        itemId: params.itemId.toString(),
+        stackSize: params.stackSize,
+        characterId: params.characterId.toString(),
+        transferToVault: params.transferToVault
       }));
     }
 
@@ -5527,12 +5536,12 @@ var Platform = function () {
 
   }, {
     key: "getCommunityLiveStatuses",
-    value: function getCommunityLiveStatuses(p1, p2, p3, modeHash) {
+    value: function getCommunityLiveStatuses(params) {
       return this._serviceRequest(new _Request2.default(_urijs2.default.expand("/CommunityContent/Live/All/{p1}/{p2}/{p3}/{?modeHash}", {
-        p1: p1,
-        p2: p2,
-        p3: p3,
-        modeHash: modeHash
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        modeHash: params.modeHash
       })));
     }
 
@@ -5733,18 +5742,29 @@ var Platform = function () {
     set: function set(timeout) {
       this._options.timeout = timeout;
     }
+  }], [{
+    key: "_activeFrame",
+    value: function _activeFrame(frame) {
+
+      _BungieNet2.default.logger.log("verbose", "Frame is active", {
+        frameId: frame.id
+      });
+
+      frame.state = _Frame2.default.state.active;
+      frame.platformRequest.execute();
+    }
   }]);
 
   return Platform;
 }();
 
-exports.default = Platform;
-;
-
 /**
  * Header key-name pairs
  * @type {Object}
  */
+
+
+exports.default = Platform;
 Platform.headers = {
   apiKey: "X-API-Key",
   contentType: "Content-Type"

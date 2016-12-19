@@ -22,10 +22,15 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Error = function (_ExtendableError) {
   _inherits(Error, _ExtendableError);
 
+  /**
+   * @param {String} message - error message
+   * @param {Error.codes} code - error code
+   * @param {*} data - any associated data
+   */
   function Error() {
     var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
     var code = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Error.codes.unknown;
-    var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : void 0;
+    var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
 
     _classCallCheck(this, Error);
 
@@ -39,44 +44,44 @@ var Error = function (_ExtendableError) {
   return Error;
 }(_extendableErrorClass2.default);
 
-exports.default = Error;
-;
-
 /**
  * Associated exception codes for BungieNet.Error exceptions
  * @type {Object}
  */
+
+
+exports.default = Error;
 Error.codes = {
 
   /**
    * Cookies cannot be found
    * @type {Number}
    */
-  no_cookie_by_name: 1,
+  noCookieByName: 1,
 
   /**
    * Network failure
    * @type {Number}
    */
-  network_error: 2,
+  networkError: 2,
 
   /**
    * Value required for X-CSRF header not found
    * @type {Number}
    */
-  no_csrf_token: 3,
+  noCsrfToken: 3,
 
   /**
    * Response from bungie.net could not be parsed as valid JSON
    * @type {Number}
    */
-  corrupt_response: 4,
+  corruptResponse: 4,
 
   /**
    * An invalid cookie provider was set or used
    * @type {Number}
    */
-  no_cookie_provider: 5,
+  noCookieProvider: 5,
 
   /**
    * Generic error

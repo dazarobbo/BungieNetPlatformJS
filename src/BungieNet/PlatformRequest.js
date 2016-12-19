@@ -1,7 +1,6 @@
-"use strict";
-
 import BungieNet from "./BungieNet.js";
 import EventEmitter from "events";
+import HttpStatus from "http-status-codes";
 import request from "request";
 import requestDebug from "request-debug";
 import Response from "./Response";
@@ -13,7 +12,7 @@ import Response from "./Response";
 export default class PlatformRequest extends EventEmitter {
 
   /**
-   * @param {Platform.Frame} frame
+   * @param {Platform.Frame} frame -
    */
   constructor(frame) {
 
@@ -47,18 +46,33 @@ export default class PlatformRequest extends EventEmitter {
 
   }
 
+  /**
+   * @return {Frame} frame
+   */
   get frame() {
     return this._frame;
   }
 
+  /**
+   * @return {Object} request options
+   */
   get options() {
     return this._options;
   }
 
-  _networkDebug(type, data, r) {
+  /**
+   * @param {String} type -
+   * @param {Object} data -
+   * @param {String} r -
+   * @return {undefined}
+   */
+  static _networkDebug(type, data, r) {
     BungieNet.logger.log("verbose", type, data);
   }
 
+  /**
+   * @return {undefined}
+   */
   _beforeSend() {
     this.emit(PlatformRequest.events.beforeSend, {
       target: this
@@ -66,6 +80,9 @@ export default class PlatformRequest extends EventEmitter {
     return Promise.resolve();
   }
 
+  /**
+   * @return {undefined}
+   */
   _httpSuccess() {
     return new Promise(resolve => {
 
@@ -84,6 +101,9 @@ export default class PlatformRequest extends EventEmitter {
     });
   }
 
+  /**
+   * @return {undefined}
+   */
   _httpFail() {
     BungieNet.logger.log("warn", "HTTP Failed", {
       frameId: this._frame.id,
@@ -95,6 +115,9 @@ export default class PlatformRequest extends EventEmitter {
     return Promise.resolve();
   }
 
+  /**
+   * @return {undefined}
+   */
   _onHttpDone() {
     this.emit(PlatformRequest.events.httpDone, {
       target: this
@@ -102,15 +125,22 @@ export default class PlatformRequest extends EventEmitter {
     return Promise.resolve();
   }
 
+  /**
+   * @return {undefined}
+   */
   _onHttpSuccess() {
     return new Promise(resolve => {
       Response
         .parse(this._responseText)
-        .then((r) => this._onResponseParsed(r), () => this._onResponseCorrupt())
+        .then(r => this._onResponseParsed(r), () => this._onResponseCorrupt())
         .then(() => resolve());
     });
   }
 
+  /**
+   * @param {Response} response -
+   * @return {undefined}
+   */
   _onResponseParsed(response) {
     return new Promise(resolve => {
 
@@ -126,6 +156,9 @@ export default class PlatformRequest extends EventEmitter {
     });
   }
 
+  /**
+   * @return {undefined}
+   */
   _onResponseCorrupt() {
     return new Promise(resolve => {
       this._error()
@@ -134,6 +167,9 @@ export default class PlatformRequest extends EventEmitter {
     });
   }
 
+  /**
+   * @return {undefined}
+   */
   _error() {
     this.emit(PlatformRequest.events.error, {
       target: this
@@ -141,6 +177,9 @@ export default class PlatformRequest extends EventEmitter {
     return Promise.resolve();
   }
 
+  /**
+   * @return {undefined}
+   */
   _success() {
     this.emit(PlatformRequest.events.success, {
       target: this
@@ -148,6 +187,9 @@ export default class PlatformRequest extends EventEmitter {
     return Promise.resolve();
   }
 
+  /**
+   * @return {undefined}
+   */
   _done() {
     this.emit(PlatformRequest.events.done, {
       target: this
@@ -155,6 +197,9 @@ export default class PlatformRequest extends EventEmitter {
     return Promise.resolve();
   }
 
+  /**
+   * @return {undefined}
+   */
   __internalBind() {
 
     //bind all information to the _options object
@@ -162,12 +207,11 @@ export default class PlatformRequest extends EventEmitter {
     this._options.method = this._frame.request.method;
     this._options.body = this._frame.request.data;
 
-    //copy anything not in _options.headers to _options.headers
-    //TODO: prefer event callbacks rather than this property
-    Object.assign(this._options.headers, this._frame.request.headers);
-
   }
 
+  /**
+   * @return {undefined}
+   */
   execute() {
     this._beforeSend().then(() => {
 
@@ -175,7 +219,7 @@ export default class PlatformRequest extends EventEmitter {
 
       BungieNet.logger.log("info", "Executing request", {
         frameId: this._frame.id,
-        line: `${this._options.method} ${this._options.uri}`
+        line: `${ this._options.method } ${ this._options.uri }`
       });
 
       request(this._options, (err, response, body) => {
@@ -183,7 +227,7 @@ export default class PlatformRequest extends EventEmitter {
         this._responseMessage = response;
         this._responseText = body;
 
-        if(err || response.statusCode !== 200) {
+        if(err || response.statusCode !== HttpStatus.OK) {
           return this._httpFail()
             .then(() => this._onHttpDone())
             .then(() => this._error())
@@ -199,7 +243,7 @@ export default class PlatformRequest extends EventEmitter {
     });
   }
 
-};
+}
 
 /**
  * Events generated by a PlatformRequest instance

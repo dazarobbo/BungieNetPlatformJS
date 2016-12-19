@@ -51,8 +51,8 @@ var Cookies = function () {
 
     /**
      * Returns the cookie with the given name
-     * @param  {String} name
-     * @return {Promise.<Cookie>}
+     * @param  {String} name cookie name
+     * @return {Promise.<Cookie>} cookie
      */
     value: function get(name) {
       return new Promise(function (resolve, reject) {
@@ -71,8 +71,8 @@ var Cookies = function () {
 
     /**
      * Returns an array of cookies which pass the predicate function
-     * @param  {Function} predicate
-     * @return {Promise.<Cookie[]>}
+     * @param  {Function} predicate return true to include
+     * @return {Promise.<Cookie[]>} array
      */
 
   }, {
@@ -92,7 +92,7 @@ var Cookies = function () {
 
     /**
      * Returns an array of session cookies
-     * @return {Promise.<Cookie[]>}
+     * @return {Promise.<Cookie[]>} array
      */
 
   }, {
@@ -106,7 +106,7 @@ var Cookies = function () {
     /**
      * Returns the value for a given cookie name
      * @param  {String} name - name of cookie
-     * @return {Promise.<String>}
+     * @return {Promise.<String>} string
      */
 
   }, {
@@ -123,12 +123,12 @@ var Cookies = function () {
   return Cookies;
 }();
 
-exports.default = Cookies;
-;
-
 /**
  * Cookie provider interface
  * @type {*}
  */
+
+
+exports.default = Cookies;
 Cookies.provider = null;
 //# sourceMappingURL=Cookies.js.map

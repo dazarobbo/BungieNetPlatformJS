@@ -1,5 +1,3 @@
-"use strict";
-
 import BungieNet from "./BungieNet.js";
 
 /**
@@ -13,7 +11,7 @@ import BungieNet from "./BungieNet.js";
 export default class Response {
 
   /**
-   * @param {Object} o
+   * @param {Object} o -
    */
   constructor(o) {
     this.errorCode = o.ErrorCode;
@@ -34,7 +32,7 @@ export default class Response {
 
   /**
    * Whether this response was throttled
-   * @return {Boolean}
+   * @return {Boolean} -
    */
   get isThrottled() {
 
@@ -45,30 +43,30 @@ export default class Response {
       case BungieNet.enums.platformErrorCodes.throttle_limit_exceeded_momentarily:
       case BungieNet.enums.platformErrorCodes.per_endpoint_request_throttle_exceeded:
         return true;
+      default:
+        return false;
     }
-
-    return false;
 
   }
 
   /**
    * Parses a response from the bungie.net platform
-   * @param {String} text
-   * @return {Promise.<BungieNet.Platform.Response>}
+   * @param {String} text -
+   * @return {Promise.<BungieNet.Platform.Response>} -
    */
   static parse(text) {
 
-    let obj = void 0;
+    let obj = undefined;
 
     try {
       obj = JSON.parse(text);
     }
     catch(err) {
-      return reject();
+      return Promise.reject(undefined);
     }
 
     return Promise.resolve(new Response(obj));
 
   }
 
-};
+}

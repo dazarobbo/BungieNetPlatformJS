@@ -106,7 +106,12 @@
     "no-shadow": "error",
     "no-undef-init": "off",
     "no-undefined": "off",
-    "no-unused-vars": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
     "no-use-before-define": "error",
 
     "global-require": "error",
@@ -175,7 +180,10 @@
     ],
     "indent": [
       "error",
-      2
+      2,
+      {
+        "SwitchCase": 1
+      }
     ],
     "key-spacing": [
       "error",
@@ -198,6 +206,12 @@
             "after": false
           },
           "while": {
+            "after": false
+          },
+          "catch": {
+            "after": false
+          },
+          "switch": {
             "after": false
           }
         }
@@ -316,13 +330,6 @@
       "error",
       {
         "before": true,
-        "after": true
-      }
-    ],
-    "generator-star-spacing": [
-      "error",
-      {
-        "before": false,
         "after": true
       }
     ],

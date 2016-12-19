@@ -24,11 +24,6 @@ let p = new BungieNet.Platform({
 
 p.addPlugin(new BungieNet.Platform.Plugin.CookieJarMemoryPlugin());
 
-p.getCurrentUser()
+p.helloWorld()
   .then(r => console.log(r.response), r => console.log(r))
-  .catch(e => console.log(e))
-  .then(() => {
-
-    p.helloWorld();
-
-  });
+  .catch(e => console.log(e));

@@ -14,6 +14,10 @@ var _events = require("events");
 
 var _events2 = _interopRequireDefault(_events);
 
+var _httpStatusCodes = require("http-status-codes");
+
+var _httpStatusCodes2 = _interopRequireDefault(_httpStatusCodes);
+
 var _request = require("request");
 
 var _request2 = _interopRequireDefault(_request);
@@ -42,7 +46,7 @@ var PlatformRequest = function (_EventEmitter) {
   _inherits(PlatformRequest, _EventEmitter);
 
   /**
-   * @param {Platform.Frame} frame
+   * @param {Platform.Frame} frame -
    */
   function PlatformRequest(frame) {
     _classCallCheck(this, PlatformRequest);
@@ -78,19 +82,29 @@ var PlatformRequest = function (_EventEmitter) {
     return _this;
   }
 
+  /**
+   * @return {Frame} frame
+   */
+
+
   _createClass(PlatformRequest, [{
-    key: "_networkDebug",
-    value: function _networkDebug(type, data, r) {
-      _BungieNet2.default.logger.log("verbose", type, data);
-    }
-  }, {
     key: "_beforeSend",
+
+
+    /**
+     * @return {undefined}
+     */
     value: function _beforeSend() {
       this.emit(PlatformRequest.events.beforeSend, {
         target: this
       });
       return Promise.resolve();
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_httpSuccess",
     value: function _httpSuccess() {
@@ -112,6 +126,11 @@ var PlatformRequest = function (_EventEmitter) {
         });
       });
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_httpFail",
     value: function _httpFail() {
@@ -124,6 +143,11 @@ var PlatformRequest = function (_EventEmitter) {
       });
       return Promise.resolve();
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_onHttpDone",
     value: function _onHttpDone() {
@@ -132,6 +156,11 @@ var PlatformRequest = function (_EventEmitter) {
       });
       return Promise.resolve();
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_onHttpSuccess",
     value: function _onHttpSuccess() {
@@ -147,6 +176,12 @@ var PlatformRequest = function (_EventEmitter) {
         });
       });
     }
+
+    /**
+     * @param {Response} response -
+     * @return {undefined}
+     */
+
   }, {
     key: "_onResponseParsed",
     value: function _onResponseParsed(response) {
@@ -165,6 +200,11 @@ var PlatformRequest = function (_EventEmitter) {
         });
       });
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_onResponseCorrupt",
     value: function _onResponseCorrupt() {
@@ -178,6 +218,11 @@ var PlatformRequest = function (_EventEmitter) {
         });
       });
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_error",
     value: function _error() {
@@ -186,6 +231,11 @@ var PlatformRequest = function (_EventEmitter) {
       });
       return Promise.resolve();
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_success",
     value: function _success() {
@@ -194,6 +244,11 @@ var PlatformRequest = function (_EventEmitter) {
       });
       return Promise.resolve();
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "_done",
     value: function _done() {
@@ -202,6 +257,11 @@ var PlatformRequest = function (_EventEmitter) {
       });
       return Promise.resolve();
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "__internalBind",
     value: function __internalBind() {
@@ -210,11 +270,12 @@ var PlatformRequest = function (_EventEmitter) {
       this._options.uri = this._frame.request.uri.toString();
       this._options.method = this._frame.request.method;
       this._options.body = this._frame.request.data;
-
-      //copy anything not in _options.headers to _options.headers
-      //TODO: prefer event callbacks rather than this property
-      Object.assign(this._options.headers, this._frame.request.headers);
     }
+
+    /**
+     * @return {undefined}
+     */
+
   }, {
     key: "execute",
     value: function execute() {
@@ -234,7 +295,7 @@ var PlatformRequest = function (_EventEmitter) {
           _this6._responseMessage = response;
           _this6._responseText = body;
 
-          if (err || response.statusCode !== 200) {
+          if (err || response.statusCode !== _httpStatusCodes2.default.OK) {
             return _this6._httpFail().then(function () {
               return _this6._onHttpDone();
             }).then(function () {
@@ -257,23 +318,41 @@ var PlatformRequest = function (_EventEmitter) {
     get: function get() {
       return this._frame;
     }
+
+    /**
+     * @return {Object} request options
+     */
+
   }, {
     key: "options",
     get: function get() {
       return this._options;
+    }
+
+    /**
+     * @param {String} type -
+     * @param {Object} data -
+     * @param {String} r -
+     * @return {undefined}
+     */
+
+  }], [{
+    key: "_networkDebug",
+    value: function _networkDebug(type, data, r) {
+      _BungieNet2.default.logger.log("verbose", type, data);
     }
   }]);
 
   return PlatformRequest;
 }(_events2.default);
 
-exports.default = PlatformRequest;
-;
-
 /**
  * Events generated by a PlatformRequest instance
  * @type {Object}
  */
+
+
+exports.default = PlatformRequest;
 PlatformRequest.events = {
 
   beforeSend: "beforeSend",

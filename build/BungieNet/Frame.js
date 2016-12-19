@@ -1,11 +1,5 @@
 "use strict";
 
-/**
- * Platform.Frame
- *
- * Instances of this class should be used in the Platform
- */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -14,7 +8,16 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+/**
+ * Platform.Frame
+ *
+ * Instances of this class should be used in the Platform
+ */
 var Frame = function () {
+
+  /**
+   *
+   */
   function Frame() {
     _classCallCheck(this, Frame);
 
@@ -64,6 +67,11 @@ var Frame = function () {
     this.serviceReject = null;
   }
 
+  /**
+   * @return {Number} - frame id number
+   */
+
+
   _createClass(Frame, [{
     key: "id",
     get: function get() {
@@ -72,25 +80,27 @@ var Frame = function () {
 
     /**
      * Generates a global id value for a Frame
+     * @return {Number} new frame id
      */
 
   }], [{
     key: "generateId",
     value: function generateId() {
-      return ++Frame.id;
+      Frame.id += 1;
+      return Frame.id;
     }
   }]);
 
   return Frame;
 }();
 
-exports.default = Frame;
-;
-
 /**
  * Static id variable to tag Frames with
  * @type {Number}
  */
+
+
+exports.default = Frame;
 Frame.id = 0;
 
 /**

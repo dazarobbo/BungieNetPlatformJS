@@ -30,25 +30,26 @@ var CurrentUser = function () {
 
     /**
      * Returns a bool for whether the user is signed in based on cookie existence
-     * @return {Promise.<Boolean>}
+     * @return {Promise.<Boolean>} bool
      */
     value: function authenticated() {
       return new Promise(function (resolve) {
+        return (
 
-        //if cookie found, resolve as true
-        //if it isn't found, resolve as false
-        //TODO: does this make sense?
-        return _Cookies2.default.get("bungleatk").then(function () {
-          return resolve(true);
-        }, function () {
-          return resolve(false);
-        });
+          //if cookie found, resolve as true
+          //if it isn't found, resolve as false
+          _Cookies2.default.get("bungleatk").then(function () {
+            return resolve(true);
+          }, function () {
+            return resolve(false);
+          })
+        );
       });
     }
 
     /**
      * Whether there is any trace of an existing user
-     * @return {Promise.<Cookie[]>}
+     * @return {Promise.<Cookie[]>} cookie
      */
 
   }, {
@@ -65,7 +66,7 @@ var CurrentUser = function () {
 
     /**
      * Returns the CSRF token for API requests
-     * @return {Promise.<String>}
+     * @return {Promise.<String>} string
      */
 
   }, {
@@ -77,7 +78,7 @@ var CurrentUser = function () {
 
     /**
      * Returns the member id of the current user
-     * @return {Promise.<Number>}
+     * @return {Promise.<Number>} id
      */
 
   }, {
@@ -92,13 +93,13 @@ var CurrentUser = function () {
 
     /**
      * Returns the set bungie.net theme
-     * @return {Promise.<String>}
+     * @return {Promise.<String>} theme
      */
 
   }, {
     key: "getTheme",
     value: function getTheme() {
-      return cookies.getValue("bungletheme");
+      return _Cookies2.default.getValue("bungletheme");
     }
 
     /**
@@ -134,5 +135,4 @@ var CurrentUser = function () {
 }();
 
 exports.default = CurrentUser;
-;
 //# sourceMappingURL=CurrentUser.js.map
