@@ -185,7 +185,7 @@
         "mode": "strict"
       }
     ],
-    "keyword-spacing ": [
+    "keyword-spacing": [
       "error",
       {
         "before": true,
