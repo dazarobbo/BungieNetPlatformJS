@@ -1,5 +1,3 @@
-"use strict";
-
 import URI from "urijs";
 import winston from "winston";
 import CurrentUser from "./CurrentUser";

@@ -1,0 +1,9 @@
+.git
+bower_components/
+build/
+node_modules/
+.gitattributes
+.gitignore
+.jshintrc
+.npmignore
+Gruntfile.js
