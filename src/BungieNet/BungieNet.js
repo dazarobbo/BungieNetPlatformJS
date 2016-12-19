@@ -1,4 +1,3 @@
-//workaround for the enums
 /*eslint camelcase: "off"*/
 
 import URI from "urijs";
