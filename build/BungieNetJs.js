@@ -26,4 +26,3 @@ exports.default = _BungieNet2.default;
 
 _BungieNet2.default.Platform = _Platform2.default;
 _BungieNet2.default.Platform.Plugin = _Plugin2.default;
-//# sourceMappingURL=BungieNetJs.js.map

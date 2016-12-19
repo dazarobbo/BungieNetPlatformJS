@@ -102,4 +102,3 @@ var FrameManager = function () {
 }();
 
 exports.default = FrameManager;
-//# sourceMappingURL=FrameManager.js.map

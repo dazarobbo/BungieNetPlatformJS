@@ -101,4 +101,3 @@ Plugin.OAuthPlugin = function (_Plugin2) {
 
   return _class2;
 }(Plugin);
-//# sourceMappingURL=Plugin.js.map

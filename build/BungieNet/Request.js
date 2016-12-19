@@ -37,4 +37,3 @@ function Request(uri) {
 };
 
 exports.default = Request;
-//# sourceMappingURL=Request.js.map

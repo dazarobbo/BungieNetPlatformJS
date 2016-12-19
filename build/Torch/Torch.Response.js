@@ -39,4 +39,3 @@ Torch.Response = function () {
 
   return _class;
 }();
-//# sourceMappingURL=Torch.Response.js.map

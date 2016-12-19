@@ -74,4 +74,3 @@ Torch.Tag = function () {
 
   return _class;
 }();
-//# sourceMappingURL=Torch.Tag.js.map

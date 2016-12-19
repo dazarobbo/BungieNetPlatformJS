@@ -135,4 +135,3 @@ var CurrentUser = function () {
 }();
 
 exports.default = CurrentUser;
-//# sourceMappingURL=CurrentUser.js.map

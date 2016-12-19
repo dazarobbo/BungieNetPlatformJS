@@ -16,4 +16,3 @@ var Common = function Common() {
 };
 
 exports.default = Common;
-//# sourceMappingURL=Common.js.map

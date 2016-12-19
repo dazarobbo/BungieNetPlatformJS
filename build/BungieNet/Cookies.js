@@ -131,4 +131,3 @@ var Cookies = function () {
 
 exports.default = Cookies;
 Cookies.provider = null;
-//# sourceMappingURL=Cookies.js.map

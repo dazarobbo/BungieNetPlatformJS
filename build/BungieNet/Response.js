@@ -97,4 +97,3 @@ var Response = function () {
 }();
 
 exports.default = Response;
-//# sourceMappingURL=Response.js.map

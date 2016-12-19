@@ -149,4 +149,3 @@ var Torch = function () {
 }();
 
 exports.default = Torch;
-//# sourceMappingURL=Torch.js.map

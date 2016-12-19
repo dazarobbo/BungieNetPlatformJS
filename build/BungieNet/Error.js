@@ -90,4 +90,3 @@ Error.codes = {
   unknown: 6
 
 };
-//# sourceMappingURL=Error.js.map
