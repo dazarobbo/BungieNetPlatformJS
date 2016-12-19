@@ -17,9 +17,8 @@ BungieNet.logger.add(winston.transports.Console, {
 BungieNet.logger.cli();
 
 
-let p = new BungieNet.Platform({
-  apiKey: "49380b64725a497598c0d3cb140b002f",
-  cookieJar: true
+const p = new BungieNet.Platform({
+  apiKey: "49380b64725a497598c0d3cb140b002f"
 });
 
 p.addPlugin(new BungieNet.Platform.Plugin.CookieJarMemoryPlugin());

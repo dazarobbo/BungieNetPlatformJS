@@ -1,7 +1,7 @@
 {
   "name": "bungienetplatformjs",
   "description": "JavaScript API for the Bungie.net Platform",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "author": "dazarobbo",
   "keywords": [
@@ -40,7 +40,6 @@
   "dependencies": {
     "babel-polyfill": "^6.20.0",
     "bignumber.js": "^3.0.1",
-    "dotenv": "^2.0.0",
     "events": "^1.1.1",
     "extendable-error-class": "^0.1.1",
     "http-status-codes": "^1.0.6",

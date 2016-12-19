@@ -1,7 +1,12 @@
+## Install
+```bashp
+npm install bungienetplatformjs
 ```
+## Usage
+```js
 import BungieNet from "bungienetplatformjs";
 
-let p = new BungieNet.Platform({
+const p = new BungieNet.Platform({
   apiKey: "-api-key-here-"
 });
 
