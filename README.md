@@ -4,7 +4,7 @@ npm install bungienetplatformjs
 ```
 ## Usage
 ```js
-import BungieNet from "bungienetplatformjs";
+const BungieNet = require("bungienetplatformjs").default;
 
 const p = new BungieNet.Platform({
   apiKey: "-api-key-here-"
