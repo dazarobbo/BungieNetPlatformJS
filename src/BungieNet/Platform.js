@@ -5,7 +5,6 @@ import Frame from "./Frame.js";
 import FrameSet from "./FrameSet.js";
 import FrameManager from "./FrameManager";
 import PlatformRequest from "./PlatformRequest";
-import request from "request";
 import Request from "./Request.js";
 import URI from "urijs";
 import URITemplate from "urijs/src/URITemplate";
@@ -65,12 +64,6 @@ export default class Platform {
      * @type {Set<Platform.Plugin>}
      */
     this._plugins = new Set();
-
-    /**
-     * Instance-specific cookie store
-     * @type {Object}
-     */
-    this._internalCookieJar = request.jar();
 
   }
 
@@ -306,18 +299,6 @@ export default class Platform {
     this._plugins.delete(p);
   }
 
-  get cookieJar() {
-    return this._options.cookieJar;
-  }
-
-  set cookieJar(ok) {
-    this._options.cookieJar = ok;
-  }
-
-  get internalCookieJar() {
-    return this._internalCookieJar;
-  }
-
   /**
    * @type {Number}
    */
@@ -452,12 +433,12 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getAccessTokensFromCode() {
+  getAccessTokensFromCode(code) {
     return this._serviceRequest(new Request(
       new URI("/App/GetAccessTokensFromCode/"),
       "POST",
       {
-
+        code
       }
     ));
   }
@@ -465,12 +446,12 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getAccessTokensFromRefreshToken() {
+  getAccessTokensFromRefreshToken(refreshToken) {
     return this._serviceRequest(new Request(
       new URI("/App/GetAccessTokensFromRefreshToken/"),
       "POST",
       {
-
+        refreshToken
       }
     ));
   }
