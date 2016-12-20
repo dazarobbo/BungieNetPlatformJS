@@ -23,7 +23,7 @@
   "main": "./lib/index.js",
   "bin": {},
   "scripts": {
-    "build": "babel src -d build --source-maps inline"
+    "build": "babel src -d lib --source-maps inline"
   },
   "man": "",
   "config": {},
