@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/BungieNet/Common.js"],"names":["Common"],"mappings":";;;;;;AAAA;;;;AAEA;;;IAGqBA,M;;;;kBAAAA,M","file":"Common.js","sourcesContent":["import \"babel-polyfill\";\r\n\r\n/**\r\n * Common functions and includes/imports/requires\r\n */\r\nexport default class Common {\r\n\r\n}\r\n"]}

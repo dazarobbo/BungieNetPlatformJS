@@ -1,5 +1,3 @@
-"use strict";
-
 import "./BungieNet/Common.js";
 import { default as BungieNet } from "./BungieNet/BungieNet.js";
 import { default as Platform } from "./BungieNet/Platform.js";
