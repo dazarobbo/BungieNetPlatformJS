@@ -7,10 +7,7 @@
   "keywords": [
     "bungie",
     "bungie.net",
-    "platform",
-    "destiny",
-    "javascript",
-    "api"
+    "destiny"
   ],
   "homepage": "https://github.com/dazarobbo/BungieNetPlatformJS",
   "repository": {
