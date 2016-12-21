@@ -17,6 +17,7 @@
   "bugs": {
     "url": "https://github.com/dazarobbo/BungieNetPlatformJS/issues"
   },
+  "homepage": "https://github.com/dazarobbo/BungieNetPlatformJS",
   "main": "./lib/index.js",
   "bin": {},
   "scripts": {
