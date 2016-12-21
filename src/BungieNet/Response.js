@@ -52,7 +52,7 @@ export default class Response {
   /**
    * Parses a response from the bungie.net platform
    * @param {String} text -
-   * @return {Promise.<BungieNet.Platform.Response>} -
+   * @return {Promise.<Response>} -
    */
   static parse(text) {
 

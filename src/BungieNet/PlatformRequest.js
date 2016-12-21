@@ -2,7 +2,7 @@ import BungieNet from "./BungieNet.js";
 import EventEmitter from "events";
 import HttpStatus from "http-status-codes";
 import request from "request";
-import Response from "./Response";
+import Response from "./Response.js";
 
 /**
  * This class does NOT represent a response from bungie.net. This class exists
@@ -11,14 +11,14 @@ import Response from "./Response";
 export default class PlatformRequest extends EventEmitter {
 
   /**
-   * @param {Platform.Frame} frame -
+   * @param {Frame} frame -
    */
   constructor(frame) {
 
     super();
 
     /**
-     * @type {Platform.Frame}
+     * @type {Frame}
      */
     this._frame = frame;
 
@@ -188,12 +188,9 @@ export default class PlatformRequest extends EventEmitter {
    * @return {undefined}
    */
   __internalBind() {
-
-    //bind all information to the _options object
     this._options.uri = this._frame.request.uri.toString();
     this._options.method = this._frame.request.method;
     this._options.body = this._frame.request.data;
-
   }
 
   /**
