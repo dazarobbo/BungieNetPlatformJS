@@ -1,8 +1,8 @@
 /*eslint camelcase: "off"*/
 
+import CurrentUser from "./CurrentUser";
 import URI from "urijs";
 import winston from "winston";
-import CurrentUser from "./CurrentUser";
 
 /**
  * BungieNet
@@ -10,7 +10,7 @@ import CurrentUser from "./CurrentUser";
 export default class BungieNet {
 
   /**
-   * @returns {URI} Gets the base bungie.net URI
+   * @return {URI} Gets the base bungie.net URI
    */
   static get base() {
     return new URI({
@@ -20,14 +20,14 @@ export default class BungieNet {
   }
 
   /**
-   * @returns {String} Fully qualified hostname
+   * @return {String} Fully qualified hostname
    */
   static get host() {
     return `www.${ BungieNet.domain }`;
   }
 
   /**
-   * @returns {Promise.<URI>} Generates most appropriate locale-aware base URI
+   * @return {Promise.<URI>} Generates most appropriate locale-aware base URI
    */
   static getLocaleBase() {
     return new Promise(resolve => {
@@ -38,7 +38,7 @@ export default class BungieNet {
   }
 
   /**
-   * @returns {URI} Base platform URI
+   * @return {URI} Base platform URI
    */
   static get platformPath() {
     return BungieNet.base.segment("Platform");
@@ -47,7 +47,7 @@ export default class BungieNet {
   /**
    * Find the most appropriate locale to use, taking into account any
    * currently detected user
-   * @returns {Promise.<String>} locale
+   * @return {Promise.<String>} locale
    */
   static getLocale() {
     return new Promise(resolve => {
