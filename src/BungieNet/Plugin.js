@@ -4,7 +4,7 @@ import BungieNet from "./BungieNet.js";
 /**
  * Plugin base class for plugins. Each plugin MUST define an update method.
  *
- * void update( String: eventName, Array: args )
+ * void update( String: eventName, args[] )
  */
 export default class Plugin {
 

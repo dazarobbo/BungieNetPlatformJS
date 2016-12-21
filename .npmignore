@@ -1,4 +1,7 @@
-bower_components/
 node_modules/
+src/
 test/
+.eslintignore
+.eslintrc.json
+.tern-project
 npm-debug.log

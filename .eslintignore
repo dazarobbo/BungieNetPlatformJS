@@ -1,9 +1,14 @@
 .git
-bower_components/
-build/
+lib/
 node_modules/
+test/
+.babelrc
 .gitattributes
 .gitignore
 .jshintrc
 .npmignore
-Gruntfile.js
+.npm-debug.log
+.tern-project
+LICENSE
+package.json
+README.md
