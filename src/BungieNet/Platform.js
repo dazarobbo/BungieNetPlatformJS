@@ -4488,19 +4488,6 @@ export default class Platform {
   /// Destiny Service
 
   /**
-   * @return {Promise.<Platform.Response>}
-   */
-  buyItem() {
-    return this._serviceRequest(new Request(
-      new URI("/Destiny/BuyItem/"),
-      "POST",
-      {
-
-      }
-    ));
-  }
-
-  /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} itemId
    * @param {BigNumber} characterId
@@ -5316,21 +5303,6 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
-   */
-  refundItem(p1) {
-    return this._serviceRequest(new Request(
-      URI.expand("/Destiny/{p1}/RefundItem/", {
-        p1
-      }),
-      "POST",
-      {
-
-      }
-    ));
-  }
-
-  /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {String} displayName
    * @return {Promise.<Platform.Response>}
@@ -5481,12 +5453,13 @@ export default class Platform {
   /**
    * @return {Promise.<Platform.Response>}
    */
-  getAdminCommunityLiveStatuses(p1, p2, name) {
+  getAdminCommunityLiveStatuses(params) {
     return this._serviceRequest(new Request(
-      URI.expand("/CommunityContent/Live/Admin/{p1}/{p2}/{?name}", {
-        p1,
-        p2,
-        name
+      URI.expand("/CommunityContent/Live/Admin/{p1}/{p2}/{p3}/{?name}", {
+        p1: params.p1,
+        p2: params.p2,
+        p3: params.p3,
+        name: params.name
       }),
       "POST",
       {
