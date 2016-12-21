@@ -264,6 +264,10 @@ export default class Platform {
     return this._frameManager.getActive().size;
   }
 
+  /**
+   * Plugins to the platform
+   * @type {Set}
+   */
   get plugins() {
     return this._plugins;
   }
