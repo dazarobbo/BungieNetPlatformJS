@@ -264,12 +264,8 @@ export default class Platform {
     return this._frameManager.getActive().size;
   }
 
-  addPlugin(p) {
-    this._plugins.add(p);
-  }
-
-  removePlugin(p) {
-    this._plugins.delete(p);
+  get plugins() {
+    return this._plugins;
   }
 
   /**
