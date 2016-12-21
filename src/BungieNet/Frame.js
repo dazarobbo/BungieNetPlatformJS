@@ -24,24 +24,24 @@ export default class Frame {
 
     /**
      * The incoming service-level request
-     * @type {Platform.Request}
+     * @type {Request}
      */
     this.request = null;
 
     /**
      * The finished service-level response
-     * @type {Platform.Response}
+     * @type {Response}
      */
     this.response = null;
 
     /**
      * Object handling the request workflow
-     * @type {Platform.PlatformRequest}
+     * @type {PlatformRequest}
      */
     this.platformRequest = null;
 
     /**
-     * @type {Platform.Frame.state}
+     * @type {Frame.state}
      */
     this.state = Frame.state.none;
 

@@ -11,31 +11,6 @@ import URITemplate from "urijs/src/URITemplate";
 
 /**
  * Platform
- *
- * Notes:
- *
- * ===== Plugins =====
- * Plugins extend and dictate the operation of the platform. A platform instance
- * can have 0 or more plugins.
- *
- *
- *
- *
- *
- *
- * @example
- * let p = new Platform({
- *  apiKey: "api-key-here"
- * });
- *
- * p.timeout = 10000; //10 seconds
- *
- * p.getPublicAdvisorsV2().then(r => {
- * 	//Platform.Response
- * }, frame => {
- * 	//Platform.Frame
- * });
- *
  */
 export default class Platform {
 
@@ -51,12 +26,12 @@ export default class Platform {
     this._options = Platform.defaultOptions;
 
     /**
-     * @type {Platform.FrameSet}
+     * @type {FrameSet}
      */
     this._frames = new FrameSet();
 
     /**
-     * @type {Platform.FrameManager}
+     * @type {FrameManager}
      */
     this._frameManager = new FrameManager(this._frames);
 
@@ -80,8 +55,6 @@ export default class Platform {
     //copy any value in opts to this._options
     //only copy matching keys
     //DON'T use hasOwnProperty - opts could be any object and that's OK
-    //
-    //NOTE: Object.assign is shallow; defaults are primitives anyway so it's OK
     Object.keys(this._options)
       .filter(x => x in opts)
       .forEach(x => {
@@ -92,7 +65,7 @@ export default class Platform {
 
   /**
    * Prepares the request and queues it
-   * @param {Platform.Frame} frame - frame to prepare
+   * @param {Frame} frame - frame to prepare
    * @return {undefined}
    */
   _prepareRequest(frame) {
@@ -136,8 +109,8 @@ export default class Platform {
 
   /**
    * API-level request method
-   * @param  {Platform.Request} req
-   * @return {Promise.<Platform.Response>}
+   * @param  {Request} req
+   * @return {Promise.<Response>}
    */
   _serviceRequest(req) {
     return new Promise((resolve, reject) => {
@@ -162,7 +135,7 @@ export default class Platform {
         .segment(req.uri.path())
         .setSearch(req.uri.search(true));
 
-      //urijs is smart enough to remove the trailing forwards-slash
+      //urijs is smart enough to remove the trailing forward-slash
       //so add it back in manually
       if(!frame.request.uri.path().endsWith("/")) {
         frame.request.uri.path(`${ frame.request.uri.path() }/`);
@@ -281,7 +254,7 @@ export default class Platform {
   }
 
 
-  /// Platform Options
+  /// Platform Info/Options
 
   /**
    * Number of active requests
@@ -345,7 +318,7 @@ export default class Platform {
   /**
    * @param {Number} ownerMembershipId - member id to search apps for
    * @param {Number} currentPage - result page
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   applicationSearch(ownerMembershipId, currentPage = 0) {
     return this._serviceRequest(new Request(
@@ -359,7 +332,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   changeApiKeyStatus(keyId, state) {
     return this._serviceRequest(new Request(
@@ -380,7 +353,7 @@ export default class Platform {
    *  creationDate: "2016-12-19T11:05:41.603Z",
    *  status: 1
    * }
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createApiKey(appId) {
     return this._serviceRequest(new Request(
@@ -400,7 +373,7 @@ export default class Platform {
    * @param {String} details.origin - origin header
    * @param {String} details.redirectUrl - oauth redirect url
    * @param {BigNumber} details.scope - scope of app access
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createApplication(details) {
     return this._serviceRequest(new Request(
@@ -418,7 +391,7 @@ export default class Platform {
    * @param {String} details.redirectUrl - oauth redirect url
    * @param {BigNumber} details.scope - scope of app access
    * @param {BigNumber} details.status - app status
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editApplication(appId, details) {
     return this._serviceRequest(new Request(
@@ -431,7 +404,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAccessTokensFromCode(code) {
     return this._serviceRequest(new Request(
@@ -444,7 +417,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAccessTokensFromRefreshToken(refreshToken) {
     return this._serviceRequest(new Request(
@@ -458,7 +431,7 @@ export default class Platform {
 
   /**
    * @param {Number} appId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getApplication(appId) {
     return this._serviceRequest(new Request(
@@ -469,7 +442,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getApplicationApiKeys(p1) {
     return this._serviceRequest(new Request(
@@ -480,7 +453,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAuthorizationForUserAndApplication(p1, p2) {
     return this._serviceRequest(new Request(
@@ -492,7 +465,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAuthorizations(p1) {
     return this._serviceRequest(new Request(
@@ -503,7 +476,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   privateApplicationSearch() {
     return this._serviceRequest(new Request(
@@ -516,7 +489,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   revokeAuthorization(p1, p2) {
     return this._serviceRequest(new Request(
@@ -536,7 +509,7 @@ export default class Platform {
   /// User Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createUser() {
     return this._serviceRequest(new Request(
@@ -549,7 +522,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editSuccessMessageFlags(p1) {
     return this._serviceRequest(new Request(
@@ -564,7 +537,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAvailableAvatars() {
     return this._serviceRequest(new Request(
@@ -573,7 +546,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAvailableAvatarsAdmin(p1) {
     return this._serviceRequest(new Request(
@@ -584,7 +557,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAvailableThemes() {
     return this._serviceRequest(new Request(
@@ -607,7 +580,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId - bungie.net memberId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getBungieNetUserById(membershipId) {
     return this._serviceRequest(new Request(
@@ -618,7 +591,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCountsForCurrentUser() {
     return this._serviceRequest(new Request(
@@ -627,7 +600,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: [
    *  {
@@ -647,7 +620,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: {
    *  destinyAccounts: [],
@@ -664,7 +637,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCurrentUser() {
     return this._serviceRequest(new Request(
@@ -673,7 +646,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: [
    *  {
@@ -695,7 +668,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example {@see getMobileAppPairings}
    */
   getMobileAppPairingsUncached() {
@@ -705,7 +678,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: [
    *  {
@@ -729,7 +702,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPartnerships(p1) {
     return this._serviceRequest(new Request(
@@ -740,7 +713,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: [
    *  {
@@ -759,7 +732,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: "/ExpireWebAuth.ashx?..."
    */
@@ -771,7 +744,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId - bungie.net membership id
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: []
    */
@@ -785,7 +758,7 @@ export default class Platform {
 
   /**
    * @param {Boolean} [excludeBungieNet = false] - exclude bungie.net member id
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: {
    *  -id-as-key-: -membership-type-as-value-,
@@ -801,7 +774,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   linkOverride() {
     return this._serviceRequest(new Request(
@@ -814,7 +787,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   registerMobileAppPair() {
     return this._serviceRequest(new Request(
@@ -828,7 +801,7 @@ export default class Platform {
 
   /**
    * @param {*} p1
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   removePartnership(p1) {
     return this._serviceRequest(new Request(
@@ -844,7 +817,7 @@ export default class Platform {
 
   /**
    * @param {String} username - query to search for
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: [
    *  { user information },
@@ -862,7 +835,7 @@ export default class Platform {
   /**
    * @param {String} username - search query
    * @param {Number} [page = 1] - 1-based page number
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example {@see searchUsers}
    */
   searchUsersPaged(username, page = 1) {
@@ -878,7 +851,7 @@ export default class Platform {
    * @param {String} username - search query
    * @param {Number} [page = 1] 1-based page number
    * @param {*} [p3 = null] UNKNOWN
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example {@see SearchUsersPaged}
    */
   searchUsersPagedV2(username, page = 1, p3 = null) {
@@ -892,7 +865,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   setAcknowledged(ackId) {
     return this._serviceRequest(new Request(
@@ -907,7 +880,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unregisterMobileAppPair(p1) {
     return this._serviceRequest(new Request(
@@ -922,7 +895,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   updateDestinyEmblemAvatar() {
     return this._serviceRequest(new Request(
@@ -935,7 +908,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   updateNotificationSetting() {
     return this._serviceRequest(new Request(
@@ -948,7 +921,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   updateStateInfoForMobileAppPair() {
     return this._serviceRequest(new Request(
@@ -964,7 +937,7 @@ export default class Platform {
    * Updates the user with the given options
    * @link https://destinydevs.github.io/BungieNetPlatform/docs/UserService/UpdateUser#/JSON-POST-Parameters
    * @param  {Object} opts
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   updateUser(opts) {
     return this._serviceRequest(new Request(
@@ -975,7 +948,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   updateUserAdmin(p1) {
     return this._serviceRequest(new Request(
@@ -996,7 +969,7 @@ export default class Platform {
   /**
    * @param {BigNumber[]} membersTo - array of memberIDs
    * @param {String} body - body of the message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createConversation(membersTo, body) {
     return this._serviceRequest(new Request(
@@ -1010,7 +983,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createConversationV2() {
     return this._serviceRequest(new Request(
@@ -1023,7 +996,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllianceInvitedToJoinInvitations(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1035,7 +1008,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllianceJoinInvitations(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1048,7 +1021,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} conversationId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationById(conversationId) {
     return this._serviceRequest(new Request(
@@ -1060,7 +1033,7 @@ export default class Platform {
 
   /**
    * @param  {BigNumber} conversationId - conversation id
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationByIdV2(conversationId) {
     return this._serviceRequest(new Request(
@@ -1071,7 +1044,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationsV2(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1083,7 +1056,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationsV3(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1095,7 +1068,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationsV4(p1) {
     return this._serviceRequest(new Request(
@@ -1107,7 +1080,7 @@ export default class Platform {
 
   /**
    * @param  {Number} [page = 1]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationsV5(page = 1) {
     return this._serviceRequest(new Request(
@@ -1118,7 +1091,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationThreadV2(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -1139,7 +1112,7 @@ export default class Platform {
    * @param {Number} params.page - page to return
    * @param {BigNumber} params.before - message id filter
    * @param {BigNumber} params.after - message id filter
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationThreadV3(params) {
     return this._serviceRequest(new Request(
@@ -1155,7 +1128,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationWithMemberId(membershipId) {
     return this._serviceRequest(new Request(
@@ -1167,7 +1140,7 @@ export default class Platform {
 
   /**
    * @param  {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getConversationWithMemberIdV2(membershipId) {
     return this._serviceRequest(new Request(
@@ -1179,7 +1152,7 @@ export default class Platform {
 
   /**
    * @param  {Number} [page = 1] - 1-based
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupConversations(page = 1) {
     return this._serviceRequest(new Request(
@@ -1190,7 +1163,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getInvitationDetails(p1) {
     return this._serviceRequest(new Request(
@@ -1201,7 +1174,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getTotalConversationCount() {
     return this._serviceRequest(new Request(
@@ -1210,7 +1183,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUnreadConversationCountV2() {
     return this._serviceRequest(new Request(
@@ -1219,7 +1192,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUnreadConversationCountV3() {
     return this._serviceRequest(new Request(
@@ -1228,7 +1201,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUnreadConversationCountV4() {
     return this._serviceRequest(new Request(
@@ -1237,7 +1210,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUnreadGroupConversationCount() {
     return this._serviceRequest(new Request(
@@ -1248,7 +1221,7 @@ export default class Platform {
   /**
    * Leave a given conversation by id
    * @param  {BigNumber} conversationId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   leaveConversation(conversationId) {
     return this._serviceRequest(new Request(
@@ -1261,7 +1234,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} messageId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   moderateGroupWall(groupId, messageId) {
     return this._serviceRequest(new Request(
@@ -1275,7 +1248,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   reviewAllInvitations(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1291,7 +1264,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   reviewInvitation(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -1308,7 +1281,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   reviewInvitationDirect(invitationId, invitationResponseState) {
     return this._serviceRequest(new Request(
@@ -1324,7 +1297,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   reviewInvitations(p1) {
     return this._serviceRequest(new Request(
@@ -1339,7 +1312,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   saveMessageV2() {
     return this._serviceRequest(new Request(
@@ -1355,7 +1328,7 @@ export default class Platform {
    * Add a message to a conversation
    * @param  {String} body
    * @param  {BigNumber} conversationId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   saveMessageV3(body, conversationId) {
     return this._serviceRequest(new Request(
@@ -1373,7 +1346,7 @@ export default class Platform {
    * @param {String} body
    * @param {BigNumber} conversationId
    * @param {String} [subject = ""]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   saveMessageV4(conversationId, body, subject = "") {
     return this._serviceRequest(new Request(
@@ -1388,7 +1361,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   updateConversationLastViewedTimestamp() {
     return this._serviceRequest(new Request(
@@ -1407,7 +1380,7 @@ export default class Platform {
    * but both appear to work
    *
    * @param  {BigNumber} conversationId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   userIsTyping(conversationId) {
     return this._serviceRequest(new Request(
@@ -1424,7 +1397,7 @@ export default class Platform {
   /// Notification Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRealTimeEvents(p1, p2, timeout) {
     return this._serviceRequest(new Request(
@@ -1444,7 +1417,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRecentNotifications() {
     return this._serviceRequest(new Request(
@@ -1453,7 +1426,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   resetNotification() {
     return this._serviceRequest(new Request(
@@ -1467,7 +1440,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} careerId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: {
    *  careerId: "44767",
@@ -1487,7 +1460,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: {
    *  categories: [
@@ -1513,7 +1486,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getContentById(p1, p2, head) {
     return this._serviceRequest(new Request(
@@ -1526,7 +1499,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getContentByTagAndType(params) {
     return this._serviceRequest(new Request(
@@ -1540,7 +1513,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getContentType(p1) {
     return this._serviceRequest(new Request(
@@ -1551,7 +1524,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyContent(p1) {
     return this._serviceRequest(new Request(
@@ -1562,7 +1535,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyContentV2(p1) {
     return this._serviceRequest(new Request(
@@ -1573,7 +1546,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFeaturedArticle() {
     return this._serviceRequest(new Request(
@@ -1582,7 +1555,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getHomepageContent(p1) {
     return this._serviceRequest(new Request(
@@ -1593,7 +1566,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getHomepageContentV2() {
     return this._serviceRequest(new Request(
@@ -1602,7 +1575,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getJobs(p1) {
     return this._serviceRequest(new Request(
@@ -1613,7 +1586,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @param {Number} currentPage = 1
    */
   getNews(params) {
@@ -1628,7 +1601,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPromoWidget() {
     return this._serviceRequest(new Request(
@@ -1637,7 +1610,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPublications(p1) {
     return this._serviceRequest(new Request(
@@ -1649,7 +1622,7 @@ export default class Platform {
 
   /**
    * @param {String} query - search query
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   searchCareers(query) {
     return this._serviceRequest(new Request(
@@ -1660,7 +1633,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   searchContentByTagAndType(params) {
     return this._serviceRequest(new Request(
@@ -1676,7 +1649,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   searchContentEx(p1, head) {
     return this._serviceRequest(new Request(
@@ -1688,7 +1661,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   searchContentWithText(params) {
     return this._serviceRequest(new Request(
@@ -1712,7 +1685,7 @@ export default class Platform {
   /// ExternalSocial Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAggregatedSocialFeed(p1, types) {
     return this._serviceRequest(new Request(
@@ -1728,7 +1701,7 @@ export default class Platform {
   /// Survey Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getSurvey() {
     return this._serviceRequest(new Request(
@@ -1741,7 +1714,7 @@ export default class Platform {
   /// Forum Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   approveFireteamThread(p1) {
     return this._serviceRequest(new Request(
@@ -1756,7 +1729,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   changeLockState(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1772,7 +1745,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   changePinState(p1, p2) {
     return this._serviceRequest(new Request(
@@ -1788,7 +1761,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createContentComment() {
     return this._serviceRequest(new Request(
@@ -1824,7 +1797,7 @@ export default class Platform {
    * @param {String} post.tagCategory
    * @param {String} post.tagInput - comma separated
    * @param {String} post.urlLinkOrImage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createPost(post) {
     return this._serviceRequest(new Request(
@@ -1836,7 +1809,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} postId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   deletePost(postId) {
     return this._serviceRequest(new Request(
@@ -1862,7 +1835,7 @@ export default class Platform {
    * @param {String} [post.tagCategory = ""]
    * @param {String} [post.tagInput = ""]
    * @param {String} [post.urlLinkOrImage = ""]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editPost(postId, post) {
     return this._serviceRequest(new Request(
@@ -1885,7 +1858,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCoreTopicsPaged(params) {
     return this._serviceRequest(new Request(
@@ -1899,7 +1872,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getForumTagCountEstimate(p1) {
     return this._serviceRequest(new Request(
@@ -1910,7 +1883,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getForumTagSuggestions(partialTag) {
     return this._serviceRequest(new Request(
@@ -1922,7 +1895,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} postId - postId of the post containing the poll
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPoll(postId) {
     return this._serviceRequest(new Request(
@@ -1935,7 +1908,7 @@ export default class Platform {
   /**
    * @param {Number} quantity
    * @param {*} tagsSinceDate
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPopularTags(quantity, tagsSinceDate) {
     return this._serviceRequest(new Request(
@@ -1949,7 +1922,7 @@ export default class Platform {
   /**
    * @param {BigNumber} childPostId
    * @param {Boolean} [showBanned = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPostAndParent(childPostId, showBanned = false) {
     return this._serviceRequest(new Request(
@@ -1961,7 +1934,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPostAndParentAwaitingApproval(childPostId, showBanned) {
     return this._serviceRequest(new Request(
@@ -1973,7 +1946,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPostsThreadedPaged(params) {
     return this._serviceRequest(new Request(
@@ -1991,7 +1964,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPostsThreadedPagedFromChild(params) {
     return this._serviceRequest(new Request(
@@ -2008,7 +1981,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRecruitmentThreadSummaries() {
     return this._serviceRequest(new Request(
@@ -2021,7 +1994,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getTopicForContent(contentId) {
     return this._serviceRequest(new Request(
@@ -2032,7 +2005,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getTopicsPaged(params) {
     return this._serviceRequest(new Request(
@@ -2050,7 +2023,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} postId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   joinFireteamThread(postId) {
     return this._serviceRequest(new Request(
@@ -2067,7 +2040,7 @@ export default class Platform {
   /**
    * @param {BigNumber} postId
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   kickBanFireteamApplicant(postId, membershipId) {
     return this._serviceRequest(new Request(
@@ -2084,7 +2057,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} postId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   leaveFireteamThread(postId) {
     return this._serviceRequest(new Request(
@@ -2101,7 +2074,7 @@ export default class Platform {
   /**
    * @param {BigNumber} answerPostId
    * @param {BigNumber} questionTopicId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   markReplyAsAnswer(answerPostId, questionTopicId) {
     return this._serviceRequest(new Request(
@@ -2123,7 +2096,7 @@ export default class Platform {
    * @param {String} [comments = "group post ban"]
    * @param {BungieNet.enums.affectedItemType} [moderatedItemType = BungieNet.enums.affectedItemType.post]
    * @param {BungieNet.enums.requestedPunishment} [requestedPunishment = BungieNet.enums.requestedPunishment.ban]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   moderateGroupPost(params) {
     return this._serviceRequest(new Request(
@@ -2143,7 +2116,7 @@ export default class Platform {
 
   /**
    *
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   moderatePost(p1) {
     return this._serviceRequest(new Request(
@@ -2158,7 +2131,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   moderateTag(p1) {
     return this._serviceRequest(new Request(
@@ -2177,7 +2150,7 @@ export default class Platform {
    * - payload is set to null, this may result in a bug
    * @param {BigNumber} pollId
    * @param {Number} optionIndex - 0-based index of the option being voted for
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   pollVote(pollId, optionIndex) {
     return this._serviceRequest(new Request(
@@ -2195,7 +2168,7 @@ export default class Platform {
   /**
    * @param {BigNumber} postId
    * @param {Number} rating - 0 to 100, currently only 0 OR 100
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   ratePost(postId, rating) {
     return this._serviceRequest(new Request(
@@ -2212,7 +2185,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} topicId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unmarkReplyAsAnswer(topicId) {
     return this._serviceRequest(new Request(
@@ -2228,7 +2201,7 @@ export default class Platform {
 
   /**
    * @param {String} tag - ie. #destiny, hash included
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   followTag(tag) {
     return this._serviceRequest(new Request(
@@ -2244,7 +2217,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   followUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -2262,7 +2235,7 @@ export default class Platform {
    * @param {*} p1
    * @param {*} p2
    * @param {Number} [currentPage = 1]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getApplicationActivityForUser(p1, p2, currentPage = 1) {
     return this._serviceRequest(new Request(
@@ -2275,7 +2248,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @deprecated 2016-09-10
    */
   getAggregatedActivitiesForCurrentUser(typeFilter, format) {
@@ -2288,7 +2261,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getEntitiesFollowedByCurrentUser() {
     return this._serviceRequest(new Request(
@@ -2297,7 +2270,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getEntitiesFollowedByCurrentUserV2(p1, p2) {
     return this._serviceRequest(new Request(
@@ -2309,7 +2282,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getEntitiesFollowedByUser(p1) {
     return this._serviceRequest(new Request(
@@ -2320,7 +2293,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getEntitiesFollowedByUserV2(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -2333,7 +2306,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFollowersOfTag(tag, itemsPerPage, currentPage) {
     return this._serviceRequest(new Request(
@@ -2346,7 +2319,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFollowersOfUser(membershipId, itemsPerPage, currentPage) {
     return this._serviceRequest(new Request(
@@ -2359,7 +2332,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getForumActivitiesForUser(params) {
     return this._serviceRequest(new Request(
@@ -2373,7 +2346,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getForumActivitiesForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new Request(
@@ -2386,7 +2359,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFriends() {
     return this._serviceRequest(new Request(
@@ -2395,7 +2368,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFriendsAllNoPresence(p1) {
     return this._serviceRequest(new Request(
@@ -2406,7 +2379,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFriendsPaged(membershipType, page) {
     return this._serviceRequest(new Request(
@@ -2418,7 +2391,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupsFollowedByCurrentUser() {
     return this._serviceRequest(new Request(
@@ -2428,7 +2401,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupsFollowedByUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -2439,7 +2412,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupsFollowedPagedByCurrentUser(p1) {
     return this._serviceRequest(new Request(
@@ -2450,7 +2423,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupsFollowedPagedByUser(p1, p2) {
     return this._serviceRequest(new Request(
@@ -2462,7 +2435,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getLikeAndShareActivityForUser(params) {
     return this._serviceRequest(new Request(
@@ -2476,7 +2449,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getLikeAndShareActivityForUserV2(p1, currentPage, format) {
     return this._serviceRequest(new Request(
@@ -2489,7 +2462,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getLikeShareAndForumActivityForUser(p1, currentPage, format) {
     return this._serviceRequest(new Request(
@@ -2502,7 +2475,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUsersFollowedByCurrentUser() {
     return this._serviceRequest(new Request(
@@ -2512,7 +2485,7 @@ export default class Platform {
 
   /**
    * @param {String} tag - ie. #destiny, with hash
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unfollowTag(tag) {
     return this._serviceRequest(new Request(
@@ -2528,7 +2501,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unfollowUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -2549,7 +2522,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   approveAllPending(groupId, message) {
     return this._serviceRequest(new Request(
@@ -2566,7 +2539,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   approveGroupMembership(groupId, membershipId) {
     return this._serviceRequest(new Request(
@@ -2585,7 +2558,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BigNumber} membershipId
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   approveGroupMembershipV2(groupId, membershipId, message) {
     return this._serviceRequest(new Request(
@@ -2604,7 +2577,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {String} message
    * @param {BigNumber[]} membershipIds
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   approvePendingForList(groupId, message, membershipIds) {
     return this._serviceRequest(new Request(
@@ -2624,7 +2597,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {String} comment
    * @param {BungieNet.enums.moderatorRequestedPunishment} - might not be right enum
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   banMember(params) {
     return this._serviceRequest(new Request(
@@ -2643,7 +2616,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} allyGroupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   breakAlliance(groupId, allyGroupId) {
     return this._serviceRequest(new Request(
@@ -2660,7 +2633,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   breakAlliances(groupId) {
     return this._serviceRequest(new Request(
@@ -2675,7 +2648,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createGroup() {
     return this._serviceRequest(new Request(
@@ -2703,7 +2676,7 @@ export default class Platform {
    * @param {String} detail.name
    * @param {String} detail.tags - "#tag1,#tag2,#tag3"
    * @param {String} detail.theme
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createGroupV2(details) {
     return this._serviceRequest(new Request(
@@ -2714,7 +2687,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   createMinimalGroup(name, about) {
     return this._serviceRequest(new Request(
@@ -2730,7 +2703,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   denyAllPending(groupId, message) {
     return this._serviceRequest(new Request(
@@ -2747,7 +2720,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   denyGroupMembership(groupId, membershipId) {
     return this._serviceRequest(new Request(
@@ -2766,7 +2739,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BigNumber} membershipId
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   denyGroupMembershipV2(groupId, membershipId, message) {
     return this._serviceRequest(new Request(
@@ -2785,7 +2758,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {String} message
    * @param {BigNumber[]} membershipIds
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   denyPendingForList(groupId, message, membershipIds) {
     return this._serviceRequest(new Request(
@@ -2803,7 +2776,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BungieNet.enums.bungieMembershipType}
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   diableClanForGroup(groupId, clanMembershipType) {
     return this._serviceRequest(new Request(
@@ -2820,7 +2793,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   disbandAlliance(groupId) {
     return this._serviceRequest(new Request(
@@ -2836,7 +2809,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editGroup(groupId) {
     return this._serviceRequest(new Request(
@@ -2855,7 +2828,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {BungieNet.enums.groupMemberType} groupMembershipType
    * @param {*} [clanPlatformType = 0]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editGroupMembership(params) {
     return this._serviceRequest(new Request(
@@ -2889,7 +2862,7 @@ export default class Platform {
    * @param {String} details.motto
    * @param {String} details.name
    * @param {String} details.tags - "#tag1,#tag2,#tag3"
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editGroupV2(groupId, details) {
     return this._serviceRequest(new Request(
@@ -2905,7 +2878,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
    * @param {String} clanName
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   enableClanForGroup(groupId, clanMembershipType, clanName) {
     return this._serviceRequest(new Request(
@@ -2923,7 +2896,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   followGroupsWithGroup(groupId) {
     return this._serviceRequest(new Request(
@@ -2940,7 +2913,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} followGroupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   followGroupWithGroup(groupId, followGroupId) {
     return this._serviceRequest(new Request(
@@ -2959,7 +2932,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} itemsPerPage
    * @param {Number} currentPage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdminsOfGroup(groupId, itemsPerPage, currentPage) {
     return this._serviceRequest(new Request(
@@ -2975,7 +2948,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} itemsPerPage
    * @param {Number} currentPage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdminsOfGroupV2(groupId, itemsPerPage, currentPage) {
     return this._serviceRequest(new Request(
@@ -2989,7 +2962,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllFoundedGroupsForMember(membershipId) {
     return this._serviceRequest(new Request(
@@ -3002,7 +2975,7 @@ export default class Platform {
   /**
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllGroupsForCurrentMember(clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3017,7 +2990,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllGroupsForMember(membershipId, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3033,7 +3006,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} currentPage
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAlliedGroups(groupId, currentPage, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3046,7 +3019,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAvailableGroupAvatars() {
     return this._serviceRequest(new Request(
@@ -3055,7 +3028,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAvailableGroupThemes() {
     return this._serviceRequest(new Request(
@@ -3067,7 +3040,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} currentPage
    * @param {Number} itemsPerPage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getBannedMembersOfGroup(groupId, currentPage, itemsPerPage) {
     return this._serviceRequest(new Request(
@@ -3083,7 +3056,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} currentPage
    * @param {Number} itemsPerPage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getBannedMembersOfGroupV2(groupId, currentPage, itemsPerPage) {
     return this._serviceRequest(new Request(
@@ -3096,7 +3069,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getClanAttributeDefinitions() {
     return this._serviceRequest(new Request(
@@ -3105,7 +3078,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDeletedGroupsForCurrentMember() {
     return this._serviceRequest(new Request(
@@ -3118,7 +3091,7 @@ export default class Platform {
    * @param {Number} currentPage
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFoundedGroupsForMember(params) {
     return this._serviceRequest(new Request(
@@ -3134,7 +3107,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroup(groupId, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3148,7 +3121,7 @@ export default class Platform {
   /**
    * @param {String} groupName
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupByName(groupName, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3163,7 +3136,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} currentPage
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupsFollowedByGroup(groupId, currentPage, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3179,7 +3152,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {Number} currentPage
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupsFollowingGroup(groupId, currentPage, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3193,7 +3166,7 @@ export default class Platform {
 
   /**
    * @param {String} partialTag
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGroupTagSuggestions(partialTag) {
     return this._serviceRequest(new Request(
@@ -3206,7 +3179,7 @@ export default class Platform {
   /**
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getJoinedGroupsForCurrentMember(clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3221,7 +3194,7 @@ export default class Platform {
    * @param {Number} currentPage
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getJoinedGroupsForCurrentMemberV2(currentPage, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3237,7 +3210,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getJoinedGroupsForMember(membershipId, clanOnly = false, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3254,7 +3227,7 @@ export default class Platform {
    * @param {Number} currentPage
    * @param {Boolean} [clanOnly = false]
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getJoinedGroupsForMemberV2(params) {
     return this._serviceRequest(new Request(
@@ -3271,7 +3244,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {Number} currentPage
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getJoinedGroupsForMemberV3(membershipId, currentPage, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3289,7 +3262,7 @@ export default class Platform {
    * @param {BungieNet.enums.groupMemberType}
    * @param {*} [sort = 0]
    * @param {BungieNet.enums.bungieMembershipType} platformType
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getMembersOfClan(params) {
     return this._serviceRequest(new Request(
@@ -3310,7 +3283,7 @@ export default class Platform {
    * @param {BungieNet.enums.groupMemberType} memberType
    * @param {BungieNet.enums.bungieMembershipType} platformType
    * @param {*} sort
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getMembersOfGroup(params) {
     return this._serviceRequest(new Request(
@@ -3332,7 +3305,7 @@ export default class Platform {
    * @param {BungieNet.enums.groupMemberType} memberType
    * @param {BungieNet.enums.bungieMembershipType} platformType
    * @param {*} sort
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getMembersOfGroupV2(params) {
     return this._serviceRequest(new Request(
@@ -3355,7 +3328,7 @@ export default class Platform {
    * @param {BungieNet.enums.bungieMembershipType} platformType
    * @param {*} sort
    * @param {String} nameSearch
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getMembersOfGroupV3(params) {
     return this._serviceRequest(new Request(
@@ -3372,7 +3345,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: [
    *  {
@@ -3392,7 +3365,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
    * @param {Number} currentPage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingClanMemberships(groupId, clanMembershipType, currentPage) {
     return this._serviceRequest(new Request(
@@ -3406,7 +3379,7 @@ export default class Platform {
 
   /**
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingGroupsForCurrentMember(populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3419,7 +3392,7 @@ export default class Platform {
   /**
    * @param {Number} currentPage
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingGroupsForCurrentMemberV2(currentPage, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3433,7 +3406,7 @@ export default class Platform {
   /**
    * @param {BigNumber} membershipId
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingGroupsForMember(membershipId, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3447,7 +3420,7 @@ export default class Platform {
   /**
    * @param {Number} currentPage
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingGroupsForMemberV2(currentPage, populateFriends) {
     return this._serviceRequest(new Request(
@@ -3461,7 +3434,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingMemberships(groupId, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3475,7 +3448,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {Number} currentPage
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPendingMembershipsV2(groupId, currentPage) {
     return this._serviceRequest(new Request(
@@ -3488,7 +3461,7 @@ export default class Platform {
 
   /**
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRecommendedGroups(populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3516,7 +3489,7 @@ export default class Platform {
    * @param {*} params.sortBy
    * @param {String} params.tagText
    * @param {Boolean} [populatefriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   groupSearch(params, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3534,7 +3507,7 @@ export default class Platform {
    * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
    * @param {String} title
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   inviteClanMember(params) {
     return this._serviceRequest(new Request(
@@ -3556,7 +3529,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {String} title
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   inviteGroupMember(params) {
     return this._serviceRequest(new Request(
@@ -3576,7 +3549,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BigNumber[]} targetIds
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   inviteManyToJoin(groupId, targetIds, message) {
     return this._serviceRequest(new Request(
@@ -3596,7 +3569,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} allyGroupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   inviteToJoinAlliance(groupId, allyGroupId) {
     return this._serviceRequest(new Request(
@@ -3615,7 +3588,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
    * @param {String} message
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   joinClanForGroup(groupId, clanMembershipType, message) {
     return this._serviceRequest(new Request(
@@ -3634,7 +3607,7 @@ export default class Platform {
    * @param {BigNumber} groupId
    * @param {BigNumber} membershipId
    * @param {BungieNet.enums.bungieMembershipType} clanPlatformType
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   kickMember(groupId, membershipId, clanPlatformType) {
     return this._serviceRequest(new Request(
@@ -3653,7 +3626,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   leaveClanForGroup(groupId, clanMembershipType) {
     return this._serviceRequest(new Request(
@@ -3669,7 +3642,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   migrate(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -3688,7 +3661,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BungieNet.enums.bungieMembershipType} membershipType
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   overrideFounderAdmin(groupId, membershipType) {
     return this._serviceRequest(new Request(
@@ -3705,7 +3678,7 @@ export default class Platform {
 
   /**
    * @param {BungieNet.enums.bungieMembershipType} clanMembershipType
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   refreshClanSettingsInDestiny(clanMembershipType) {
     return this._serviceRequest(new Request(
@@ -3722,7 +3695,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   requestGroupMembership(groupId, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3740,7 +3713,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   requestGroupMembershipV2(groupId, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3758,7 +3731,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} allyGroupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   requestToJoinAlliance(groupId, allyGroupId) {
     return this._serviceRequest(new Request(
@@ -3776,7 +3749,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {Boolean} [populateFriends = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   rescindGroupMembership(groupId, populateFriends = false) {
     return this._serviceRequest(new Request(
@@ -3793,7 +3766,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   setGroupAsAlliance(groupId) {
     return this._serviceRequest(new Request(
@@ -3810,7 +3783,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {*} p2
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   setPrivacy(groupId, p2) {
     return this._serviceRequest(new Request(
@@ -3828,7 +3801,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unbanMember(groupId, membershipId) {
     return this._serviceRequest(new Request(
@@ -3845,7 +3818,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   undeleteGroup(groupId) {
     return this._serviceRequest(new Request(
@@ -3861,7 +3834,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unfollowAllGroupsWithGroup(groupId) {
     return this._serviceRequest(new Request(
@@ -3877,7 +3850,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} groupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unfollowGroupsWithGroup(groupId) {
     return this._serviceRequest(new Request(
@@ -3894,7 +3867,7 @@ export default class Platform {
   /**
    * @param {BigNumber} groupId
    * @param {BigNumber} followGroupId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unfollowGroupWithGroup(groupId, followGroupId) {
     return this._serviceRequest(new Request(
@@ -3914,7 +3887,7 @@ export default class Platform {
   /// Ignore Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   flagItem() {
     return this._serviceRequest(new Request(
@@ -3927,7 +3900,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getIgnoresForUser() {
     return this._serviceRequest(new Request(
@@ -3940,7 +3913,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getIgnoreStatusForPost(postId) {
     return this._serviceRequest(new Request(
@@ -3952,7 +3925,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getIgnoreStatusForUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -3963,7 +3936,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getReportContext(p1) {
     return this._serviceRequest(new Request(
@@ -3974,7 +3947,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   ignoreItem(params) {
     return this._serviceRequest(new Request(
@@ -3993,7 +3966,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   myLastReport() {
     return this._serviceRequest(new Request(
@@ -4002,7 +3975,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   unignoreItem() {
     return this._serviceRequest(new Request(
@@ -4019,7 +3992,7 @@ export default class Platform {
   /// Game Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPlayerGamesById(p1) {
     return this._serviceRequest(new Request(
@@ -4030,7 +4003,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   reachModelSneakerNet(p1) {
     return this._serviceRequest(new Request(
@@ -4050,7 +4023,7 @@ export default class Platform {
 
   /**
    * @param {String} username - search term
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   adminUserSearch(username) {
     return this._serviceRequest(new Request(
@@ -4061,7 +4034,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   bulkEditPost() {
     return this._serviceRequest(new Request(
@@ -4074,7 +4047,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdminHistory(params) {
     return this._serviceRequest(new Request(
@@ -4089,7 +4062,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAssignedReports() {
     return this._serviceRequest(new Request(
@@ -4105,7 +4078,7 @@ export default class Platform {
    * @param {BigNumber} membershipId
    * @param {Number} [currentPage = 1]
    * @param {Number} [itemsPerPage = 1]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDisciplinedReportsForMember(membershipId, currentPage = 1, itemsPerPage = 1) {
     return this._serviceRequest(new Request(
@@ -4123,7 +4096,7 @@ export default class Platform {
   /**
    * @param {BigNumber} membershipId
    * @param {*} p2
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRecentDisciplineAndFlagHistoryForMember(membershipId, p2) {
     return this._serviceRequest(new Request(
@@ -4135,7 +4108,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getResolvedReports() {
     return this._serviceRequest(new Request(
@@ -4149,7 +4122,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: {
    *  membershipId: "-id-",
@@ -4170,7 +4143,7 @@ export default class Platform {
   /**
    * @param {BigNumber} membershipId
    * @param {Number} currentPage - 0-based
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUserPostHistory(membershipId, currentPage = 0) {
     return this._serviceRequest(new Request(
@@ -4183,7 +4156,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUserWebHistoryClientIpHistory(membershipId) {
     return this._serviceRequest(new Request(
@@ -4194,7 +4167,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   globallyIgnoreItem() {
     return this._serviceRequest(new Request(
@@ -4208,7 +4181,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   overrideBanOnUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -4223,7 +4196,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   overrideGlobalIgnore() {
     return this._serviceRequest(new Request(
@@ -4237,7 +4210,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   overrideGroupWallBanOnUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -4253,7 +4226,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   overrideMsgBanOnUser(membershipId) {
     return this._serviceRequest(new Request(
@@ -4268,7 +4241,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   overturnReport() {
     return this._serviceRequest(new Request(
@@ -4286,7 +4259,7 @@ export default class Platform {
    * @param {BigNumber} banLength
    * @param {Number} result
    * @param {BigNumber} reportId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   resolveReport(params) {
     return this._serviceRequest(new Request(
@@ -4307,7 +4280,7 @@ export default class Platform {
   /// Token Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   applyOfferToCurrentDestinyMembership(p1, p2) {
     return this._serviceRequest(new Request(
@@ -4323,7 +4296,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   breakBond() {
     return this._serviceRequest(new Request(
@@ -4336,7 +4309,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   claimAndApplyOnToken(tokenType, redeemCode) {
     return this._serviceRequest(new Request(
@@ -4351,7 +4324,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   claimToken(redeemCode) {
     return this._serviceRequest(new Request(
@@ -4364,7 +4337,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   consumeMarketplacePlatformCodeOffer(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -4381,7 +4354,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCurrentUserOfferHistory() {
     return this._serviceRequest(new Request(
@@ -4390,7 +4363,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: {
    *  IsThrottled: false,
@@ -4407,7 +4380,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRAFEligibility() {
     return this._serviceRequest(new Request(
@@ -4416,7 +4389,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   marketplacePlatformCodeOfferHistory() {
     return this._serviceRequest(new Request(
@@ -4425,7 +4398,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   rafClaim() {
     return this._serviceRequest(new Request(
@@ -4438,7 +4411,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   rafGenerateReferralCode(p1) {
     return this._serviceRequest(new Request(
@@ -4453,7 +4426,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   rafGetNewPlayerBondDetails() {
     return this._serviceRequest(new Request(
@@ -4462,7 +4435,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   rafGetVeteranBondDetails() {
     return this._serviceRequest(new Request(
@@ -4471,7 +4444,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   verifyAge() {
     return this._serviceRequest(new Request(
@@ -4491,7 +4464,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} itemId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   equipItem(membershipType, itemId, characterId) {
     return this._serviceRequest(new Request(
@@ -4509,7 +4482,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
    * @param {BigNumber[]} itemIds
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   equipItems(membershipType, characterId, itemIds) {
     return this._serviceRequest(new Request(
@@ -4526,7 +4499,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAccount(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -4540,7 +4513,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAccountSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -4552,7 +4525,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getActivityBlob(e) {
     return this._serviceRequest(new Request(
@@ -4569,7 +4542,7 @@ export default class Platform {
    * @param {BungieNet.enums.destinyActivityModeType} [mode = BungieNet.enums.destinyActivityModeType.none]
    * @param {Number} [count = 25] number of results to return
    * @param {Number} [page = 1] 1-based
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getActivityHistory(params) {
     return this._serviceRequest(new Request(
@@ -4587,7 +4560,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdvisorsForAccount(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -4602,7 +4575,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdvisorsForCharacter(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4618,7 +4591,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdvisorsForCharacterV2(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4633,7 +4606,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdvisorsForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new Request(
@@ -4647,7 +4620,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllItemsSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -4661,7 +4634,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAllVendorsForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new Request(
@@ -4674,7 +4647,7 @@ export default class Platform {
 
   /**
    * @param {BungieNet.enums.membershipType}
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getBondAdvisors(membershipType) {
     return this._serviceRequest(new Request(
@@ -4688,7 +4661,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCharacter(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4704,7 +4677,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCharacterActivities(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4720,7 +4693,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCharacterInventory(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4736,7 +4709,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCharacterInventorySummary(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4752,7 +4725,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCharacterProgression(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4768,7 +4741,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCharacterSummary(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4781,7 +4754,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getClanLeaderboards(params) {
     return this._serviceRequest(new Request(
@@ -4798,7 +4771,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyAggregateActivityStats(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -4811,7 +4784,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyExplorerItems(params) {
     return this._serviceRequest(new Request(
@@ -4822,7 +4795,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyExplorerTalentNodeSteps(params) {
     return this._serviceRequest(new Request(
@@ -4833,7 +4806,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyLiveTileContentItems() {
     return this._serviceRequest(new Request(
@@ -4842,7 +4815,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinyManifest() {
     return this._serviceRequest(new Request(
@@ -4851,7 +4824,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getDestinySingleDefinition(definitionType, definitionId, version) {
     return this._serviceRequest(new Request(
@@ -4866,7 +4839,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getExcellenceBadges(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -4878,7 +4851,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGrimoireByMembership(params) {
     return this._serviceRequest(new Request(
@@ -4892,7 +4865,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGrimoireDefinition() {
     return this._serviceRequest(new Request(
@@ -4912,7 +4885,7 @@ export default class Platform {
    * @param {String} options.monthEnd
    * @param {String} options.dayStart
    * @param {String} options.dayEnd
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getHistoricalStats(options) {
     return this._serviceRequest(new Request(
@@ -4932,7 +4905,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getHistoricalStatsDefinition() {
     return this._serviceRequest(new Request(
@@ -4944,7 +4917,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BungieNet.enums.destinyStatsGroupType[]} groups
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getHistoricalStatsForAccount(membershipType, destinyMembershipId, groups) {
     return this._serviceRequest(new Request(
@@ -4961,7 +4934,7 @@ export default class Platform {
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
    * @param {BigNumber} itemInstanceId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getItemDetail(params) {
     return this._serviceRequest(new Request(
@@ -4975,7 +4948,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getItemReferenceDetail(params) {
     return this._serviceRequest(new Request(
@@ -4994,7 +4967,7 @@ export default class Platform {
    * @param {BungieNet.enums.destinyActivityModeType[]} modes
    * @param {*} statid
    * @param {*} maxtop
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getLeaderboards(params) {
     return this._serviceRequest(new Request(
@@ -5015,7 +4988,7 @@ export default class Platform {
    * @param {BungieNet.enums.destinyActivityModeType[]} modes
    * @param {*} statid
    * @param {*} maxtop
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getLeaderboardsForCharacter(params) {
     return this._serviceRequest(new Request(
@@ -5033,7 +5006,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.destinyActivityModeType[]} modes
    * @param {*} code
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getLeaderboardsForPsn(modes, code) {
     return this._serviceRequest(new Request(
@@ -5048,7 +5021,7 @@ export default class Platform {
    * @param {BungieNet.eums.membershipType} membershipType
    * @param {String} displayName
    * @param {Boolean} [ignoreCase = false]
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getMembershipIdByDisplayName(membershipType, displayName, ignoreCase) {
     return this._serviceRequest(new Request(
@@ -5064,7 +5037,7 @@ export default class Platform {
    * @param {BungieNet.enums.bungieMembershipType} membershipType
    * @param {Boolean} flavour
    * @param {BigNumber} single
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getMyGrimoire(membershipType, flavour, single) {
     return this._serviceRequest(new Request(
@@ -5078,7 +5051,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} activityInstanceId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPostGameCarnageReport(activityInstanceId) {
     return this._serviceRequest(new Request(
@@ -5089,7 +5062,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPublicAdvisors() {
     return this._serviceRequest(new Request(
@@ -5098,7 +5071,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPublicAdvisorsV2() {
     return this._serviceRequest(new Request(
@@ -5108,7 +5081,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} vendorId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPublicVendor(vendorId) {
     return this._serviceRequest(new Request(
@@ -5120,7 +5093,7 @@ export default class Platform {
 
   /**
    * @param {BigNumber} vendorId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPublicVendorWithMetadata(vendorId) {
     return this._serviceRequest(new Request(
@@ -5131,7 +5104,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getPublicXurVendor() {
     return this._serviceRequest(new Request(
@@ -5142,7 +5115,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.bungieMembershipType} membershipType
    * @param {BigNumber} recordBookHash
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getRecordBookCompletionStatus(membershipType, recordBookHash) {
     return this._serviceRequest(new Request(
@@ -5154,7 +5127,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getSpecialEventAdvisors() {
     return this._serviceRequest(new Request(
@@ -5165,7 +5138,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getTriumphs(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -5180,7 +5153,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getUniqueWeaponHistory(membershipType, destinyMembershipId, characterId) {
     return this._serviceRequest(new Request(
@@ -5195,7 +5168,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVault(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -5209,7 +5182,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} destinyMembershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVaultSummary(membershipType, destinyMembershipId) {
     return this._serviceRequest(new Request(
@@ -5224,7 +5197,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
    * @param {BigNumber} vendorId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVendorForCurrentCharacter(membershipType, characterId, vendorId) {
     return this._serviceRequest(new Request(
@@ -5240,7 +5213,7 @@ export default class Platform {
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
    * @param {BigNumber} vendorId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVendorForCurrentCharacterWithMetadata(membershipType, characterId, vendorId) {
     return this._serviceRequest(new Request(
@@ -5257,7 +5230,7 @@ export default class Platform {
    * @param {BigNumber} characterId
    * @param {BigNumber} vendorId
    * @param {BigNumber} itemId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVendorItemDetailForCurrentUser(params) {
     return this._serviceRequest(new Request(
@@ -5275,7 +5248,7 @@ export default class Platform {
    * @param {BigNumber} characterId
    * @param {BigNumber} vendorId
    * @param {BigNumber} itemId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVendorItemDetailForCurrentUserWithMetadata(params) {
     return this._serviceRequest(new Request(
@@ -5291,7 +5264,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {BigNumber} characterId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getVendorSummariesForCurrentCharacter(membershipType, characterId) {
     return this._serviceRequest(new Request(
@@ -5305,7 +5278,7 @@ export default class Platform {
   /**
    * @param {BungieNet.enums.membershipType} membershipType
    * @param {String} displayName
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   searchDestinyPlayer(membershipType, displayName) {
     return this._serviceRequest(new Request(
@@ -5321,7 +5294,7 @@ export default class Platform {
    * @param {BigNumber} itemId
    * @param {BigNumber} characterId
    * @param {Boolean} state - true to lock, false to unlock
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   setItemLockState(params) {
     return this._serviceRequest(new Request(
@@ -5342,7 +5315,7 @@ export default class Platform {
    * @param {BigNumber} characterId
    * @param {BigNumber} itemId
    * @param {Boolean} state - true to track, false to not track
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   setQuestTrackedState(params) {
     return this._serviceRequest(new Request(
@@ -5365,7 +5338,7 @@ export default class Platform {
    * @param {Number} stackSize
    * @param {BigNumber} characterId
    * @param {Boolean} transferToVault
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   transferItem(params) {
     return this._serviceRequest(new Request(
@@ -5387,7 +5360,7 @@ export default class Platform {
   /// Community Content Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   adminSetCommunityLiveMemberBanStatus(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5404,7 +5377,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   adminSetCommunityLiveMemberFeatureStatus(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5421,7 +5394,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   alterApprovalState(p1) {
     return this._serviceRequest(new Request(
@@ -5436,7 +5409,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   editContent(p1) {
     return this._serviceRequest(new Request(
@@ -5451,7 +5424,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAdminCommunityLiveStatuses(params) {
     return this._serviceRequest(new Request(
@@ -5469,7 +5442,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getApprovalQueue(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5482,7 +5455,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCommunityContent(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5495,7 +5468,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCommunityFeaturedActivityModes() {
     return this._serviceRequest(new Request(
@@ -5504,7 +5477,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCommunityLiveStatuses(params) {
     return this._serviceRequest(new Request(
@@ -5518,7 +5491,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCommunityLiveStatusesForClanmates(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5531,7 +5504,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCommunityLiveStatusesForFriends(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5544,7 +5517,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getFeaturedCommunityLiveStatuses(p1, p2, p3) {
     return this._serviceRequest(new Request(
@@ -5560,7 +5533,7 @@ export default class Platform {
    * @param {BungieNet.enums.partnershipType} partnershipType
    * @param {BungieNet.enums.bungieMembershipType} membershipType
    * @param {BigNumber} membershipId
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getStreamingStatusForMember(partnershipType, membershipType, membershipId) {
     return this._serviceRequest(new Request(
@@ -5573,7 +5546,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   submitContent() {
     return this._serviceRequest(new Request(
@@ -5590,7 +5563,7 @@ export default class Platform {
   /// Core Service
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getAvailableLocales() {
     return this._serviceRequest(new Request(
@@ -5599,7 +5572,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getCommonSettings() {
     return this._serviceRequest(new Request(
@@ -5609,7 +5582,7 @@ export default class Platform {
 
   /**
    * @param {Boolean} includeStreaming
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getGlobalAlerts(includeStreaming = true) {
     return this._serviceRequest(new Request(
@@ -5620,7 +5593,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    */
   getSystemStatus(p1) {
     return this._serviceRequest(new Request(
@@ -5631,7 +5604,7 @@ export default class Platform {
   }
 
   /**
-   * @return {Promise.<Platform.Response>}
+   * @return {Promise.<Response>}
    * @example
    * Response: "Hello World"
    */

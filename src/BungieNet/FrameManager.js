@@ -6,32 +6,14 @@ import Frame from "./Frame.js";
 export default class FrameManager {
 
   /**
-   * @param {Platform.FrameSet} frameSet - reference to a FrameSet
+   * @param {FrameSet} frameSet - reference to a FrameSet
    */
   constructor(frameSet) {
     this._frameSet = frameSet;
   }
 
   /**
-   * Generate a FrameSet containing all waiting frames from the inner
-   * FrameSet. NOTE: frames within the returned set are mutable!
-   * @return {Platform.FrameSet} frames currently waiting
-   */
-  getWaiting() {
-    return this._frameSet.filter(f => f.state === Frame.state.waiting);
-  }
-
-  /**
-   * Generate a FrameSet containing all active frames from the inner
-   * FrameSet. NOTE: frames within the returned set are mutable!
-   * @return {Platform.FrameSet} frames currently active
-   */
-  getActive() {
-    return this._frameSet.filter(f => f.state === Frame.state.active);
-  }
-
-  /**
-   * @param {Platform.Frame} frame - frame to add
+   * @param {Frame} frame - frame to add
    * @return {undefined}
    */
   addFrame(frame) {
@@ -39,11 +21,12 @@ export default class FrameManager {
   }
 
   /**
-   * @param {Platform.Frame} frame - frame to remove
-   * @return {undefined}
+   * Generate a FrameSet containing all active frames from the inner
+   * FrameSet. NOTE: frames within the returned set are mutable!
+   * @return {FrameSet} frames currently active
    */
-  removeFrame(frame) {
-    this._frameSet.remove(frame);
+  getActive() {
+    return this._frameSet.filter(f => f.state === Frame.state.active);
   }
 
   /**
@@ -60,6 +43,23 @@ export default class FrameManager {
 
     return waitList.front;
 
+  }
+
+  /**
+   * Generate a FrameSet containing all waiting frames from the inner
+   * FrameSet. NOTE: frames within the returned set are mutable!
+   * @return {FrameSet} frames currently waiting
+   */
+  getWaiting() {
+    return this._frameSet.filter(f => f.state === Frame.state.waiting);
+  }
+
+  /**
+   * @param {Frame} frame - frame to remove
+   * @return {undefined}
+   */
+  removeFrame(frame) {
+    this._frameSet.remove(frame);
   }
 
 }

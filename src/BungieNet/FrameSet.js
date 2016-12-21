@@ -1,8 +1,5 @@
 /**
  * FrameSet
- *
- * By default, this set will act in FIFO mode. If custom, set the operation
- * type to custom and set a comparer function
  */
 export default class FrameSet {
 
@@ -24,6 +21,14 @@ export default class FrameSet {
   }
 
   /**
+   * Item at the back of the set
+   * @type {Frame}
+   */
+  get back() {
+    return this._arr[this.length - 1];
+  }
+
+  /**
    * Clear all items in the set
    * @return {undefined}
    */
@@ -32,8 +37,40 @@ export default class FrameSet {
   }
 
   /**
+   * Comparer function for items
+   * @type {Function}
+   */
+  get comparer() {
+    return this._comparer;
+  }
+
+  /**
+   * Sets the comparer function for items
+   * @param {Function} func - comparer function
+   */
+  set comparer(func) {
+    this._comparer = func;
+  }
+
+  /**
+   * Remove and return the item at the front of the set
+   * @return {Frame} frame to return
+   */
+  dequeue() {
+    return this._arr.shift();
+  }
+
+  /**
+   * Whether the set is empty
+   * @type {Boolean}
+   */
+  get empty() {
+    return this.length === 0;
+  }
+
+  /**
    * Add an item to the end of the queue
-   * @param {Platform.Frame} frame - frame to add
+   * @param {Frame} frame - frame to add
    * @return {undefined}
    */
   enqueue(frame) {
@@ -47,35 +84,29 @@ export default class FrameSet {
   }
 
   /**
-   * Remove and return the item at the front of the set
-   * @return {Platform.Frame} frame to return
+   * Filter the set by the given function; return true to keep
+   * @param {Function} func - filter function
+   * @return {FrameSet} filtered set
    */
-  dequeue() {
-    return this._arr.shift();
+  filter(func) {
+
+    const fs = new FrameSet();
+
+    fs._arr = this._arr.filter(func);
+    fs._operation = this._operation;
+    fs._maxSize = this._maxSize;
+    fs._comparer = this._comparer;
+
+    return fs;
+
   }
 
   /**
    * Item at the front of the set
-   * @type {Platform.Frame}
+   * @type {Frame}
    */
   get front() {
     return this._arr[0];
-  }
-
-  /**
-   * Item at the back of the set
-   * @type {Platform.Frame}
-   */
-  get back() {
-    return this._arr[this.length - 1];
-  }
-
-  /**
-   * Whether the set is empty
-   * @type {Boolean}
-   */
-  get empty() {
-    return this.length === 0;
   }
 
   /**
@@ -84,14 +115,6 @@ export default class FrameSet {
    */
   get full() {
     return this.length >= this.maxLength;
-  }
-
-  /**
-   * Number of items in the set
-   * @type {Number}
-   */
-  get size() {
-    return this._arr.length;
   }
 
   /**
@@ -112,7 +135,7 @@ export default class FrameSet {
 
   /**
    * Remove a given frame from the set
-   * @param {Platform.Frame} frame - frame to remove
+   * @param {Frame} frame - frame to remove
    * @return {undefined}
    */
   remove(frame) {
@@ -120,19 +143,11 @@ export default class FrameSet {
   }
 
   /**
-   * Comparer function for items
-   * @type {Function}
+   * Number of items in the set
+   * @type {Number}
    */
-  get comparer() {
-    return this._comparer;
-  }
-
-  /**
-   * Sets the comparer function for items
-   * @param {Function} func - comparer function
-   */
-  set comparer(func) {
-    this._comparer = func;
+  get size() {
+    return this._arr.length;
   }
 
   /**
@@ -141,24 +156,6 @@ export default class FrameSet {
    */
   sort() {
     this._arr.sort(this._comparer);
-  }
-
-  /**
-   * Filter the set by the given function; return true to keep
-   * @param {Function} func - filter function
-   * @return {FrameSet} filtered set
-   */
-  filter(func) {
-
-    const fs = new FrameSet();
-
-    fs._arr = this._arr.filter(func);
-    fs._operation = this._operation;
-    fs._maxSize = this._maxSize;
-    fs._comparer = this._comparer;
-
-    return fs;
-
   }
 
 }
