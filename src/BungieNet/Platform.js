@@ -80,7 +80,6 @@ export default class Platform {
       opts.timeout = this._options.timeout;
       opts.forever = true;
       opts.gzip = true;
-      opts.json = true;
       opts.headers[Platform.headers.contentType] = Platform.contentType;
       opts.headers[Platform.headers.apiKey] = this._options.apiKey;
 

@@ -190,7 +190,7 @@ export default class PlatformRequest extends EventEmitter {
   __internalBind() {
     this._options.uri = this._frame.request.uri.toString();
     this._options.method = this._frame.request.method;
-    this._options.body = this._frame.request.data;
+    this._options.body = JSON.stringify(this._frame.request.data);
   }
 
   /**
