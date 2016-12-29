@@ -41,6 +41,11 @@ export default class PlatformRequest extends EventEmitter {
      */
     this._responseText = null;
 
+    /**
+     * @type {String}
+     */
+    this._errorMessage = null;
+
   }
 
   /**
@@ -94,7 +99,10 @@ export default class PlatformRequest extends EventEmitter {
   _httpFail() {
     BungieNet.logger.log("warn", "HTTP Failed", {
       frameId: this._frame.id,
-      status: this._responseMessage.statusCode
+      error: this._errorMessage,
+      status: this._responseMessage === undefined
+        ? null
+        : this._responseMessage.statusCode
     });
     this.emit(PlatformRequest.events.httpFail, {
       target: this
@@ -210,6 +218,14 @@ export default class PlatformRequest extends EventEmitter {
 
         this._responseMessage = response;
         this._responseText = body;
+        this._errorMessage = err ? err.message : null;
+
+        BungieNet.logger.log("debug", "HTTP Response", {
+          frameId: this._frame.id,
+          error: this._errorMessage,
+          response,
+          body
+        });
 
         if(err || response.statusCode !== HttpStatus.OK) {
           return this._httpFail()
