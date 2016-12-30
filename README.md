@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/dazarobbo/BungieNetPlatformJS.svg?branch=master)](https://travis-ci.org/dazarobbo/BungieNetPlatformJS)
 ## Install
 ```bashp
 npm install bungienetplatformjs
