@@ -358,6 +358,7 @@ export default class Platform {
    *  creationDate: "2016-12-19T11:05:41.603Z",
    *  status: 1
    * }
+   * @param {Number} appId - application id number
    * @return {Promise.<Response>}
    */
   createApiKey(appId) {
@@ -409,6 +410,7 @@ export default class Platform {
   }
 
   /**
+   * @param {String} code - obtained from user
    * @return {Promise.<Response>}
    */
   getAccessTokensFromCode(code) {
@@ -422,6 +424,7 @@ export default class Platform {
   }
 
   /**
+   * @param {String} refreshToken
    * @return {Promise.<Response>}
    */
   getAccessTokensFromRefreshToken(refreshToken) {
@@ -447,35 +450,82 @@ export default class Platform {
   }
 
   /**
+   * Response: [
+   *  {
+   *    "apiKeyId": 999,
+   *    "apiKey": "-hex-str-",
+   *    "authorizationUrl": "https://www.bungie.net/en/Application/Authorize/1",
+   *    "creationDate": "2015-10-22T07:45:42.941Z",
+   *    "status": 1
+   *  },
+   *  ...
+   * ]
+   * @param {Number} appId
    * @return {Promise.<Response>}
    */
-  getApplicationApiKeys(p1) {
+  getApplicationApiKeys(appId) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/ApplicationApiKeys/{p1}/", {
-        p1
+      URI.expand("/App/ApplicationApiKeys/{appId}/", {
+        appId
       })
     ));
   }
 
   /**
+   * Response: {
+   *  "applicationId": 1,
+   *  "name": "name of app",
+   *  "redirectUrl": "https://example.com/app",
+   *  "link": "",
+   *  "scope": "129",
+   *  "origin": "*",
+   *  "applicationStatus": 1,
+   *  "membershipId": "68974",
+   *  "authorizationStatus": 1,
+   *  "authExpirationDate": "2017-12-25T14:18:08.459Z",
+   *  "authorizationDate": "2016-12-25T14:18:08.092Z",
+   *  "sessionId": "4223682639057300080"
+   * }
+   * @param {BigNumber} membershipId
+   * @param {Number} appId
    * @return {Promise.<Response>}
    */
-  getAuthorizationForUserAndApplication(p1, p2) {
+  getAuthorizationForUserAndApplication(membershipId, appId) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/Authorization/{p1}/{p2}/", {
-        p1,
-        p2
+      URI.expand("/App/Authorization/{mId}/{appId}/", {
+        mId: membershipId.toString(),
+        appId
       })
     ));
   }
 
   /**
+   * Response: {
+   *  "results": [
+   *    {
+   *      "applicationId": 1,
+   *      "name": "name of app",
+   *      "redirectUrl": "https://example.com/app",
+   *      "link": "",
+   *      "scope": "129",
+   *      "origin": "*",
+   *      "applicationStatus": 1,
+   *      "membershipId": "68974",
+   *      "authorizationStatus": 1,
+   *      "authExpirationDate": "2017-12-25T14:18:08.459Z",
+   *      "authorizationDate": "2016-12-25T14:18:08.092Z",
+   *      "sessionId": "4223682639057300080"
+   *    },
+   *    ...
+   *  ]
+   * }
+   * @param {BigNumber} membershipId
    * @return {Promise.<Response>}
    */
-  getAuthorizations(p1) {
+  getAuthorizations(membershipId) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/Authorizations/{p1}/", {
-        p1
+      URI.expand("/App/Authorizations/{mId}/", {
+        mId: membershipId.toString()
       })
     ));
   }
