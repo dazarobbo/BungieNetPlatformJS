@@ -92,7 +92,7 @@ export default class PlatformRequest extends EventEmitter {
   /**
    * @return {undefined}
    */
-  _httpFail() {
+  async _httpFail() {
 
     BungieNet.logger.log("warn", "HTTP Failed", {
       frameId: this._frame.id,
@@ -105,6 +105,10 @@ export default class PlatformRequest extends EventEmitter {
     this.emit(PlatformRequest.events.httpFail, {
       target: this
     });
+
+    await this._onHttpDone();
+    await this._error();
+    await this._done();
 
   }
 
@@ -121,6 +125,8 @@ export default class PlatformRequest extends EventEmitter {
    * @return {undefined}
    */
   async _onHttpSuccess() {
+
+    await this._onHttpDone();
 
     try {
       this.frame.response = await Response.parse(this._responseText);
@@ -150,8 +156,14 @@ export default class PlatformRequest extends EventEmitter {
    * @return {undefined}
    */
   async _onResponseCorrupt() {
+
+    this.emit(PlatformRequest.events.responseCorrupt, {
+      target: this
+    });
+
     await this._error();
     await this._done();
+
   }
 
   /**
@@ -218,14 +230,9 @@ export default class PlatformRequest extends EventEmitter {
 
       if(err || response.statusCode !== HttpStatus.OK) {
         await this._httpFail();
-        await this._onHttpDone();
-        await this._error();
-        await this._done();
       }
       else {
         await this._httpSuccess();
-        await this._onHttpDone();
-        await this._onHttpSuccess();
       }
 
     });
@@ -247,6 +254,7 @@ PlatformRequest.events = {
   httpDone: "httpDone",
 
   responseParsed: "responseParsed",
+  responseCorrupt: "responseCorrupt",
 
   success: "success",
   error: "error",

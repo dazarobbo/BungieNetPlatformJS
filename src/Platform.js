@@ -93,9 +93,10 @@ export default class Platform {
     const listeners = {
       [PlatformRequest.events.beforeSend]: this._frameBeforeSend,
       [PlatformRequest.events.httpSuccess]: this._frameHttpSuccess,
-      [PlatformRequest.events.httpError]: this._frameHttpError,
+      [PlatformRequest.events.httpFail]: this._frameHttpError,
       [PlatformRequest.events.httpDone]: this._frameHttpDone,
       [PlatformRequest.events.responseParsed]: this._frameResponseParsed,
+      [PlatformRequest.events.responseCorrupt]: this._frameResponseCorrupt,
       [PlatformRequest.events.error]: this._frameError,
       [PlatformRequest.events.success]: this._frameSuccess,
       [PlatformRequest.events.done]: this._frameDone
@@ -238,16 +239,18 @@ export default class Platform {
     this._notifyPlugins(Platform.events.frameResponseParsed, e);
   }
 
+  _frameResponseCorrupt(e) {
+    this._notifyPlugins(Platform.events.frameResponseCorrupt, e);
+  }
+
   _frameError(e) {
     this._notifyPlugins(Platform.events.frameError, e);
     e.target.frame.serviceReject();
-    this._frameDone(e);
   }
 
   _frameSuccess(e) {
     this._notifyPlugins(Platform.events.frameSuccess, e);
     e.target.frame.serviceResolve(e.target.frame.response);
-    this._frameDone(e);
   }
 
   _frameDone(e) {
@@ -5647,6 +5650,9 @@ Platform.events = {
   frameHttpError: "frameHttpError",
   frameHttpSuccess: "frameHttpSuccess",
   frameHttpDone: "frameHttpDone",
+
+  frameResponseParsed: "frameResponseParsed",
+  frameResponseCorrupt: "frameResponseCorrupt",
 
   frameError: "frameError",
   frameSuccess: "frameSuccess",
