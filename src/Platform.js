@@ -3,8 +3,9 @@
 import BungieNet from "./BungieNet.js";
 import Frame from "./Frame.js";
 import FrameSet from "./FrameSet.js";
-import FrameManager from "./FrameManager";
-import PlatformRequest from "./PlatformRequest";
+import FrameManager from "./FrameManager.js";
+import PlatformRequest from "./PlatformRequest.js";
+import Plugin from "./Plugin.js";
 import Request from "./Request.js";
 import URI from "urijs";
 import URITemplate from "urijs/src/URITemplate";
@@ -39,6 +40,10 @@ export default class Platform {
      * @type {Set<Platform.Plugin>}
      */
     this._plugins = new Set();
+
+    //set default plugins
+    this._plugins.add(new Plugin.CookieJarMemoryPlugin());
+    this._plugins.add(new Plugin.OAuthPlugin(""));
 
   }
 

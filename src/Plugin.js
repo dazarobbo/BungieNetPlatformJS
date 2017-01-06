@@ -8,6 +8,16 @@ import BungieNet from "./BungieNet.js";
  */
 export default class Plugin {
 
+  /**
+   * Dummy function for inheriting classes
+   * @param {String} eventName - name of the event being raised
+   * @param {*} e - event object
+   * @return {undefined}
+   */
+  static update(eventName, e) {
+    throw new Error("update method is undefined in subclass");
+  }
+
 }
 
 Plugin.CookieJarMemoryPlugin = class extends Plugin {
