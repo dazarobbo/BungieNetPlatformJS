@@ -11,7 +11,7 @@ export default class Frame {
   constructor() {
 
     /**
-     * Frame id to help identify it
+     * Frame id to identify it
      * @type {Number}
      */
     this._id = Frame.generateId();

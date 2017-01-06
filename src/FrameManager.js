@@ -31,7 +31,7 @@ export default class FrameManager {
 
   /**
    * Returns the "next" waiting frame
-   * @return {Promise<Platform.Frame>} the next frame in the wait list
+   * @return {Frame} the next frame in the wait list
    */
   getFrame() {
 

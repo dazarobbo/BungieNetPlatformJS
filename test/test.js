@@ -7,10 +7,10 @@ const expect = chai.expect;
 const p = new BungieNet.Platform({});
 let resp;
 
-//BungieNet.logger.add(winston.transports.Console, {
-//  level: "debug",
-//  colorize: true
-//});
+BungieNet.logger.add(winston.transports.Console, {
+  level: "debug",
+  colorize: true
+});
 
 describe("BungieNet.Platform", () => {
 

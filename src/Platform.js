@@ -184,27 +184,25 @@ export default class Platform {
    * @return {Promise}
    */
   _tryFrame() {
-    return new Promise((resolve, reject) => {
 
-      BungieNet.logger.log("verbose", "Trying for a frame...");
+    BungieNet.logger.log("verbose", "Trying for a frame...");
 
       //check if too many ongoing requests
-      if(this._options.maxConcurrent >= 0) {
-        if(this._frameManager.getActive().size >= this._options.maxConcurrent) {
-          BungieNet.logger.log("warn", "Cannot get a frame - too many active requests");
-          return reject();
-        }
+    if(this._options.maxConcurrent >= 0) {
+      if(this._frameManager.getActive().size >= this._options.maxConcurrent) {
+        BungieNet.logger.log("warn", "Cannot get a frame - too many active requests");
+        return;
       }
+    }
 
-      const frame = this._frameManager.getFrame();
+    const frame = this._frameManager.getFrame();
 
-      if(frame === null) {
-        return reject();
-      }
+    if(frame === null) {
+      return;
+    }
 
-      return Promise.resolve(Platform._activeFrame(frame));
+    Platform._activeFrame(frame);
 
-    });
   }
 
   /**
