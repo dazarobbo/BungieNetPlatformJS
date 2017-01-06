@@ -1,5 +1,6 @@
 /*eslint camelcase: "off"*/
 
+import "babel-polyfill";
 import CurrentUser from "./CurrentUser.js";
 import Platform from "./Platform.js";
 import Plugin from "./Plugin.js";

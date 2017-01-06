@@ -1,4 +1,3 @@
-import "./Common.js";
 import Cookies from "./Cookies.js";
 
 /**

@@ -1,5 +1,3 @@
-import "babel-polyfill";
-
 /**
  * Common functions and includes/imports/requires
  */
