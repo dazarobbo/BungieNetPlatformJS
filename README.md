@@ -18,7 +18,7 @@ const p = new BungieNet.Platform({
 
 p.helloWorld().then(r => console.log(r.response)); //Hello World
 ```
-<sup>[try this](https://runkit.com/5865c7bdb1021e0013dc5268/586f45d6d4634d0014843395)</sup>
+<sup>[try this](https://runkit.com/5865c7bdb1021e0013dc5268/586f52479090c40013b47f24)</sup>
 
 ## Thanks
 lowlines, everyone in the BungieNetPlatform group, and of course, Bungie.
