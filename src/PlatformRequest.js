@@ -69,34 +69,31 @@ export default class PlatformRequest extends EventEmitter {
     this.emit(PlatformRequest.events.beforeSend, {
       target: this
     });
-    return Promise.resolve();
   }
 
   /**
    * @return {undefined}
    */
-  _httpSuccess() {
-    return new Promise(resolve => {
+  async _httpSuccess() {
 
-      BungieNet.logger.log("info", "HTTP Success", {
-        frameId: this._frame.id,
-        status: this._responseMessage.statusCode
-      });
-
-      this.emit(PlatformRequest.events.httpSuccess, {
-        target: this
-      });
-
-      return this._onHttpSuccess()
-        .then(() => resolve());
-
+    BungieNet.logger.log("info", "HTTP Success", {
+      frameId: this._frame.id,
+      status: this._responseMessage.statusCode
     });
+
+    this.emit(PlatformRequest.events.httpSuccess, {
+      target: this
+    });
+
+    await this._onHttpSuccess();
+
   }
 
   /**
    * @return {undefined}
    */
   _httpFail() {
+
     BungieNet.logger.log("warn", "HTTP Failed", {
       frameId: this._frame.id,
       error: this._errorMessage,
@@ -104,10 +101,11 @@ export default class PlatformRequest extends EventEmitter {
         ? null
         : this._responseMessage.statusCode
     });
+
     this.emit(PlatformRequest.events.httpFail, {
       target: this
     });
-    return Promise.resolve();
+
   }
 
   /**
@@ -117,49 +115,43 @@ export default class PlatformRequest extends EventEmitter {
     this.emit(PlatformRequest.events.httpDone, {
       target: this
     });
-    return Promise.resolve();
   }
 
   /**
    * @return {undefined}
    */
-  _onHttpSuccess() {
-    return new Promise(resolve => {
-      Response
-        .parse(this._responseText)
-        .then(r => this._onResponseParsed(r), () => this._onResponseCorrupt())
-        .then(() => resolve());
-    });
-  }
+  async _onHttpSuccess() {
 
-  /**
-   * @param {Response} response -
-   * @return {undefined}
-   */
-  _onResponseParsed(response) {
-    return new Promise(resolve => {
+    try {
+      this.frame.response = await Response.parse(this._responseText);
+      await this._onResponseParsed();
+    }
+    catch(err) {
+      await this._onResponseCorrupt();
+    }
 
-      this.frame.response = response;
-
-      this.emit(PlatformRequest.events.responseParsed, {
-        target: this
-      });
-
-      this._success()
-        .then(() => this._done());
-
-    });
   }
 
   /**
    * @return {undefined}
    */
-  _onResponseCorrupt() {
-    return new Promise(resolve => {
-      this._error()
-        .then(() => this._done())
-        .then(() => resolve());
+  async _onResponseParsed() {
+
+    this.emit(PlatformRequest.events.responseParsed, {
+      target: this
     });
+
+    await this._success();
+    await this._done();
+
+  }
+
+  /**
+   * @return {undefined}
+   */
+  async _onResponseCorrupt() {
+    await this._error();
+    await this._done();
   }
 
   /**
@@ -169,7 +161,6 @@ export default class PlatformRequest extends EventEmitter {
     this.emit(PlatformRequest.events.error, {
       target: this
     });
-    return Promise.resolve();
   }
 
   /**
@@ -179,7 +170,6 @@ export default class PlatformRequest extends EventEmitter {
     this.emit(PlatformRequest.events.success, {
       target: this
     });
-    return Promise.resolve();
   }
 
   /**
@@ -189,7 +179,6 @@ export default class PlatformRequest extends EventEmitter {
     this.emit(PlatformRequest.events.done, {
       target: this
     });
-    return Promise.resolve();
   }
 
   /**
@@ -204,43 +193,43 @@ export default class PlatformRequest extends EventEmitter {
   /**
    * @return {undefined}
    */
-  execute() {
-    this._beforeSend().then(() => {
+  async execute() {
 
-      this.__internalBind();
+    await this._beforeSend();
+    await this.__internalBind();
 
-      BungieNet.logger.log("info", "Executing request", {
+    BungieNet.logger.log("info", "Executing request", {
+      frameId: this._frame.id,
+      line: `${ this._options.method } ${ this._options.uri }`
+    });
+
+    request(this._options, async (err, response, body) => {
+
+      this._responseMessage = response;
+      this._responseText = body;
+      this._errorMessage = err ? err.message : null;
+
+      BungieNet.logger.log("debug", "HTTP Response", {
         frameId: this._frame.id,
-        line: `${ this._options.method } ${ this._options.uri }`
+        error: this._errorMessage,
+        response,
+        body
       });
 
-      request(this._options, (err, response, body) => {
-
-        this._responseMessage = response;
-        this._responseText = body;
-        this._errorMessage = err ? err.message : null;
-
-        BungieNet.logger.log("debug", "HTTP Response", {
-          frameId: this._frame.id,
-          error: this._errorMessage,
-          response,
-          body
-        });
-
-        if(err || response.statusCode !== HttpStatus.OK) {
-          return this._httpFail()
-            .then(() => this._onHttpDone())
-            .then(() => this._error())
-            .then(() => this._done());
-        }
-
-        return this._httpSuccess()
-          .then(() => this._onHttpDone())
-          .then(() => this._onHttpSuccess());
-
-      });
+      if(err || response.statusCode !== HttpStatus.OK) {
+        await this._httpFail();
+        await this._onHttpDone();
+        await this._error();
+        await this._done();
+      }
+      else {
+        await this._httpSuccess();
+        await this._onHttpDone();
+        await this._onHttpSuccess();
+      }
 
     });
+
   }
 
 }

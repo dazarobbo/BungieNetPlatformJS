@@ -1,3 +1,4 @@
+import "./Common.js";
 import Cookies from "./Cookies.js";
 
 /**
@@ -11,31 +12,25 @@ export default class CurrentUser {
    * Returns a bool for whether the user is signed in based on cookie existence
    * @return {Promise.<Boolean>} bool
    */
-  static authenticated() {
-    return new Promise(resolve =>
+  static async authenticated() {
 
-      //if cookie found, resolve as true
-      //if it isn't found, resolve as false
-      Cookies
-        .get("bungleatk")
-        .then(() => resolve(true), () => resolve(false))
+    try {
+      await Cookies.get("bungleatk");
+      return true;
+    }
+    catch(err) {
+      return false;
+    }
 
-    );
   }
 
   /**
    * Whether there is any trace of an existing user
-   * @return {Promise.<Cookie[]>} cookie
+   * @return {Promise.<Boolean>} true if exists
    */
-  static exists() {
-    return new Promise((resolve, reject) => {
-      Cookies
-        .getMatching(c => c)
-        .then(
-          cookies => resolve(cookies.length > 0),
-          reject
-        );
-    });
+  static async exists() {
+    const cookies = await Cookies.getMatching(c => c);
+    return cookies.length > 0;
   }
 
   /**
@@ -51,12 +46,9 @@ export default class CurrentUser {
    * Returns the member id of the current user
    * @return {Promise.<Number>} id
    */
-  static getMembershipId() {
-    return new Promise((resolve, reject) => {
-      Cookies
-        .getValue("bungleme")
-        .then(id => resolve(parseInt(id, 10)), reject);
-    });
+  static async getMembershipId() {
+    const cookie = await Cookies.get("bungleme");
+    return parseInt(cookie.value, 10);
   }
 
   /**
@@ -72,23 +64,17 @@ export default class CurrentUser {
    * @return {Promise.<String>} resolves with string if successful, otherwise
    * rejected with null
    */
-  static getLocale() {
-    return new Promise((resolve, reject) => {
-      Cookies.getValue("bungleloc").then(str => {
+  static async getLocale() {
 
-        //parse the locale from the cookie
-        const arr = /&?lc=(.+?)(?:$|&)/i.exec(str);
+    const cookie = await Cookies.get("bungleloc");
+    const arr = /&?lc=(.+?)(?:$|&)/i.exec(cookie.value);
 
-        //if successful, resolve it
-        if(arr.length >= 1) {
-          return resolve(arr[1]);
-        }
+    if(arr.length >= 1) {
+      return arr[1];
+    }
 
-        //otherwise reject as unable to find
-        return reject(null);
+    return null;
 
-      }, () => reject(null));
-    });
   }
 
 }

@@ -227,7 +227,6 @@
       3
     ],
     "new-parens": "error",
-    "newline-after-var": "error",
     "newline-per-chained-call": [
       "error",
       {

@@ -55,18 +55,7 @@ export default class Response {
    * @return {Promise.<Response>} -
    */
   static parse(text) {
-
-    let obj = undefined;
-
-    try {
-      obj = JSON.parse(text);
-    }
-    catch(err) {
-      return Promise.reject(undefined);
-    }
-
-    return Promise.resolve(new Response(obj));
-
+    return new Response(JSON.parse(text));
   }
 
 }

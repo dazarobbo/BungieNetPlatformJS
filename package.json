@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/dazarobbo/BungieNetPlatformJS/issues"
   },
-  "main": "./lib/index.js",
+  "main": "./lib/BungieNet.js",
   "bin": {},
   "scripts": {
     "clean": "rimraf lib/*",

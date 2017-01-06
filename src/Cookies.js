@@ -1,6 +1,4 @@
-import BungieNet from "./BungieNet.js";
-import Error from "./Error.js";
-
+import "babel-polyfill";
 /**
  * BungieNet.Cookies
  *
@@ -30,23 +28,9 @@ export default class Cookies {
    * @param  {String} name cookie name
    * @return {Promise.<Cookie>} cookie
    */
-  static get(name) {
-    return new Promise((resolve, reject) => {
-      Cookies
-        .getMatching(c => c.name === name)
-        .then(cookies => {
-
-          if(cookies.length === 0) {
-            return reject(new BungieNet.Error(
-              null,
-              Error.codes.no_cookie_by_name
-            ));
-          }
-
-          return resolve(cookies[0]);
-
-        }, reject);
-    });
+  static async get(name) {
+    const cookies = await Cookies.getMatching(c => c.name === name);
+    return cookies[0];
   }
 
   /**
@@ -54,22 +38,9 @@ export default class Cookies {
    * @param  {Function} predicate return true to include
    * @return {Promise.<Cookie[]>} array
    */
-  static getMatching(predicate) {
-    return new Promise((resolve, reject) => {
-
-      try {
-        Cookies.provider
-          .getAll()
-          .then(cookies => resolve(cookies.filter(predicate)));
-      }
-      catch(ex) {
-        return reject(new BungieNet.Error(
-          null,
-          Error.codes.no_cookie_provider
-        ));
-      }
-
-    });
+  static async getMatching(predicate) {
+    const cookies = await Cookies.provider.getAll();
+    return cookies.filter(predicate);
   }
 
   /**
@@ -85,12 +56,9 @@ export default class Cookies {
    * @param  {String} name - name of cookie
    * @return {Promise.<String>} string
    */
-  static getValue(name) {
-    return new Promise((resolve, reject) => {
-      Cookies
-        .get(name)
-        .then(cookie => resolve(cookie.value), reject);
-    });
+  static async getValue(name) {
+    const cookie = await Cookies.get(name);
+    return cookie.value;
   }
 
 }

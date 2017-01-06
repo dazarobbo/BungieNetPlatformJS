@@ -1,4 +1,4 @@
-const BungieNet = require("../lib/index.js").default;
+const BungieNet = require("../lib/BungieNet.js").default;
 const chai = require("chai");
 const nock = require("nock");
 const winston = require("winston");
