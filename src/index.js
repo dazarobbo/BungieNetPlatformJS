@@ -1,7 +1,7 @@
-import "./BungieNet/Common.js";
-import { default as BungieNet } from "./BungieNet/BungieNet.js";
-import { default as Platform } from "./BungieNet/Platform.js";
-import { default as Plugin } from "./BungieNet/Plugin.js";
+import "./Common.js";
+import { default as BungieNet } from "./BungieNet.js";
+import { default as Platform } from "./Platform.js";
+import { default as Plugin } from "./Plugin.js";
 export { BungieNet };
 
 BungieNet.Platform = Platform;
