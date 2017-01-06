@@ -29,7 +29,7 @@ export default class BungieNet {
   /**
    * @return {Promise.<URI>} Generates most appropriate locale-aware base URI
    */
-  static getLocaleBase() {
+  async static getLocaleBase() {
     return new Promise(resolve => {
       BungieNet.getLocale().then(loc =>
         resolve(BungieNet.base.segment(loc))
