@@ -43,7 +43,6 @@ export default class Platform {
 
     //set default plugins
     this._plugins.add(new Plugin.CookieJarMemoryPlugin());
-    this._plugins.add(new Plugin.OAuthPlugin(""));
 
   }
 
