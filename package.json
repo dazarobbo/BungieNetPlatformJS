@@ -1,6 +1,6 @@
 {
   "name": "bungienetplatformjs",
-  "description": "JavaScript node API for the Bungie.net Platform",
+  "description": "node API for the Bungie.net Platform",
   "version": "0.3.16",
   "license": "MIT",
   "author": "dazarobbo",

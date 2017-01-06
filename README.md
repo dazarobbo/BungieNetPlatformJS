@@ -1,4 +1,5 @@
 # BungieNetPlatformJS
+node API for the Bungie.net Platform
 
 [![Travis](https://img.shields.io/travis/dazarobbo/BungieNetPlatformJS.svg?style=flat-square)](https://travis-ci.org/dazarobbo/BungieNetPlatformJS) [![npm](https://img.shields.io/npm/v/bungienetplatformjs.svg?style=flat-square)](https://www.npmjs.com/package/bungienetplatformjs)
 
