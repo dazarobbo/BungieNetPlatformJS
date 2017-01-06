@@ -95,7 +95,9 @@ export default class FrameSet {
     fs._arr = this._arr.filter(func);
     fs._operation = this._operation;
     fs._maxSize = this._maxSize;
-    fs._comparer = this._comparer;
+    fs._comparer = typeof this._comparer === "function"
+      ? this._comparer.bind(fs)
+      : null;
 
     return fs;
 
