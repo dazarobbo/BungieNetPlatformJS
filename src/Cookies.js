@@ -9,26 +9,29 @@
  * [public] getAll( void ) : Promise(array of Cookie)
  * - return all cookies (*.bungie.net only)
  *
- *
  * Cookie must implement at least the following properties:
  *
  * name: string
  * session: bool
  * value: string
  *
- *
- * The cookie provider should be set similar to:
- * 	BungieNet.Cookies.provider = new CustomCookieProvider();
  */
 export default class Cookies {
+
+  /**
+   * @param {*} provider - an interface to cookies
+   */
+  constructor(provider) {
+    this.provider = provider;
+  }
 
   /**
    * Returns the cookie with the given name
    * @param  {String} name cookie name
    * @return {Promise.<Cookie>} cookie
    */
-  static async get(name) {
-    const cookies = await Cookies.getMatching(c => c.name === name);
+  async get(name) {
+    const cookies = await this.getMatching(c => c.name === name);
     return cookies[0];
   }
 
@@ -37,8 +40,8 @@ export default class Cookies {
    * @param  {Function} predicate return true to include
    * @return {Promise.<Cookie[]>} array
    */
-  static async getMatching(predicate) {
-    const cookies = await Cookies.provider.getAll();
+  async getMatching(predicate) {
+    const cookies = await this.provider.getAll();
     return cookies.filter(predicate);
   }
 
@@ -46,8 +49,8 @@ export default class Cookies {
    * Returns an array of session cookies
    * @return {Promise.<Cookie[]>} array
    */
-  static getSessionCookies() {
-    return Cookies.getMatching(c => c.session);
+  getSessionCookies() {
+    return this.getMatching(c => c.session);
   }
 
   /**
@@ -55,15 +58,9 @@ export default class Cookies {
    * @param  {String} name - name of cookie
    * @return {Promise.<String>} string
    */
-  static async getValue(name) {
-    const cookie = await Cookies.get(name);
+  async getValue(name) {
+    const cookie = await this.get(name);
     return cookie.value;
   }
 
 }
-
-/**
- * Cookie provider interface
- * @type {*}
- */
-Cookies.provider = null;

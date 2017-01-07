@@ -1,5 +1,5 @@
-import request from "request";
 import BungieNet from "./BungieNet.js";
+import request from "request";
 
 /**
  * Plugin base class for plugins. Each plugin MUST define an update method.
