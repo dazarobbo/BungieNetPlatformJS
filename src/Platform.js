@@ -802,7 +802,16 @@ export default class Platform {
    * @param {BigNumber} membershipId - bungie.net membership id
    * @return {Promise.<Response>}
    * @example
-   * Response: []
+   * Response: [
+   *  {
+   *    userAliasId: "-BigNumber-",
+   *    membershipId: "-BigNumber-",
+   *    akaDisplayName: "-the-alias-",
+   *    akaUniqueName: "-the-unique-name-",
+   *    changedDate: "-date-string-"
+   *  },
+   *  ...
+   * ]
    */
   getUserAliases(membershipId) {
     return this._serviceRequest(new Request(
@@ -818,13 +827,14 @@ export default class Platform {
    * @example
    * Response: {
    *  -id-as-key-: -membership-type-as-value-,
+   *  "68974": 254,
    *  ...
    * }
    */
   getUserMembershipIds(excludeBungieNet = false) {
     return this._serviceRequest(new Request(
       URI.expand("/User/GetMembershipIds/{?excludebungienet}", {
-        excludeBungieNet
+        excludebungienet: excludeBungieNet
       })
     ));
   }
