@@ -37,7 +37,7 @@ export default class Platform {
     this._frameManager = new FrameManager(this._frames);
 
     /**
-     * @type {Set<Platform.Plugin>}
+     * @type {Set<Plugin>}
      */
     this._plugins = new Set();
 
