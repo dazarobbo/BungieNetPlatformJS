@@ -1182,14 +1182,13 @@ export default class Platform {
    */
   getConversationThreadV3(params) {
     return this._serviceRequest(new Request(
-      URI.expand(
-        "/Message/GetConversationThreadV3/{id}/{page}/{?after,before}", {
-          id: params.id.toString(),
-          page: params.page,
-          after: params.after.toString(),
-          before: params.before.toString()
-        })
-      ));
+      URI.expand("/Message/GetConversationThreadV3/{id}/{page}/{?after,before}", {
+        id: params.id.toString(),
+        page: params.page,
+        after: params.after.toString(),
+        before: params.before.toString()
+      })
+    ));
   }
 
   /**
