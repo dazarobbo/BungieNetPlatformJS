@@ -660,16 +660,13 @@ export default class Platform {
 
   /**
    * @return {Promise.<Response>}
-   * @example
    * Response: [
    *  {
    *    credentialType: 2,
    *    credentialDisplayName: "Psnid",
    *    isPublic: false
    *  },
-   *  {
-   *    ...
-   *  }
+   *  ...
    * ]
    */
   getCredentialTypesForAccount() {
