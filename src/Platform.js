@@ -714,6 +714,7 @@ export default class Platform {
    *    PairId: "-BigNumber-",
    *    PairingDate: "iso date string"
    *  }
+   *  ...
    * ]
    */
   getMobileAppPairings() {
