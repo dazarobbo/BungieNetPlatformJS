@@ -1145,7 +1145,7 @@ export default class Platform {
   }
 
   /**
-   * @param  {Number} [page = 1]
+   * @param {Number} [page = 1]
    * @return {Promise.<Response>}
    */
   getConversationsV5(page = 1) {
