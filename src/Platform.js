@@ -677,7 +677,6 @@ export default class Platform {
 
   /**
    * @return {Promise.<Response>}
-   * @example
    * Response: {
    *  destinyAccounts: [],
    *  bungieNetUser: {},
