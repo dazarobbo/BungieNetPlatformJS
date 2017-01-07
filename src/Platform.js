@@ -548,18 +548,18 @@ export default class Platform {
   }
 
   /**
+   * @param {BigNumber} membershipId - membershipId of user who is revoking access
+   * @param {Number} appId - id of the app user is revoking
    * @return {Promise.<Response>}
    */
-  revokeAuthorization(p1, p2) {
+  revokeAuthorization(membershipId, appId) {
     return this._serviceRequest(new Request(
-      URI.expand("/App/RevokeAuthorization/{p1}/{p2}/", {
-        p1,
-        p2
+      URI.expand("/App/RevokeAuthorization/{mId}/{appId}/", {
+        mId: membershipId.toString(),
+        appId
       }),
       "POST",
-      {
-
-      }
+      null
     ));
   }
 
