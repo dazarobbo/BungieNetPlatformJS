@@ -181,34 +181,36 @@ export default class Platform {
 
   /**
    * Attempts to begin a request, taking any conditiions into account
-   * @return {Promise}
+   * @return {Bool} true if frame was obtained and set active
    */
   _tryFrame() {
 
     BungieNet.logger.log("verbose", "Trying for a frame...");
 
-      //check if too many ongoing requests
+    //check if too many ongoing requests
     if(this._options.maxConcurrent >= 0) {
       if(this._frameManager.getActive().size >= this._options.maxConcurrent) {
         BungieNet.logger.log("warn", "Cannot get a frame - too many active requests");
-        return;
+        return false;
       }
     }
 
     const frame = this._frameManager.getFrame();
 
     if(frame === null) {
-      return;
+      return false;
     }
 
     Platform._activeFrame(frame);
+
+    return true;
 
   }
 
   /**
    * Updates plugins with the given event name and any data
    * @param {String} eventName
-   * @param {*[]} args - array of arguments to be passed to plugin function
+   * @param {*} args - arguments to be passed to plugin function
    * @return {Promise}
    */
   _notifyPlugins(eventName, ...args) {
@@ -303,14 +305,14 @@ export default class Platform {
 
   /**
    * Timeout for requests to the platform in milliseconds
-   * @return {[type]} [description]
+   * @return {Number}
    */
   get timeout() {
     return this._options.timeout;
   }
 
   /**
-   * @param  {Number} timeout
+   * @param {Number} timeout
    */
   set timeout(timeout) {
     this._options.timeout = timeout;
@@ -337,6 +339,8 @@ export default class Platform {
   }
 
   /**
+   * @param {String} keyId - API key id
+   * @param {BungieNet.enums.apiKeyStatus} state - new key state
    * @return {Promise.<Response>}
    */
   changeApiKeyStatus(keyId, state) {
