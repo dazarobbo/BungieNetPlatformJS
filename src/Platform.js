@@ -625,8 +625,8 @@ export default class Platform {
   }
 
   /**
-   * @param  {BigNumber} membershipId
-   * @param  {BungieNet.enums.bungieMembershipType} membershipType
+   * @param {BigNumber} membershipId
+   * @param {BungieNet.enums.bungieMembershipType} membershipType
    */
   getBungieAccount(membershipId, membershipType) {
     return this._serviceRequest(new Request(
