@@ -1,7 +1,6 @@
 /*eslint camelcase: "off"*/
 
 import "babel-polyfill";
-import CurrentUser from "./CurrentUser.js";
 import Platform from "./Platform.js";
 import Plugin from "./Plugin.js";
 import URI from "urijs";
@@ -45,19 +44,11 @@ export default class BungieNet {
   }
 
   /**
-   * Find the most appropriate locale to use, taking into account any
-   * currently detected user
+   * Find the most appropriate locale to use
    * @return {Promise.<String>} locale
    */
-  static async getLocale() {
-
-    try {
-      return await CurrentUser.getLocale();
-    }
-    catch(err) {
-      return BungieNet.defaultLocale;
-    }
-
+  static getLocale() {
+    return BungieNet.defaultLocale;
   }
 
 }
