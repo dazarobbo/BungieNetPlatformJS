@@ -1204,7 +1204,7 @@ export default class Platform {
   }
 
   /**
-   * @param  {BigNumber} membershipId
+   * @param {BigNumber} membershipId
    * @return {Promise.<Response>}
    */
   getConversationWithMemberIdV2(membershipId) {
@@ -1216,7 +1216,7 @@ export default class Platform {
   }
 
   /**
-   * @param  {Number} [page = 1] - 1-based
+   * @param {Number} [page = 1] - 1-based
    * @return {Promise.<Response>}
    */
   getGroupConversations(page = 1) {
@@ -1285,7 +1285,7 @@ export default class Platform {
 
   /**
    * Leave a given conversation by id
-   * @param  {BigNumber} conversationId
+   * @param {BigNumber} conversationId
    * @return {Promise.<Response>}
    */
   leaveConversation(conversationId) {
@@ -1391,8 +1391,8 @@ export default class Platform {
 
   /**
    * Add a message to a conversation
-   * @param  {String} body
-   * @param  {BigNumber} conversationId
+   * @param {String} body
+   * @param {BigNumber} conversationId
    * @return {Promise.<Response>}
    */
   saveMessageV3(body, conversationId) {
@@ -1474,6 +1474,7 @@ export default class Platform {
 
   /**
    * @deprecated
+   * @return {Promise.<Response>}
    */
   getRecentNotificationCount() {
     return this._serviceRequest(new Request(
